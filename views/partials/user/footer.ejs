@@ -1,0 +1,156 @@
+<footer class="footer bg-light py-4 mt-5">
+  <style>
+    /* Footer main styling */
+    .footer {
+      font-family: 'Arial', sans-serif;
+      background-color: #f8f9fa;
+      color: #212529;
+      padding-top: 40px;
+      padding-bottom: 20px;
+    }
+
+    /* Footer headings */
+    .footer h5, .footer h6 {
+      font-weight: bold;
+      margin-bottom: 15px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Footer links */
+    .footer a {
+      color: #212529;
+      text-decoration: none;
+      transition: color 0.3s, transform 0.3s;
+    }
+
+    .footer a:hover {
+      color: #ff6b6b;
+      transform: translateY(-2px);
+    }
+
+    /* Newsletter input and button */
+    .newsletter-form input.form-control {
+      border-radius: 0.25rem 0 0 0.25rem;
+      border: 1px solid #ced4da;
+      transition: border-color 0.3s;
+    }
+
+    .newsletter-form input.form-control:focus {
+      border-color: #ff6b6b;
+      box-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+    }
+
+    .newsletter-form button.btn {
+      border-radius: 0 0.25rem 0.25rem 0;
+      transition: background-color 0.3s, transform 0.3s;
+    }
+
+    .newsletter-form button.btn:hover {
+      background-color: #ff6b6b;
+      transform: translateY(-2px);
+    }
+
+    /* Social icons */
+    .social-icons a {
+      font-size: 20px;
+      margin-right: 10px;
+      color: #212529;
+      transition: color 0.3s, transform 0.3s;
+    }
+
+    .social-icons a:hover {
+      color: #ff6b6b;
+      transform: scale(1.3);
+    }
+
+    /* Divider */
+    .footer hr {
+      border-top: 1px solid #dee2e6;
+      margin: 20px 0;
+    }
+
+    /* Copyright */
+    .footer .text-center {
+      color: #6c757d;
+      font-size: 14px;
+      margin-top: 15px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .footer .row > div {
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .newsletter-form {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .newsletter-form input,
+      .newsletter-form button {
+        width: 100%;
+      }
+
+      .social-icons {
+        justify-content: center;
+      }
+    }
+  </style>
+
+  <div class="container">
+    <div class="row text-center text-md-start">
+      <!-- Logo -->
+      <div class="col-md-3 mb-3">
+        <h5 class="fw-bold logo-text">ZYRA</h5>
+      </div>
+
+      <!-- Info links -->
+      <div class="col-md-3 mb-3">
+        <h6 class="fw-bold">Info</h6>
+        <ul class="list-unstyled">
+          <li><a href="/contact">Contact Us</a></li>
+          <li><a href="/about">About Us</a></li>
+        </ul>
+      </div>
+
+      <!-- Policies links -->
+      <div class="col-md-3 mb-3">
+        <h6 class="fw-bold">Policies</h6>
+        <ul class="list-unstyled">
+          <li><a href="/privacy-notice">Privacy Notice</a></li>
+          <li><a href="/return-policy">Return Policy</a></li>
+          <li><a href="/terms">Terms & Conditions</a></li>
+          <li><a href="/cookie-policy">Cookie Policy</a></li>
+        </ul>
+      </div>
+
+      <!-- Newsletter & social -->
+      <div class="col-md-3 mb-3">
+        <h6 class="fw-bold">Subscribe to Our Newsletter</h6>
+        <form class="d-flex mb-2 newsletter-form">
+          <input type="email" class="form-control" placeholder="Email Address">
+          <button class="btn btn-dark">Subscribe</button>
+        </form>
+        <div class="social-icons mt-2">
+          <a href="https://www.instagram.com" target="_blank"><i class="bi bi-instagram"></i></a>
+          <a href="https://www.facebook.com" target="_blank"><i class="bi bi-facebook"></i></a>
+          <a href="https://www.twitter.com" target="_blank"><i class="bi bi-twitter"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Copyright -->
+    <div class="text-center small">
+      &copy; 2025 | ZYRA | All Rights Reserved. We Give You Style.
+    </div>
+  </div>
+
+  <!-- Bootstrap Icons CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</footer>
+</body>
+</html>
