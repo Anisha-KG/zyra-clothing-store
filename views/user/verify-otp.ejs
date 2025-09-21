@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm with OTP</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {
+      background-color: #e8d0c7; /* matches your background */
+    }
+    .otp-container {
+      max-width: 850px;
+      margin: 50px auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .otp-image {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+    .otp-input {
+      width: 50px;
+      height: 50px;
+      text-align: center;
+      font-size: 20px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin: 0 5px;
+    }
+    .confirm-btn {
+      background-color: #8b3f2b;
+      color: white;
+      border: none;
+      padding: 10px 30px;
+      font-size: 16px;
+      border-radius: 8px;
+      transition: 0.3s;
+    }
+    .confirm-btn:hover {
+      background-color: #6f2f1f;
+    }
+    .resend {
+      font-size: 14px;
+      color: #555;
+      margin-top: 10px;
+    }
+    .resend a {
+      color: #8b3f2b;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="otp-container row g-0">
+    <!-- Left Side Image -->
+    <div class="col-md-6">
+      <img src="/images/verify-otp-image.jpg" class="otp-image" alt="OTP Image">
+    </div>
+
+    <!-- Right Side Content -->
+    <div class="col-md-6 d-flex flex-column justify-content-center align-items-center p-4">
+      <h4 class="fw-bold" style="color:#8b3f2b;">Confirm with OTP</h4>
+      <p>Please check your mail address for OTP</p>
+
+      <!-- OTP Inputs -->
+      <div class="d-flex mb-3">
+        <input type="text" maxlength="1" class="otp-input" id="otp1">
+        <input type="text" maxlength="1" class="otp-input" id="otp2">
+        <input type="text" maxlength="1" class="otp-input" id="otp3">
+        <input type="text" maxlength="1" class="otp-input" id="otp4">
+        <input type="text" maxlength="1" class="otp-input" id="otp5">
+        <input type="text" maxlength="1" class="otp-input" id="otp6">
+      </div>
+
+      <!-- Confirm Button -->
+      <button type="button" class="confirm-btn mb-3" onclick="validateOtpForm()">Confirm</button>
+
+      <!-- Resend OTP -->
+        <div class="resend">
+        <span><span id="timer">00:30</span></span>
+        <a href="#" id="resend-link" onclick="resendOtp()">Resend OTP</a>
+        </div>
+
+      <!-- Go back -->
+      <div class="mt-2">
+        <a href="/signup">Go back to Signup page</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // OTP Auto focus
+    const inputs = document.querySelectorAll(".otp-input");
+    inputs.forEach((input, index) => {
+      input.addEventListener("input", () => {
+        if (input.value && index < inputs.length - 1) {
+          inputs[index + 1].focus();
+        }
+      });
+    });
+
+    // Timer
+    let countdownInterval;
+const timer = document.getElementById("timer");
+const resendLink = document.getElementById("resend-link");
+let timeLeft = 30;
+
+// Start countdown function
+function startCountdown(duration) {
+    clearInterval(countdownInterval);
+    timeLeft = duration;
+
+    // Disable resend link while timer is running
+    resendLink.style.pointerEvents = 'none';
+    resendLink.style.opacity = 0.5;
+
+    countdownInterval = setInterval(() => {
+        let minutes = String(Math.floor(timeLeft / 60)).padStart(2, "0");
+        let seconds = String(timeLeft % 60).padStart(2, "0");
+        timer.textContent = `${minutes}:${seconds}`;
+        timeLeft--;
+
+        if (timeLeft < 0) {
+            clearInterval(countdownInterval);
+            // Enable resend link when timer is 0
+            resendLink.style.pointerEvents = 'auto';
+            resendLink.style.opacity = 1;
+        }
+    }, 1000);
+}
+
+// Initial countdown
+startCountdown(30);
+
+// Restart timer function
+function restartTimer() {
+    startCountdown(60); // start from 01:00
+    // Optional: call your resend OTP ajax here if needed
+}
+
+    function validateOtpForm(){
+        const otpValue=Array.from(inputs).map((input)=>input.value).join('')
+
+        $.ajax({
+            type:'POST',
+            url:'/verify-otp',
+            data:{otp:otpValue},
+            success:function(response){
+                if(response.success){
+                    Swal.fire({
+                        icon:'success',
+                        title:'OTP Verified Succesfully',
+                        showConfirmButton: false,
+                        timer: 1500,
+                    }).then(()=>{
+                        window.location.href=response.redirectUrl
+                    })
+                }else{
+                    Swal.fire({
+                        icon:'error',
+                        title:'Error',
+                        text:response.message
+                    })
+                }
+            },
+            error:function(){
+                Swal.fire({
+                    icon:'error',
+                    title:'Invalid OTP',
+                    text:'Please Try Again'
+                })
+            }
+        })
+        return false
+    }
+    const timerelement=document.getElementById('timer')
+    function resendOtp(){
+        restartTimer()
+        $.ajax({
+            type:'POST',
+            url:'/resend-otp',
+            success:function(response){
+                if(response.success){
+                    Swal.fire({
+                        icon:'success',
+                        title:'OTP Resend Succesfully',
+                        showConfirmButton: false,
+                        timer: 1500,
+                    })
+                }else{
+                    Swal.fire({
+                        icon:'error',
+                        title:'Error',
+                        text:response.message
+                    })
+                }
+            },error:function(response){
+                Swal.fire({
+                    icon:'error',
+                    title:'Someth',
+                    text:response.message
+                })
+            }
+        })
+        return false
+
+
+    }
+    
+  </script>
+  
+</body>
+</html>
