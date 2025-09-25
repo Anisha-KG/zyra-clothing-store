@@ -8,34 +8,27 @@ passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: '/auth/google/callback'
-},
-async (accessToken, refreshToken, profile, done) => {
+  },
+  async (accessToken, refreshToken, profile, done) => {
     try {
-        let user = await User.findOne({
-            $or: [{ googleId: profile.id }, { email: profile.emails[0].value }]
-        });
+      const user = await User.findOneAndUpdate(
+        { $or: [{ googleId: profile.id }, { email: profile.emails[0].value.toLowerCase() }] }, // search condition
+        {
+          $set: {
+            name: profile.displayName,
+            email: profile.emails[0].value.toLowerCase(),
+            googleId: profile.id
+          }
+        },
+        { upsert: true, new: true } // if not found, create new
+      );
 
-        if (user) {
-            if (!user.googleId) {
-                user.googleId = profile.id;
-                await user.save();
-            }
-            return done(null, user);
-        } else {
-            user = new User({
-                name: profile.displayName,
-                email: profile.emails[0].value.toLowerCase(),
-                googleId: profile.id
-            });
-            await user.save();
-            return done(null, user);
-        }
+      return done(null, user);
     } catch (error) {
-        return done(error, null);
+      return done(error, null);
     }
-}
-
-))
+  }
+));
 
 passport.serializeUser((user, done) => {
     done(null, user.id);

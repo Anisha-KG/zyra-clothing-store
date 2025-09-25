@@ -3,6 +3,7 @@ const router=express.Router()
 const adminController=require('../controller/admin/adminController')
 const{userAuth,adminAuth}=require('../middleware/auth')
 const customersController=require('../controller/admin/customersController')
+const categoryController=require('../controller/admin/categoryController')
 
 
 router.get('/pageerror',adminController.pageerror)
@@ -15,4 +16,6 @@ router.get('/adminlogout',adminController.logout)
 router.get('/customers',adminAuth,customersController.customerInfo)
 router.get('/blockCustomer',adminAuth,customersController.customerBlocked)
 router.get('/unbloCkcustomer',adminAuth,customersController.customerUnblocked)
+
+
 module.exports=router
