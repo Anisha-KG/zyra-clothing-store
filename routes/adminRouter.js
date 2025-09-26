@@ -17,5 +17,8 @@ router.get('/customers',adminAuth,customersController.customerInfo)
 router.get('/blockCustomer',adminAuth,customersController.customerBlocked)
 router.get('/unbloCkcustomer',adminAuth,customersController.customerUnblocked)
 
+router.get('/categories',adminAuth,categoryController.categoryInfo)
+router.get('/addcategory',adminAuth,categoryController.addCategory)
+
 
 module.exports=router

@@ -1,45 +1,61 @@
+<%- include("../../views/partials/admin/header")%>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <%- include("../../views/partials/admin/header")%>
+<!-- Main Content -->
+<main class="col-12 col-md-10 px-3 pt-3">
 
-  
-
-  <!-- Main Content -->
-  <main class="col-12 col-md-10 px-3 pt-3">
-
-    <!-- Page Header & Search -->
-    <div class="d-flex justify-content-between align-items-center my-3">
-      <h4><strong>Categories</strong></h4>
+  <!-- Page Header & Search -->
+  <div class="d-flex justify-content-between align-items-center my-3">
+    <h4><strong>Categories</strong></h4>
+    <div class="d-flex gap-2">
       <form class="d-flex gap-2">
         <input type="text" class="form-control form-control-sm" placeholder="Search by category name">
         <button class="btn btn-dark btn-sm" type="submit">Search</button>
-        <a href="#" class="btn btn-outline-secondary btn-sm">Clear</a>
+        <% if (search) { %>
+          <a href="/admin/categories" class="btn btn-outline-secondary btn-sm">Clear</a>
+        <% } %>
       </form>
-    </div>
 
-    <!-- Categories Table -->
-    <div class="table-responsive bg-white p-3 rounded shadow-sm">
-      <table class="table align-middle table-hover">
-        <thead class="table-head">
+      <!-- Add Category Button -->
+      <button 
+        class="btn btn-primary btn-sm"
+        data-bs-toggle="modal"
+        data-bs-target="#addCategoryModal">
+        <i class="bi bi-plus-lg me-1"></i> Add Category
+      </button>
+    </div>
+  </div>
+
+  <!-- Categories Table -->
+  <div class="table-responsive bg-white p-3 rounded shadow-sm">
+    <table class="table align-middle table-hover">
+      <thead class="table-head">
+        <tr>
+          <th>Sl No</th>
+          <th>Category Name</th>
+          <th>Image</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th>Offer</th>
+          <th>Valid Until</th>
+          <th>Add Offer</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% data.forEach((category,index)=>{ %>
           <tr>
-            <th>Sl No</th>
-            <th>Category Name</th>
-            <th>Image</th>
-            <th>Description</th>
-            <th>Status</th>
-            <th>Offer</th>
-            <th>Valid Until</th>
-            <th>Add Offer</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Example Data -->
-          <tr>
-            <td>1</td>
-            <td>Beverages</td>
+            <td><%= index+1%></td>
+            <td><%= category.name%></td>
             <td><img src="https://via.placeholder.com/40" class="category-img" alt="Beverages"></td>
-            <td>Soft drinks, juices, and water</td>
-            <td><span class="status-active">Listed</span></td>
+            <td><%= category.description%></td>
+            <td>
+              <% if (category.isListed) { %>
+                <a href="/admin/unlistCategory?id=<%= category._id %>" title="Block" class="text-danger"><span>unlist</span></a>
+              <% } else { %>
+                <a href="/admin/categories?id=<%= category._id%>" title="Unblock" class="text-success">list</a>
+              <% } %>
+            </td>
             <td>10% Off</td>
             <td>2025-10-15</td>
             <td><button class="btn btn-sm btn-outline-primary">Add Offer</button></td>
@@ -48,43 +64,155 @@
               <a href="#" title="Delete"><i class="fas fa-trash text-danger"></i></a>
             </td>
           </tr>
-          <tr>
-            <td>2</td>
-            <td>Snacks</td>
-            <td><img src="https://via.placeholder.com/40" class="category-img" alt="Snacks"></td>
-            <td>Chips, biscuits, and fast food</td>
-            <td><span class="status-blocked">Unlisted</span></td>
-            <td>—</td>
-            <td>—</td>
-            <td><button class="btn btn-sm btn-outline-primary">Add Offer</button></td>
-            <td class="action-icons">
-              <a href="#" title="Edit"><i class="fas fa-edit text-primary"></i></a>
-              <a href="#" title="Delete"><i class="fas fa-trash text-danger"></i></a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <!-- Pagination -->
-      <div class="d-flex justify-content-center mt-4">
-        <nav>
-          <ul class="pagination pagination-sm mb-0">
-            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-          </ul>
-        </nav>
+        <% }) %>
+      </tbody>
+    </table>
+<!-- ADD CATEGORY MODAL -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <form id="addCategoryForm" class="modal-content p-4 rounded-4 border-0" enctype="multipart/form-data" method="POST" action="/admin/addCategory">
+      
+      <!-- Header -->
+      <div class="modal-header p-3 mb-3" style="background-color: #a05a3b; border-radius: 0.5rem;">
+        <h5 class="modal-title text-white fw-bold" id="addCategoryModalLabel">Add Category</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+        <div class="row g-4">
+          <!-- Category Name -->
+          <div class="col-12">
+            <label for="categoryName" class="form-label fw-semibold">Category Name</label>
+            <input type="text" name="name" class="form-control rounded-3" id="categoryName"  />
+            <div id="nameError" class="error-msg"></div>
+          </div>
+
+          <!-- Image -->
+          <div class="col-12">
+            <label for="categoryImage" class="form-label fw-semibold">Image</label>
+            <input type="file" name="categoryImage" id="categoryImage" class="form-control rounded-3" accept="image/png, image/jpeg"  />
+            <div id="imageError" class="error-msg"></div>
+          </div>
+
+          <!-- Description -->
+          <div class="col-12">
+            <label for="categoryDescription" class="form-label fw-semibold">Description</label>
+            <textarea name="description" class="form-control rounded-3" id="categoryDescription" rows="4" ></textarea>
+            <div id="descriptionError" class="error-msg"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer border-0 mt-3">
+        <div class="d-flex justify-content-end gap-2">
+          <button type="reset" class="btn btn-outline-secondary rounded-3 px-4">Cancel</button>
+          <button type="submit" class="btn" style="background-color: #a05a3b; color: white;">Save Category</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+  
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center mt-4">
+      <nav>
+        <ul class="pagination pagination-sm mb-0">
+          <% for(let i=1;i<=totalPages;i++){ %>
+            <li class="page-item <%= i=currentPage?'active':''%>">
+              <a class="page-link" href="/admin/categories?page=<%= i%><%= search?'&search='+search:'' %>">1</a>
+            </li>
+          <% } %>
+        </ul>
+      </nav>
     </div>
-  </main>
+  </div>
+</main>
 
-  <!-- Footer -->
-  <footer class="text-center py-3 border-top bg-white mt-4">
-    <p class="mb-0">&copy; 2025 ZYRA Admin Panel</p>
-  </footer>
+<script>
+    
+    document.getElementById('addCategoryForm').addEventListener('submit',async function(e){
+        e.preventDefault()
+        const form = e.target;
+        let formdata=new FormData(form)
+        
+        if(addCategoryFormvalidate(formdata)){
+            await sendData(formdata)
+        }
+            
+        
+    })
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    function addCategoryFormvalidate(formdata){
+       const name=formdata.get('name').trim()
+       const image=formdata.get('categoryImage')
+       const description=formdata.get('description').trim()
 
+       if(!name||!image||!description||!image.name){
+        Swal.fire({
+            icon:'warning',
+            title:'All fields are required',
+            text:'Please fill in all the details before submiting',
+            confirmButtonColor: '#dc3545'
+        })
+        return false
+       }
+
+        
+  
+    const allowedTypes = ["image/jpeg", "image/png"];
+    if (!allowedTypes.includes(image.type)) {
+        Swal.fire({
+        icon: 'error',
+        title: 'Invalid File Type',
+        text: 'Only JPG or PNG images are allowed.',
+        confirmButtonColor: '#dc3545'
+        });
+        return false
+    }
+
+    return true
+        }
+
+
+        async function sendData(formdata){
+            try{
+                const response=await fetch('/admin/addCategory',{
+                    method:'POST',
+                    body:formdata
+                })
+
+                const result=await response.json()
+
+                if(result.success){
+                    Swal.fire({
+                        icon:'success',
+                        title:'Success!',
+                        text:result.message,
+                        confirmButtonColor: '#198754'
+                    }).then(()=>{
+                        window.location.reload()
+                    })
+                }else{
+                    Swal.fire({
+                        icon:'error',
+                        title:'Error',
+                        text:result.message,
+                        confirmButtonColor: '#dc3545'
+                    })
+                }
+            }catch(error){
+                Swal.fire({
+                    icon:'error',
+                    title:'Server Error',
+                    text:"Something went wrong",
+                    confirmButtonColor: '#dc3545'
+                })
+            }
+        }
+
+</script>
+
+<%- include("../../views/partials/admin/footer")%>
