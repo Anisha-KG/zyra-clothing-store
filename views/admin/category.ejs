@@ -1,218 +1,757 @@
 <%- include("../../views/partials/admin/header")%>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<!-- Main Content -->
-<main class="col-12 col-md-10 px-3 pt-3">
-
-  <!-- Page Header & Search -->
-  <div class="d-flex justify-content-between align-items-center my-3">
-    <h4><strong>Categories</strong></h4>
-    <div class="d-flex gap-2">
-      <form class="d-flex gap-2">
-        <input type="text" class="form-control form-control-sm" placeholder="Search by category name">
-        <button class="btn btn-dark btn-sm" type="submit">Search</button>
-        <% if (search) { %>
-          <a href="/admin/categories" class="btn btn-outline-secondary btn-sm">Clear</a>
-        <% } %>
-      </form>
-
-      <!-- Add Category Button -->
-      <button 
-        class="btn btn-primary btn-sm"
-        data-bs-toggle="modal"
-        data-bs-target="#addCategoryModal">
-        <i class="bi bi-plus-lg me-1"></i> Add Category
-      </button>
-    </div>
-  </div>
-
-  <!-- Categories Table -->
-  <div class="table-responsive bg-white p-3 rounded shadow-sm">
-    <table class="table align-middle table-hover">
-      <thead class="table-head">
-        <tr>
-          <th>Sl No</th>
-          <th>Category Name</th>
-          <th>Image</th>
-          <th>Description</th>
-          <th>Status</th>
-          <th>Offer</th>
-          <th>Valid Until</th>
-          <th>Add Offer</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% data.forEach((category,index)=>{ %>
-          <tr>
-            <td><%= index+1%></td>
-            <td><%= category.name%></td>
-            <td><img src="https://via.placeholder.com/40" class="category-img" alt="Beverages"></td>
-            <td><%= category.description%></td>
-            <td>
-              <% if (category.isListed) { %>
-                <a href="/admin/unlistCategory?id=<%= category._id %>" title="Block" class="text-danger"><span>unlist</span></a>
-              <% } else { %>
-                <a href="/admin/categories?id=<%= category._id%>" title="Unblock" class="text-success">list</a>
-              <% } %>
-            </td>
-            <td>10% Off</td>
-            <td>2025-10-15</td>
-            <td><button class="btn btn-sm btn-outline-primary">Add Offer</button></td>
-            <td class="action-icons">
-              <a href="#" title="Edit"><i class="fas fa-edit text-primary"></i></a>
-              <a href="#" title="Delete"><i class="fas fa-trash text-danger"></i></a>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
-<!-- ADD CATEGORY MODAL -->
-<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <form id="addCategoryForm" class="modal-content p-4 rounded-4 border-0" enctype="multipart/form-data" method="POST" action="/admin/addCategory">
-      
-      <!-- Header -->
-      <div class="modal-header p-3 mb-3" style="background-color: #a05a3b; border-radius: 0.5rem;">
-        <h5 class="modal-title text-white fw-bold" id="addCategoryModalLabel">Add Category</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <!-- Body -->
-      <div class="modal-body">
-        <div class="row g-4">
-          <!-- Category Name -->
-          <div class="col-12">
-            <label for="categoryName" class="form-label fw-semibold">Category Name</label>
-            <input type="text" name="name" class="form-control rounded-3" id="categoryName"  />
-            <div id="nameError" class="error-msg"></div>
-          </div>
-
-          <!-- Image -->
-          <div class="col-12">
-            <label for="categoryImage" class="form-label fw-semibold">Image</label>
-            <input type="file" name="categoryImage" id="categoryImage" class="form-control rounded-3" accept="image/png, image/jpeg"  />
-            <div id="imageError" class="error-msg"></div>
-          </div>
-
-          <!-- Description -->
-          <div class="col-12">
-            <label for="categoryDescription" class="form-label fw-semibold">Description</label>
-            <textarea name="description" class="form-control rounded-3" id="categoryDescription" rows="4" ></textarea>
-            <div id="descriptionError" class="error-msg"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="modal-footer border-0 mt-3">
-        <div class="d-flex justify-content-end gap-2">
-          <button type="reset" class="btn btn-outline-secondary rounded-3 px-4">Cancel</button>
-          <button type="submit" class="btn" style="background-color: #a05a3b; color: white;">Save Category</button>
-        </div>
-      </div>
-    </form>
-  </div>
-</div>
-
-  
-    <!-- Pagination -->
-    <div class="d-flex justify-content-center mt-4">
-      <nav>
-        <ul class="pagination pagination-sm mb-0">
-          <% for(let i=1;i<=totalPages;i++){ %>
-            <li class="page-item <%= i=currentPage?'active':''%>">
-              <a class="page-link" href="/admin/categories?page=<%= i%><%= search?'&search='+search:'' %>">1</a>
-            </li>
-          <% } %>
-        </ul>
-      </nav>
-    </div>
-  </div>
-</main>
-
-<script>
-    
-    document.getElementById('addCategoryForm').addEventListener('submit',async function(e){
-        e.preventDefault()
-        const form = e.target;
-        let formdata=new FormData(form)
-        
-        if(addCategoryFormvalidate(formdata)){
-            await sendData(formdata)
+    <style>
+        /* Table header dark brown */
+        .table-head th {
+            background-color: #a3654b !important;
+            /* Dark brown */
+            color: #0e0d0d !important;
+            /* White text for contrast */
         }
-            
-        
-    })
+    </style>
 
-    function addCategoryFormvalidate(formdata){
-       const name=formdata.get('name').trim()
-       const image=formdata.get('categoryImage')
-       const description=formdata.get('description').trim()
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-       if(!name||!image||!description||!image.name){
-        Swal.fire({
-            icon:'warning',
-            title:'All fields are required',
-            text:'Please fill in all the details before submiting',
-            confirmButtonColor: '#dc3545'
+    <!-- Main Content -->
+    <main class="col-12 col-md-10 px-3 pt-3">
+
+        <!-- Page Header & Search -->
+        <div class="d-flex justify-content-between align-items-center my-3">
+            <h4><strong>Categories</strong></h4>
+            <div class="d-flex gap-2">
+                <form class="d-flex gap-2">
+                    <input type="text" name="search" id="searchInput" placeholder="Search category..."
+                        class="form-control" style="width: 250px;"
+                        value="<%= typeof search !== 'undefined' ? search : '' %>" autocomplete="off" />
+                    <button class="btn btn-dark btn-sm" type="submit">Search</button>
+                    <% if (search) { %>
+                        <a href="/admin/categories" class="btn btn-outline-secondary btn-sm">Clear</a>
+                        <% } %>
+                </form>
+
+                <!-- Add Category Button -->
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                    <i class="bi bi-plus-lg me-1"></i> Add Category
+                </button>
+            </div>
+        </div>
+
+        <!-- Categories Table -->
+        <div class="table-responsive bg-white p-3 rounded shadow-sm">
+            <table class="table align-middle table-hover">
+                <thead class="table-head">
+                    <tr>
+                        <th>Sl No</th>
+                        <th>Category Name</th>
+                        <th>Image</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Offer</th>
+                        <th>Valid Until</th>
+                        <th>Add Offer</th>
+                        <th>Subcategories</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% data.forEach((category,index)=>{ %>
+                        <tr>
+                            <td>
+                                <%= index+1%>
+                            </td>
+                            <td>
+                                <%= category.name%>
+                            </td>
+                            <td>
+                                <img src="<%= category.categoryImage ? '/uploads/categories/' + category.categoryImage : 'https://via.placeholder.com/40' %>"
+                                    class="category-img" width="40" height="40">
+                            </td>
+                            <td>
+                                <%= category.description%>
+                            </td>
+                            <td class="action-icons">
+                                <% if (category.isListed) { %>
+                                    <button onclick="unlistCategory('<%= category._id%>')"
+                                        class="btn btn-success btn-sm" title="Click to Unlist">Listed</button>
+                                    <% } else { %>
+                                        <button onclick="listCategory('<%= category._id%>')"
+                                            class="btn btn-danger btn-sm" title="Click to List">Unlisted</button>
+                                        <% } %>
+                            </td>
+                            <td>
+                                <%= category.categoryOffer ? category.categoryOffer + "%" : "-" %>
+                            </td>
+                            <% let formattedDate=category.endDate ? new
+                                Date(category.endDate).toLocaleDateString('en-GB') : "-" ; %>
+                                <td>
+                                    <%= formattedDate %>
+                                </td>
+                                <td>
+                                    <% if (category.categoryOffer) { %>
+                                        <button class="btn btn-sm btn-outline-danger"
+                                            onclick="removeOffer('<%= category._id %>')">
+                                            Remove Offer
+                                        </button>
+                                        <% } else { %>
+                                            <button class="btn btn-sm btn-outline-primary"
+                                                onclick="openAddOfferModal('<%= category._id %>')"
+                                                data-bs-toggle="modal" data-bs-target="#addOfferModal">
+                                                Add Offer
+                                            </button>
+                                            <% } %>
+                                </td>
+                                <td class="text-center">
+    <a href="/admin/subcategories/<%= category._id %>" title="View Subcategories">
+        <i class="fas fa-layer-group text-success"></i>
+</td>
+                                <td class="action-icons">
+                                    
+                                    <a href="#" title="Edit" data-bs-toggle="modal" data-bs-target="#editCategoryModal"
+                                        data-id="<%= category._id %>" data-name="<%= category.name %>"
+                                        data-description="<%= category.description %>"
+                                        data-image="/uploads/<%= category.image %>">
+                                        <i class="fas fa-edit text-primary"></i>
+                                    </a>
+                                    <a href="#" title="Delete" onclick="deleteCategory('<%= category._id %>')">
+                                        <i class="fas fa-trash text-danger"></i>
+                                    </a>
+                                </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+            </table>
+            <!-- ADD CATEGORY MODAL -->
+            <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-md"> <!-- changed modal-lg to modal-md -->
+                    <form id="addCategoryForm" class="modal-content p-4 rounded-4 border-0"
+                        enctype="multipart/form-data" method="POST" action="/admin/addCategory">
+
+                        <!-- Header -->
+                        <div class="modal-header p-3 mb-3" style="background-color: #a05a3b; border-radius: 0.5rem;">
+                            <h5 class="modal-title text-white fw-bold" id="addCategoryModalLabel">Add Category</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+
+                        <!-- Body -->
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <!-- Category Name -->
+                                <div class="col-12">
+                                    <label for="categoryName" class="form-label fw-semibold">Category Name</label>
+                                    <input type="text" name="categoryName" class="form-control rounded-3"
+                                        id="categoryName" />
+                                    <div id="nameError" class="error-msg"></div>
+                                </div>
+
+                                <!-- Image -->
+                                <div class="col-12">
+                                    <label for="categoryImage" class="form-label fw-semibold">Image</label>
+                                    <input type="file" name="categoryImage" id="categoryImage"
+                                        class="form-control rounded-3" accept="image/png, image/jpeg" />
+                                    <div id="imageError" class="error-msg"></div>
+                                </div>
+
+                                <!-- Description -->
+                                <div class="col-12">
+                                    <label for="categoryDescription" class="form-label fw-semibold">Description</label>
+                                    <textarea name="description" class="form-control rounded-3" id="categoryDescription"
+                                        rows="3"></textarea>
+                                    <div id="descriptionError" class="error-msg"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="modal-footer border-0 mt-3">
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="reset" class="btn btn-outline-secondary rounded-3 px-4">Cancel</button>
+                                <button type="submit" class="btn" style="background-color: #a05a3b; color: white;">Save
+                                    Category</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- ADD CATEGORY OFFER MODAL -->
+            <div class="modal fade" id="addOfferModal" tabindex="-1" aria-labelledby="addOfferModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-md">
+                    <form id="addOfferForm" class="modal-content p-4 rounded-4 border-0" method="POST"
+                        action="/admin/addCategoryOffer">
+
+                        <!-- Header -->
+                        <div class="modal-header p-3 mb-3" style="background-color: #a05a3b; border-radius: 0.5rem;">
+                            <h5 class="modal-title text-white fw-bold" id="addOfferModalLabel">Add Category Offer</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+
+                        <!-- Body -->
+                        <div class="modal-body">
+                            <div class="row g-3">
+
+                                <!-- Offer Percentage -->
+                                <div class="col-12">
+                                    <label for="offerPercentage" class="form-label fw-semibold">Offer Percentage
+                                        (%)</label>
+                                    <input type="number" name="offerPercentage" class="form-control rounded-3"
+                                        id="offerPercentage" placeholder="Enter percentage (e.g. 10)" 
+                                         />
+                                </div>
+
+                                <!-- Start Date & Time -->
+                                <div class="col-12">
+                                    <label for="startDate" class="form-label fw-semibold">Start Date & Time</label>
+                                    <input type="datetime-local" name="startDate" class="form-control rounded-3"
+                                        id="startDate"  />
+                                </div>
+
+                                <!-- End Date & Time -->
+                                <div class="col-12">
+                                    <label for="endDate" class="form-label fw-semibold">End Date & Time</label>
+                                    <input type="datetime-local" name="endDate" class="form-control rounded-3"
+                                        id="endDate"  />
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="modal-footer border-0 mt-3">
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="reset" class="btn btn-outline-secondary rounded-3 px-4">Cancel</button>
+                                <button type="submit" class="btn" style="background-color: #a05a3b; color: white;">Save
+                                    Offer</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- EDIT CATEGORY MODAL -->
+            <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-md">
+                    <form id="editCategoryForm" class="modal-content p-4 rounded-4 border-0"
+                        enctype="multipart/form-data" method="POST" action="#">
+                        <!-- Hidden ID -->
+                        <input type="hidden" id="edit-category-id" name="categoryId" />
+
+                        <!-- Header -->
+                        <div class="modal-header p-3 mb-3" style="background-color: #a05a3b; border-radius: 0.5rem;">
+                            <h5 class="modal-title text-white fw-bold" id="editCategoryModalLabel">Edit Category</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+
+                        <!-- Body -->
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <!-- Category Name -->
+                                <div class="col-12">
+                                    <label for="edit-category-name" class="form-label fw-semibold">Category Name</label>
+                                    <input type="text" name="categoryName" class="form-control rounded-3"
+                                        id="edit-category-name" />
+                                    <div id="editNameError" class="error-msg"></div>
+                                </div>
+
+                                <!-- Description -->
+                                <div class="col-12">
+                                    <label for="edit-category-description"
+                                        class="form-label fw-semibold">Description</label>
+                                    <textarea name="description" class="form-control rounded-3"
+                                        id="edit-category-description" rows="3"></textarea>
+                                    <div id="editDescriptionError" class="error-msg"></div>
+                                </div>
+
+                                <!-- Existing Image -->
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Current Image</label><br />
+                                    <img id="existing-category-image" src="" alt="Category Image"
+                                        style="width: 100px; height: 100px; object-fit: cover; border-radius: 6px" />
+                                </div>
+
+                                <!-- Upload New Image -->
+                                <div class="col-12">
+                                    <label for="edit-category-image-upload" class="form-label fw-semibold">Change Image
+                                        (optional)</label>
+                                    <input type="file" name="categoryImage" id="edit-category-image-upload"
+                                        class="form-control rounded-3" accept="image/png, image/jpeg" />
+                                    <div id="editImageError" class="error-msg"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="modal-footer border-0 mt-3">
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-outline-secondary rounded-3 px-4"
+                                    data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn"
+                                    style="background-color: #a05a3b; color: white;">Update Category</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
+
+
+            <!-- Pagination -->
+            <div class="d-flex justify-content-center mt-4">
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <% for(let i=1;i<=totalPages;i++){ %>
+                            <li class="page-item <%= i=currentPage?'active':''%>">
+                                <a class="page-link"
+                                    href="/admin/categories?page=<%= i%><%= search?'&search='+search:'' %>">1</a>
+                            </li>
+                            <% } %>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        //add Category
+        document.getElementById('addCategoryForm').addEventListener('submit', async function (e) {
+            e.preventDefault()
+            const form = e.target;
+            let formdata = new FormData(form)
+
+            if (addCategoryFormvalidate(formdata)) {
+                await sendData(formdata)
+            }
+
+
         })
-        return false
-       }
 
-        
-  
-    const allowedTypes = ["image/jpeg", "image/png"];
-    if (!allowedTypes.includes(image.type)) {
-        Swal.fire({
-        icon: 'error',
-        title: 'Invalid File Type',
-        text: 'Only JPG or PNG images are allowed.',
-        confirmButtonColor: '#dc3545'
-        });
-        return false
-    }
+        function addCategoryFormvalidate(formdata) {
+            const name = formdata.get('categoryName').trim()
+            const image = formdata.get('categoryImage')
+            const description = formdata.get('description').trim()
 
-    return true
+            if (!name || !image || !description || !image.name) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'All fields are required',
+                    text: 'Please fill in all the details before submiting',
+                    confirmButtonColor: '#dc3545'
+                })
+                return false
+            }
+
+
+
+            const allowedTypes = ["image/jpeg", "image/png"];
+            if (!allowedTypes.includes(image.type)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid File Type',
+                    text: 'Only JPG or PNG images are allowed.',
+                    confirmButtonColor: '#dc3545'
+                });
+                return false
+            }
+
+            return true
         }
 
 
-        async function sendData(formdata){
-            try{
-                const response=await fetch('/admin/addCategory',{
-                    method:'POST',
-                    body:formdata
+        async function sendData(formdata) {
+            try {
+                const response = await fetch('/admin/addCategory', {
+                    method: 'POST',
+                    body: formdata
                 })
 
-                const result=await response.json()
+                const result = await response.json()
 
-                if(result.success){
+                if (result.success) {
                     Swal.fire({
-                        icon:'success',
-                        title:'Success!',
-                        text:result.message,
+                        icon: 'success',
+                        title: 'Success!',
+                        text: result.message,
                         confirmButtonColor: '#198754'
-                    }).then(()=>{
+                    }).then(() => {
                         window.location.reload()
                     })
-                }else{
+                } else {
                     Swal.fire({
-                        icon:'error',
-                        title:'Error',
-                        text:result.message,
+                        icon: 'error',
+                        title: 'Error',
+                        text: result.message,
                         confirmButtonColor: '#dc3545'
                     })
                 }
-            }catch(error){
+            } catch (error) {
                 Swal.fire({
-                    icon:'error',
-                    title:'Server Error',
-                    text:"Something went wrong",
+                    icon: 'error',
+                    title: 'Server Error',
+                    text: "Something went wrong",
                     confirmButtonColor: '#dc3545'
                 })
             }
         }
 
-</script>
+        //  Add Offer Modal
+        let selectedCategoryId = null;
 
-<%- include("../../views/partials/admin/footer")%>
+        // Set category ID when opening the modal
+        function openAddOfferModal(categoryId) {
+            selectedCategoryId = categoryId;
+            document.getElementById('offerPercentage').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+        }
+
+
+        document.getElementById('addOfferForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const offer = parseInt(document.getElementById('offerPercentage').value);
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!selectedCategoryId) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'No Category Selected',
+                    text: 'Please select a category',
+                    confirmButtonColor: '#dc3545'
+                });
+                return;
+            }
+
+            if (!offer || !startDate || !endDate) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'All details are required',
+                    text: 'Please enter all data',
+                    confirmButtonColor: '#dc3545'
+                });
+                return;
+            }
+
+            if (offer <= 0 || offer > 100) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Offer',
+                    text: 'Offer percentage should be between 1 and 99',
+                    confirmButtonColor: '#dc3545'
+                });
+                return;
+            }
+
+            if (new Date(startDate) >= new Date(endDate)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Date',
+                    text: 'Start date should be less than end date',
+                    confirmButtonColor: '#dc3545'
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch('/admin/addCategoryOffer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        categoryId: selectedCategoryId,
+                        offerPercentage: offer,
+                        startDate,
+                        endDate
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Offer Added',
+                        text: result.message,
+                        confirmButtonColor: '#198754'
+                    }).then(() => window.location.reload());
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Failed',
+                        text: result.message,
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Something went wrong',
+                    text: 'Server error',
+                    confirmButtonColor: '#dc3545'
+                });
+            }
+        });
+
+        // Deleting offer
+        function removeOffer(categoryId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This will remove the offer from this category!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/admin/removeCategoryOffer', {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ categoryId })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'The offer has been successfully removed.',
+                                    'success'
+                                ).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    data.message || 'Failed to delete the offer.',
+                                    'error'
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire(
+                                'Error!',
+                                'Something went wrong while deleting the offer.',
+                                'error'
+                            );
+                        });
+                }
+            });
+        }
+
+        // unlist category
+        function unlistCategory(categoryId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This will unlist the category!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Unlist!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/admin/unlistCategory', {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ categoryId })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire(
+                                    'Unlisted!',
+                                    'The category unlisted Succesfully.',
+                                    'success'
+                                ).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    data.message || 'Failed to unlist.',
+                                    'error'
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire(
+                                'Error!',
+                                'Something went wrong while unlisting the category.',
+                                'error'
+                            );
+                        });
+                }
+            });
+        }
+
+        // list category
+        function listCategory(categoryId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This will unlist the category!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Unlist!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/admin/listCategory', {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ categoryId })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire(
+                                    'Unlisted!',
+                                    'The category listed Succesfully.',
+                                    'success'
+                                ).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    data.message || 'Failed to unlist.',
+                                    'error'
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire(
+                                'Error!',
+                                'Something went wrong while listing the category.',
+                                'error'
+                            );
+                        });
+                }
+            });
+        }
+
+        //edit category
+        const editCategoryModal = document.getElementById('editCategoryModal');
+
+        editCategoryModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget; // Link that triggered the modal
+
+            // Extract values from data-* attributes
+            const categoryId = button.getAttribute('data-id');
+            const categoryName = button.getAttribute('data-name');
+            const categoryDescription = button.getAttribute('data-description');
+            const categoryImage = button.getAttribute('data-image');
+
+            // Fill modal fields
+            document.getElementById('edit-category-id').value = categoryId;
+            document.getElementById('edit-category-name').value = categoryName;
+            document.getElementById('edit-category-description').value = categoryDescription;
+            document.getElementById('existing-category-image').src = categoryImage;
+        });
+
+        document.getElementById('editCategoryForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const formData = new FormData(form);
+
+            // Get ID from hidden input
+            const categoryId = document.getElementById('edit-category-id').value;
+
+            try {
+                const response = await fetch(`/admin/editCategory/${categoryId}`, {
+                    method: 'PATCH',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Updated!',
+                        text: result.message,
+                        confirmButtonColor: '#198754'
+                    }).then(() => window.location.reload());
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Failed!',
+                        text: result.message,
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Something went wrong',
+                    confirmButtonColor: '#dc3545'
+                });
+            }
+        });
+
+        async function deleteCategory(categoryId) {
+            // Show confirmation popup
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: "This category will be permanently deleted!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!'
+            });
+
+            if (result.isConfirmed) {
+                try {
+
+                    const response = await fetch('/admin/deleteCategory', {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ categoryId })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: data.message,
+                            confirmButtonColor: '#198754'
+                        }).then(() => window.location.reload());
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Failed',
+                            text: data.message,
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Server Error',
+                        text: 'Something went wrong',
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            }
+        }
+
+    </script>
+
+    <%- include("../../views/partials/admin/footer")%>

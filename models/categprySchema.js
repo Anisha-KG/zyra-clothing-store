@@ -4,7 +4,7 @@ const subcategorySchema = new Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
+    //unique: true,
     trim: true,
     },
   description: {
@@ -27,7 +27,10 @@ const subcategorySchema = new Schema({
     type: Boolean,
     default: true
   },
-  offerValidUntil: {
+  startDate: {
+    type: Date
+  },
+  endDate: {
     type: Date
   },
   isDeleted: {
@@ -53,11 +56,11 @@ const categorySchema = new Schema({
     required: true,
     trim: true
   },
-  gender: {
-    type: String,
-    enum: ['Women'], // Change to ['Women', 'Men'] if needed
-    required: true
-  },
+  //gender: {
+    //type: String,
+    //enum: ['Women'], // Change to ['Women', 'Men'] if needed
+    //required: true
+ // },
  
   categoryImage: {
     type: String,
@@ -75,7 +78,10 @@ const categorySchema = new Schema({
     max: 100,
     default: 0
   },
-  offerValidUntil: {
+ startDate: {
+    type: Date
+  },
+  endDate: {
     type: Date
   },
   isDeleted: {
@@ -85,7 +91,8 @@ const categorySchema = new Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  
 });
 
 categorySchema.index({ createdAt: -1 }); // indexing for fast sort

@@ -31,7 +31,7 @@ const login=async(req,res)=>{
         return res.render('admin-login',{message:'Invalid Password'})
     }
 
-    req.session.admin=true
+    req.session.admin=admin._id
     res.redirect('/admin/dashboard')
     }catch(error){
         console.log("Login eror:",error)

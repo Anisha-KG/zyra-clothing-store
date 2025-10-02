@@ -40,7 +40,11 @@ const loadHomepage=async(req,res)=>{
         }
         const userData=await user.findOne({_id:userId})
 
-        return res.render('homepage',{user:userData})
+       if(!userData.isBlocked){
+         return res.render('homepage',{user:userData})
+       }else{
+        return res.redirect('/login')
+       }
     }catch(error){
         console.log('error while loading homepage')
         res.status(500).send('server error')

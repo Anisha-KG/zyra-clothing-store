@@ -44,9 +44,9 @@ const customerInfo=async(req,res)=>{
     }
 }
 
-const customerBlocked=async(req,res)=>{
+const customerBlocked=async(req,res)=>{   
     try{
-        const id=req.query.id
+        const {id}=req.body
         await User.updateOne({_id:id},{$set:{isBlocked:true}})
         res.redirect('/admin/customers')
     }catch(error){
@@ -56,7 +56,7 @@ const customerBlocked=async(req,res)=>{
 }
 const customerUnblocked=async(req,res)=>{
     try{
-        const id=req.query.id
+        const {id}=req.body
         await User.updateOne({_id:id},{$set:{isBlocked:false}})
         res.redirect('/admin/customers')
     }catch(error){
