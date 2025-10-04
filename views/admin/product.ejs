@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Products Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      padding: 20px;
+      font-family: 'Poppins', sans-serif;
+      background: #f8f9fa;
+    }
+    .table img {
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .card {
+      box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+    }
+    .badge-available {
+      background-color: #198754;
+    }
+    .badge-outofstock {
+      background-color: #ffc107;
+      color: black;
+    }
+    .badge-discontinued {
+      background-color: #dc3545;
+    }
+    .table td,
+    .table th {
+      min-width: 120px; /* make columns wider */
+    }
+    .table-responsive {
+      overflow-x: auto;
+      width: 100%;
+      -webkit-overflow-scrolling: touch;
+    }
+  </style>
+</head>
+<body>
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-5">
+  <h3>Products Management</h3>
+  <form id="searchForm" method="GET" action="/admin/products" class="d-flex align-items-center">
+    <input
+      type="text"
+      name="search"
+      id="searchInput"
+      placeholder="Search products or brands"
+      class="form-control"
+      style="width: 300px;"
+      value=""
+      autocomplete="off"
+    />
+    <button type="submit" class="btn btn-outline-dark ms-2" title="Search">
+      <i class="fas fa-search"></i>
+    </button>
+    <a href="/admin/products" class="btn btn-outline-secondary ms-2">Clear</a>
+  </form>
+</div>
+
+<div class="card rounded">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0" style="min-width: 1200px;">
+        <thead class="table-dark">
+          <tr>
+            <th>SL NO</th>
+            <th>Product Name</th>
+            <th>Images</th>
+            <th style="text-align: center;">Brand</th>
+            <th>Category</th>
+            <th>Subcategory</th>
+            <th>Regular Price</th>
+            <th>Final Price</th>
+            <th>Material</th>
+            <th>Status</th>
+            <th>Offer</th>
+            <th>Valid Until</th>
+            <th>Actions</th>
+            <th>Add Offer</th>
+            <th>Edit</th>
+            <th>Variant</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Example Row -->
+          <tr>
+            <td>1</td>
+            <td>Sample Product</td>
+            <td>
+              <img src="/placeholder.svg" alt="No image" width="40" height="40" />
+            </td>
+            <td>Brand Name</td>
+            <td>Category Name</td>
+            <td>Subcategory Name</td>
+            <td>₹1000.00</td>
+            <td>₹800.00</td>
+            <td>Cotton</td>
+            <td><span class="badge badge-available">Available</span></td>
+            <td>10%</td>
+            <td>10/10/2025</td>
+            <td>
+              <button class="btn btn-danger btn-sm">Block</button>
+              <button class="btn btn-danger btn-sm ms-1">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-primary me-1">Add Offer</button>
+            </td>
+            <td>
+              <a href="/admin/editProduct" class="btn btn-info btn-sm text-white">
+                <i class="fas fa-edit"></i> Edit
+              </a>
+            </td>
+            <td>
+              <a href="/admin/product/variants" class="btn btn-primary mt-3">
+                <i class="fas fa-plus"></i> Add/View Variants
+              </a>
+            </td>
+          </tr>
+          <!-- Add more rows here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Pagination -->
+<nav aria-label="Page navigation" class="mt-4">
+  <ul class="pagination justify-content-center">
+    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+    <li class="page-item"><a class="page-link" href="#">2</a></li>
+    <li class="page-item"><a class="page-link" href="#">3</a></li>
+    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+  </ul>
+</nav>
+
+<!-- Image Preview Modal -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content p-3 text-center">
+      <img
+        id="modalImage"
+        src=""
+        alt="Full Image"
+        class="img-fluid rounded"
+        style="max-height: 400px; width: auto; object-fit: contain;"
+      />
+      <button type="button" class="btn btn-secondary mt-3" data-bs-dismiss="modal">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

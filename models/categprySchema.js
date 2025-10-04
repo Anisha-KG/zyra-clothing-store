@@ -1,47 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-const subcategorySchema = new Schema({
-  name: {
-    type: String,
-    required: true,
-    //unique: true,
-    trim: true,
-    },
-  description: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  image: {
-    type: String, // store filename or full image path
-    required: false,
-    trim: true
-  },
-  offer: {
-    type: Number, // percentage (e.g., 10 for 10% off)
-    min: 0,
-    max: 100,
-    default: 0
-  },
-  isListed: {
-    type: Boolean,
-    default: true
-  },
-  startDate: {
-    type: Date
-  },
-  endDate: {
-    type: Date
-  },
-  isDeleted: {
-    type: Boolean,
-    default: false
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-});
+
 
 const categorySchema = new Schema({
   name: {
@@ -67,7 +26,7 @@ const categorySchema = new Schema({
     required: true, // ensures image is uploaded
     trim: true
   },
-  subcategories: [subcategorySchema],
+  //subcategories: [subcategorySchema],
   isListed: {
     type: Boolean,
     default: true

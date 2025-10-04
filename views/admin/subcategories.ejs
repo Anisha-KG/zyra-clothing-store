@@ -22,7 +22,7 @@
                     value="<%= typeof search !== 'undefined' ? search : '' %>" autocomplete="off" />                     
                 <button class="btn btn-dark btn-sm" type="submit">Search</button>                     
                 <% if (search) { %>                         
-                    <a href="/admin/subcategories" class="btn btn-outline-secondary btn-sm">Clear</a>                         
+                    <a href="/admin/subcategories/<%= category._id%>" class="btn btn-outline-secondary btn-sm">Clear</a>                         
                 <% } %>                 
             </form>                  
 
@@ -51,13 +51,13 @@
                 </tr>                 
             </thead>                 
             <tbody>                     
-                <% data.forEach((subcategory,index)=>{ %>                         
+                <% subcategories.forEach((subcategory,index)=>{ %>                         
                     <tr>                             
                         <td><%= index+1 %></td>                             
                         <td><%= subcategory.name %></td>                             
-                        <td><%= subcategory.parentCategory ? subcategory.parentCategory.name : '-' %></td>                             
+                        <td><%=  category.name %></td>                             
                         <td>                                 
-                            <img src="<%= subcategory.image ? '/uploads/subcategories/' + subcategory.image : 'https://via.placeholder.com/40' %>"                                     
+                            <img src="<%= subcategory.image ? '/uploads/subcategory/' + subcategory.image : 'https://via.placeholder.com/40' %>"                                     
                                 class="subcategory-img" width="40" height="40">                             
                         </td>                             
                         <td><%= subcategory.description %></td>                             
@@ -68,11 +68,11 @@
                                 <button onclick="listSubcategory('<%= subcategory._id%>')" class="btn btn-danger btn-sm" title="Click to List">Unlisted</button>                                 
                             <% } %>                             
                         </td>                             
-                        <td><%= subcategory.subcategoryOffer ? subcategory.subcategoryOffer + "%" : "-" %></td>                             
+                        <td><%= subcategory.offer ? subcategory.offer + "%" : "-" %></td>                             
                         <% let formattedDate=subcategory.endDate ? new Date(subcategory.endDate).toLocaleDateString('en-GB') : "-" ; %>                             
                         <td><%= formattedDate %></td>                             
                         <td>                                 
-                            <% if (subcategory.subcategoryOffer) { %>                                     
+                            <% if (subcategory.offer) { %>                                     
                                 <button class="btn btn-sm btn-outline-danger" onclick="removeSubOffer('<%= subcategory._id %>')">Remove Offer</button>                                 
                             <% } else { %>                                     
                                 <button class="btn btn-sm btn-outline-primary" onclick="openAddSubOfferModal('<%= subcategory._id %>')" data-bs-toggle="modal" data-bs-target="#addSubOfferModal">Add Offer</button>                                 
@@ -91,60 +91,61 @@
             </tbody>             
         </table>             
 
-        <!-- ADD SUBCATEGORY MODAL -->             
-        <div class="modal fade" id="addSubcategoryModal" tabindex="-1" aria-labelledby="addSubcategoryModalLabel" aria-hidden="true">                 
-            <div class="modal-dialog modal-dialog-centered modal-md">                     
-                <form id="addSubcategoryForm" class="modal-content p-4 rounded-4 border-0" enctype="multipart/form-data" method="POST" action="/admin/addSubcategory">                          
-                    <!-- Header -->                         
-                    <div class="modal-header p-3 mb-3" style="background-color: #a05a3b; border-radius: 0.5rem;">                             
-                        <h5 class="modal-title text-white fw-bold" id="addSubcategoryModalLabel">Add Subcategory</h5>                             
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>                         
-                    </div>                          
+        <!-- ADD SUBCATEGORY MODAL -->
+<div class="modal fade" id="addSubcategoryModal" tabindex="-1" aria-labelledby="addSubcategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <form id="addSubcategoryForm" class="modal-content p-4 rounded-4 border-0" enctype="multipart/form-data" method="POST" onsubmit="addSubcategory(event)">
+            
+            <!-- Header -->
+            <div class="modal-header p-3 mb-3" style="background-color: #a05a3b; border-radius: 0.5rem;">
+                <h5 class="modal-title text-white fw-bold" id="addSubcategoryModalLabel">
+                    Add Subcategory for <%= category.name %>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
 
-                    <!-- Body -->                         
-                    <div class="modal-body">                             
-                        <div class="row g-3">                                 
-                            <div class="col-12">                                     
-                                <label for="subcategoryName" class="form-label fw-semibold">Subcategory Name</label>                                     
-                                <input type="text" name="subcategoryName" class="form-control rounded-3" id="subcategoryName" />                                     
-                                <div id="subNameError" class="error-msg"></div>                                 
-                            </div>                                 
-                            <div class="col-12">                                     
-                                <label for="parentCategory" class="form-label fw-semibold">Parent Category</label>                                     
-                                <select name="parentCategory" class="form-control rounded-3" id="parentCategory">                                         
-                                    <% categories.forEach(cat => { %>                                             
-                                        <option value="<%= cat._id %>"><%= cat.name %></option>                                         
-                                    <% }) %>                                     
-                                </select>                                 
-                            </div>                                 
-                            <div class="col-12">                                     
-                                <label for="subcategoryImage" class="form-label fw-semibold">Image</label>                                     
-                                <input type="file" name="subcategoryImage" id="subcategoryImage" class="form-control rounded-3" accept="image/png, image/jpeg" />                                     
-                                <div id="subImageError" class="error-msg"></div>                                 
-                            </div>                                 
-                            <div class="col-12">                                     
-                                <label for="subcategoryDescription" class="form-label fw-semibold">Description</label>                                     
-                                <textarea name="description" class="form-control rounded-3" id="subcategoryDescription" rows="3"></textarea>                                     
-                                <div id="subDescriptionError" class="error-msg"></div>                                 
-                            </div>                             
-                        </div>                         
-                    </div>                          
+            <!-- Body -->
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label for="subcategoryName" class="form-label fw-semibold">Subcategory Name</label>
+                        <input type="text" name="subcategoryName" class="form-control rounded-3" id="subcategoryName" />
+                        <input type="hidden" name="categoryId" value="<%= category._id %>">
+                        <div id="subNameError" class="error-msg"></div>
+                    </div>
 
-                    <!-- Footer -->                         
-                    <div class="modal-footer border-0 mt-3">                             
-                        <div class="d-flex justify-content-end gap-2">                                 
-                            <button type="reset" class="btn btn-outline-secondary rounded-3 px-4">Cancel</button>                                 
-                            <button type="submit" class="btn" style="background-color: #a05a3b; color: white;">Save Subcategory</button>                             
-                        </div>                         
-                    </div>                     
-                </form>                 
-            </div>             
-        </div>             
+                    <div class="col-12">
+                        <label for="subcategoryImage" class="form-label fw-semibold">Image</label>
+                        <input type="file" name="subcategoryImage" id="subcategoryImage" class="form-control rounded-3" accept="image/png, image/jpeg" />
+                        <div id="subImageError" class="error-msg"></div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="subcategoryDescription" class="form-label fw-semibold">Description</label>
+                        <textarea name="description" class="form-control rounded-3" id="subcategoryDescription" rows="3"></textarea>
+                        <div id="subDescriptionError" class="error-msg"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer border-0 mt-3">
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="reset" class="btn btn-outline-secondary rounded-3 px-4">Cancel</button>
+                    <button type="submit" class="btn" style="background-color: #a05a3b; color: white;">Save Subcategory</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+ 
+
+                    
 
         <!-- ADD SUBCATEGORY OFFER MODAL -->             
         <div class="modal fade" id="addSubOfferModal" tabindex="-1" aria-labelledby="addSubOfferModalLabel" aria-hidden="true">                 
             <div class="modal-dialog modal-dialog-centered modal-md">                     
-                <form id="addSubOfferForm" class="modal-content p-4 rounded-4 border-0" method="POST" action="/admin/addSubcategoryOffer">                          
+                <form id="addSubOfferForm" onsubmit="addSubcategoryOffer(event)" class="modal-content p-4 rounded-4 border-0" method="POST" action="/admin/addSubcategoryOffer">                          
                     <div class="modal-header p-3 mb-3" style="background-color: #a05a3b; border-radius: 0.5rem;">                             
                         <h5 class="modal-title text-white fw-bold" id="addSubOfferModalLabel">Add Subcategory Offer</h5>                             
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>                         
@@ -153,15 +154,16 @@
                         <div class="row g-3">                                 
                             <div class="col-12">                                     
                                 <label for="subOfferPercentage" class="form-label fw-semibold">Offer Percentage (%)</label>                                     
-                                <input type="number" name="offerPercentage" class="form-control rounded-3" id="subOfferPercentage" placeholder="Enter percentage (e.g. 10)" />                                 
+                                <input type="number" name="offerPercentage" class="form-control rounded-3" id="OfferPercentage" placeholder="Enter percentage (e.g. 10)" />  
+                                <input type="hidden" name="subcategoryId" id="subcategoryId" >                               
                             </div>                                 
                             <div class="col-12">                                     
                                 <label for="subStartDate" class="form-label fw-semibold">Start Date & Time</label>                                     
-                                <input type="datetime-local" name="startDate" class="form-control rounded-3" id="subStartDate" />                                 
+                                <input type="datetime-local" name="startDate" class="form-control rounded-3" id="startDate" />                                 
                             </div>                                 
                             <div class="col-12">                                     
                                 <label for="subEndDate" class="form-label fw-semibold">End Date & Time</label>                                     
-                                <input type="datetime-local" name="endDate" class="form-control rounded-3" id="subEndDate" />                                 
+                                <input type="datetime-local" name="endDate" class="form-control rounded-3" id="endDate" />                                 
                             </div>                             
                         </div>                         
                     </div>                          
@@ -231,3 +233,357 @@
         </div>         
     </div>     
 </main>
+<script>
+   async function addSubcategory(e){
+        e.preventDefault()
+        let form =document.getElementById('addSubcategoryForm')
+        
+        const formdata=new FormData(form)
+        const subcategoryName=formdata.get('subcategoryName').trim()
+        const subcategoryImage=formdata.get('subcategoryImage')
+        const description=formdata.get('description').trim()
+        const categoryId=formdata.get('categoryId')
+
+        if(!subcategoryName||!subcategoryImage||!description){
+            Swal.fire({
+                icon:"warning",
+                title:'All fields are required',
+                text:'Please fill all details',
+                confirmButtonColor:'#dc3545'
+            })
+            return
+        }
+        if(!subcategoryImage || subcategoryImage.size === 0){
+        Swal.fire({
+            icon:"warning",
+            title:'Image required',
+            text:'Please select an image',
+            confirmButtonColor:'#dc3545'
+        })
+        return
+    }
+
+        const allowedImageType=['image/jpeg','image/png']
+        if(!allowedImageType.includes(subcategoryImage.type)){
+            Swal.fire({
+                icon:"warning",
+                title:'Wrong file type',
+                text:'Only JPEG or PNG files are allowed',
+                confirmButtonColor:'#dc3545'
+            })
+            return
+        }
+
+        try{
+            const response=await fetch('/admin/addSubcategory',{
+                method:'POST',
+                body:formdata
+                
+            })
+
+            const result=await response.json()
+            if(result.success){
+                Swal.fire({
+                icon:"success",
+                title:'Success!',
+                text:result.message,
+                confirmButtonColor:'#dc3545'
+            }).then(()=>{
+                window.location.reload()
+            })
+            }else{
+                Swal.fire({
+                icon:"error",
+                title:'Error!',
+                text:result.message,
+                confirmButtonColor:'#dc3545'
+            })
+        }
+        }catch(error){
+            Swal.fire({
+                icon:"error",
+                title:'Error!',
+                text:'Server error',
+                confirmButtonColor:'#dc3545'
+            })
+        }
+    }
+
+    //add offer
+    function openAddSubOfferModal(id){
+        document.getElementById('subcategoryId').value=id
+    }
+
+    async function addSubcategoryOffer(e) {
+        e.preventDefault()
+        const form=document.getElementById('addSubOfferForm')
+        const formdata=new FormData(form)
+        const offerPercentage=formdata.get('offerPercentage')
+        const startDate=formdata.get('startDate')
+        const endDate=formdata.get('endDate')
+        const subcategoryId=formdata.get('subcategoryId')
+        const now=new Date()
+
+        if(!offerPercentage||!startDate||!endDate){
+            Swal.fire({
+                icon:'error',
+                title:'All fields are required',
+                text:'Please fill all details',
+                confirmButtonColor:'#dc3545'
+            })
+            return
+        }
+
+        if(new Date(startDate)>new Date(endDate)){
+            Swal.fire({
+                icon:'error',
+                title:'Dates are not valid',
+                text:'Start date should be less than end date',
+                confirmButtonColor:'#dc3545'
+            })
+            return
+        }
+        if(offerPercentage<0||offerPercentage>100){
+            Swal.fire({
+                icon:'error',
+                title:'Invalid offer',
+                text:'Offer percentage between 0 and 99',
+                confirmButtonColor:'#dc3545'
+            })
+            return
+        }
+
+        try{
+            const response=await fetch('/admin/addSubcategoryOffer',{
+                method:'POST',
+                headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        subcategoryId: subcategoryId,
+                        offerPercentage: offerPercentage,
+                        startDate,
+                        endDate
+                    })
+            })
+
+            const result=await response.json()
+            if(result.success){
+                Swal.fire({
+                    icon:'success',
+                    title:'Success!',
+                    text:result.message,
+                    confirmButtonColor: '#198754'
+                }).then(()=>{
+                    window.location.reload()
+                })
+            }else{
+                Swal.fire({
+                    icon:'error',
+                    title:'Error',
+                    text:result.message,
+                    confirmButtonColor: '#dc3545'
+                })
+            }
+        }catch(error){
+            Swal.fire({
+                icon:'error',
+                title:'Server Error',
+                text:"Something went wrong",
+                confirmButtonColor: '#dc3545'
+            })
+        }
+
+    }
+async function removeSubOffer(id){
+    const subcategoryId=id
+    Swal.fire({
+                title: 'Are you sure?',
+                text: "This will remove the offer!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Remove!'
+                })
+
+                try{
+                    const response=await fetch('/admin/removesubcatOffer',{
+                method:'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({subcategoryId})
+            })
+
+            const result=await response.json()
+            if(result.success){
+                Swal.fire({
+                    icon:'success',
+                    title:'Success!',
+                    text:result.message,
+                    confirmButtonColor: '#198754'
+                }).then(()=>{
+                    window.location.reload()
+                })
+            }else{
+                Swal.fire({
+                    icon:'error',
+                    title:'Error',
+                    text:result.message,
+                    confirmButtonColor: '#dc3545'
+                })
+            }
+        }catch(error){
+            Swal.fire({
+                icon:'error',
+                title:'Server Error',
+                text:"Something went wrong",
+                confirmButtonColor: '#dc3545'
+            })
+        }
+                }
+
+
+//unlist subcategory
+function unlistSubcategory(subcategoryId) {
+                Swal.fire({
+                title: 'Are you sure?',
+                text: "This will unlist the subcategory!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Unlist!'
+                }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/admin/unlistSubcategory', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ subcategoryId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                    if (data.success) {
+                        Swal.fire(
+                        'Unlisted!',
+                        'The Subcategory unlisted Succesfully.',
+                        'success'
+                        ).then(() => {
+                        location.reload();
+                        });
+                    } else {
+                        Swal.fire(
+                        'Error!',
+                        data.message || 'Failed to unlist.',
+                        'error'
+                        );
+                    }
+                    })
+                    .catch(error => {
+                    Swal.fire(
+                        'Error!',
+                        'Something went wrong while unlisting the subcategory.',
+                        'error'
+                    );
+                    });
+                }
+                });
+            }
+    
+    //list subcategory
+function listSubcategory(subcategoryId) {
+                Swal.fire({
+                title: 'Are you sure?',
+                text: "This will list the subcategory!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Unlist!'
+                }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/admin/listSubcategory', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ subcategoryId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                    if (data.success) {
+                        Swal.fire(
+                        'listed!',
+                        'The Subcategory listed Succesfully.',
+                        'success'
+                        ).then(() => {
+                        location.reload();
+                        });
+                    } else {
+                        Swal.fire(
+                        'Error!',
+                        data.message || 'Failed to list.',
+                        'error'
+                        );
+                    }
+                    })
+                    .catch(error => {
+                    Swal.fire(
+                        'Error!',
+                        'Something went wrong while listing the subcategory.',
+                        'error'
+                    );
+                    });
+                }
+                });
+            }
+    //delete subcategory
+    async function deleteSubcategory(id){
+    const subcategoryId=id
+    Swal.fire({
+                title: 'Are you sure?',
+                text: "This will delete subcategory!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Remove!'
+                })
+
+                try{
+                    const response=await fetch('/admin/deleteSubcategory',{
+                method:'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({subcategoryId})
+            })
+
+            const result=await response.json()
+            if(result.success){
+                Swal.fire({
+                    icon:'success',
+                    title:'Success!',
+                    text:result.message,
+                    confirmButtonColor: '#198754'
+                }).then(()=>{
+                    window.location.reload()
+                })
+            }else{
+                Swal.fire({
+                    icon:'error',
+                    title:'Error',
+                    text:result.message,
+                    confirmButtonColor: '#dc3545'
+                })
+            }
+        }catch(error){
+            Swal.fire({
+                icon:'error',
+                title:'Server Error',
+                text:"Something went wrong",
+                confirmButtonColor: '#dc3545'
+            })
+        }
+                }
+
+</script>
+<!-- Bootstrap 5 -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

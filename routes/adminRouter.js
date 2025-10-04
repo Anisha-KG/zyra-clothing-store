@@ -6,8 +6,10 @@ const customersController=require('../controller/admin/customersController')
 const categoryController=require('../controller/admin/categoryController')
 const brandController=require('../controller/admin/brandController')
 const subcategoryController=require('../controller/admin/subcategoryController')
+const productController=require('../controller/admin/productController')
 const upload=require('../middleware/multerConfig')
 const brandUpload=require('../middleware/brandUpload')
+const subcategoryUpload=require('../middleware/subcategoryUpload')
 
 
 router.get('/pageerror',adminController.pageerror)
@@ -38,6 +40,16 @@ router.patch('/unlistBrand',adminAuth,brandController.unlistBrand)
 router.patch('/listBrand',adminAuth,brandController.listBrand)
 router.patch('/removeOffer',adminAuth,brandController.removeOffer)
 router.delete('/deleteBrand',adminAuth,brandController.deleteBrand)
+
+router.get('/subcategories/:id',adminAuth,subcategoryController.loadSubcategories)
+router.post('/addSubcategory',adminAuth,subcategoryUpload.single('subcategoryImage'),subcategoryController.addSubcategory)
+router.post('/addSubcategoryOffer',adminAuth,subcategoryController.addSubcategoryOffer)
+router.patch('/removesubcatOffer',adminAuth,subcategoryController.removeOffer)
+router.patch('/unlistSubcategory',adminAuth,subcategoryController.unlistSubcategory)
+router.patch('/listSubcategory',adminAuth,subcategoryController.listSubcategory)
+router.delete('/deleteSubcategory',adminAuth,subcategoryController.deteleSubcategory)
+
+
 
 
 module.exports=router
