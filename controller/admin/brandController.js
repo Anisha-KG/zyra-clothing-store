@@ -1,4 +1,6 @@
 const brands = require('../../models/brandsSchema')
+const messages=require('../../Constants/messages')
+const httpStatus=require('../../Constants/httpStatuscode')
 
 const getBrands = async (req, res) => {
     try {
@@ -32,17 +34,17 @@ const addBrand = async (req, res) => {
         const brandLogo = req.file ? req.file.filename : null
 
         if (!brandName) {
-            return res.json({ success: false, message: 'Enter brand Name' })
+            return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.BRAND_MESSAGES.ENTER_BRAND_NAME })
         }
         if (!brandLogo) {
-            return res.json({ success: false, message: 'Upload Brand Logo' })
+            return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.BRAND_MESSAGES.UPLOAD_BRAND_LOGO})
         }
         const normalizedName = brandName.trim().replace(/\s+/g, " ")
         const existing = await brands.findOne({
             name: new RegExp(`^${normalizedName}$`, "i")
         });
         if (existing) {
-            return res.json({ success: false, message: 'brand already exist' })
+            return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.BRAND_MESSAGES.BRAND_ALREADY_EXISTS})
         }
         const newbrand = new brands({
             brandName: brandName,
@@ -50,10 +52,10 @@ const addBrand = async (req, res) => {
 
         })
         await newbrand.save()
-        res.json({ success: true, message: 'Brand added succesfully' })
+        res.status(httpStatus.OK).json({ success: true, message:messages.BRAND_MESSAGES.BRAND_ADDED})
     } catch (error) {
         console.log("error while adding brand:", error)
-        res.json({ success: falsr, message: 'Server error' })
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message:messages.MESSAGE.SERVER_ERROR})
     }
 }
 
@@ -62,25 +64,25 @@ const addBrandOffer = async (req, res) => {
     try {
         const { brandId, offer, startDate, endDate } = req.body
         if (!offer || !startDate || !endDate) {
-            return res.json({ success: false, message: 'All values are required' })
+            return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.MESSAGE.ALL_FIELDS_REQUIRED})
         }
 
         const brandData = await brands.findById(brandId)
         if (!brandData) {
-            return res.json({ success: false, message: 'Category not found' })
+            return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.BRAND_MESSAGES.BRAND_NOT_FOUND})
         }
         if (isNaN(offer) || offer < 0 || offer > 100) {
-            return res.json({ success: false, message: 'Invalid percentage value' })
+            return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: messages.MESSAGE.INVALID_PERCENTAGE})
         }
 
         if (new Date(startDate) >= new Date(endDate)) {
-            return res.json({ success: false, message: 'startDate should be less than enddate' })
+            return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.MESSAGE.STARTDATE_ENDDATE_ERROR})
         }
         await brands.findByIdAndUpdate({ _id: brandId }, { $set: { brandOffer: offer, startDate: startDate, endDate: endDate } })
-        res.json({ success: true, message: 'Offer added successfully' })
+        res.status(httpStatus.OK).json({ success: true, message: messages.MESSAGE.OFFER_ADDED})
     } catch (error) {
         console.log(error)
-        res.json({ success: false, message: 'Server error' })
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message:messages.MESSAGE.SERVER_ERROR})
     }
 }
 
@@ -95,16 +97,14 @@ const editBrand = async (req, res) => {
 
         const update = await brands.findByIdAndUpdate(brandId, { $set: updateData }, { new: true })
         if (!update) {
-            return res.json({ success: false, message: "Unable to edit category" })
+            return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.BRAND_MESSAGES.UNABLE_TO_EDIT_BRAND})
         }
 
-        if (!update) {
-            return res.json({ success: false, message: 'Unable to edit brand' })
-        }
-        res.json({ success: true, message: 'Brand edited successfully' })
+        
+        res.status(httpStatus.OK).json({ success: true, message:messages.BRAND_MESSAGES.BRAND_EDITED})
     } catch (error) {
         console.log(error)
-        res.json({ success: false, message: 'Server error' })
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message:messages.MESSAGE.SERVER_ERROR})
     }
 }
 
@@ -114,12 +114,12 @@ const unlistBrand = async (req, res) => {
 
         const updated = await brands.findByIdAndUpdate(brandId, { $set: { isListed: false } }, { new: true })
         if (!updated) {
-            return res.json({ success: false, message: "unable to unlist brand" })
+            return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.BRAND_MESSAGES.UNABLE_TO_UNLIST_BRAND})
         }
-        res.json({ success: true, message: 'Brand unlisted successfully' })
+        res.status(httpStatus.OK).json({ success: true, message:messages.BRAND_MESSAGES.BRAND_UNLISTED})
     } catch (error) {
         console.log(error)
-        res.json({ success: false, message: 'Server error' })
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message:messages.MESSAGE.SERVER_ERROR})
     }
 }
 
@@ -129,12 +129,12 @@ const listBrand = async (req, res) => {
 
         const updated = await brands.findByIdAndUpdate(brandId, { $set: { isListed: true } }, { new: true })
         if (!updated) {
-            return res.json({ success: false, message: "unable to list brand" })
+            return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.BRAND_MESSAGES.UNABLE_TO_LIST_BRAND})
         }
-        res.json({ success: true, message: 'Brand listed successfully' })
+        res.status(httpStatus.OK).json({ success: true, message:messages.BRAND_MESSAGES.BRAND_LISTED})
     } catch (error) {
         console.log(error)
-        res.json({ success: false, message: 'Server error' })
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message:messages.MESSAGE.SERVER_ERROR})
     }
 }
 
@@ -143,17 +143,17 @@ const removeOffer = async (req, res) => {
     try {
         const { brandId } = req.body
         if (!brandId) {
-            return res.json({ success: false, message: "BrandId is missing" })
+            return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.BRAND_MESSAGES.BRAND_ID_MISSING})
         }
         const updated = await brands.findByIdAndUpdate(brandId, { $set: { brandOffer: null } }, { new: true })
         if (!updated) {
-            return res.json({ success: false, message: 'Unable to remove offer' })
+            return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.MESSAGE.OFFER_NOTREMOVED})
         }
-        res.json({ success: true, message: 'Offer removed successfully' })
+        res.status(httpStatus.OK).json({ success: true, message: messages.MESSAGE.OFFER_REMOVED})
     } catch (error) {
         console.log(error)
-        res.json({ success: false, message: "Server error" })
-    }
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message:messages.MESSAGE.SERVER_ERROR})
+}
 }
 
 const deleteBrand = async (req, res) => {
@@ -163,14 +163,14 @@ const deleteBrand = async (req, res) => {
 
         const updated = await brands.deleteOne({ _id: brandId })
         if (!updated) {
-            return res.json({ succes: false, message: 'Unable to delete brand' })
+            return res.status(httpStatus.BAD_REQUEST).json({ succes: false, message:messages.BRAND_MESSAGES.UNABLE_TO_DELETE_BRAND})
         }
-        res.json({ success: true, message: 'Brand deleted successfully' })
+        res.status(httpStatus.OK).json({ success: true, message:messages.BRAND_MESSAGES.BRAND_DELETED})
 
 
     } catch (error) {
         console.log(error)
-        res.json({ success: false, message: 'Server error' })
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message:messages.MESSAGE.SERVER_ERROR})
     }
 }
 module.exports = {

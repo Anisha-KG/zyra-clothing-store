@@ -1,78 +1,151 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Products Management</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<%- include("../../views/partials/admin/header") %>
 
-  <style>
-    body {
-      padding: 20px;
-      font-family: 'Poppins', sans-serif;
-      background: #f8f9fa;
-    }
-    .table img {
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .card {
-      box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
-    }
-    .badge-available {
-      background-color: #198754;
-    }
-    .badge-outofstock {
-      background-color: #ffc107;
-      color: black;
-    }
-    .badge-discontinued {
-      background-color: #dc3545;
-    }
-    .table td,
-    .table th {
-      min-width: 120px; /* make columns wider */
-    }
+<style>
+  /* ======= TABLE STYLES ======= */
+  .table-head th {
+    background-color: #a3654b !important;
+    color: #1f1d1d !important;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  .table th,
+  .table td {
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ======= BUTTONS ======= */
+  .btn-custom {
+    background-color: #a05a3b;
+    color: white;
+    border: none;
+  }
+
+  .btn-custom:hover {
+    background-color: #8e4e35;
+  }
+
+  .btn-outline-custom {
+    border: 1px solid #a05a3b;
+    color: #a05a3b;
+  }
+
+  .btn-outline-custom:hover {
+    background-color: #a05a3b;
+    color: white;
+  }
+
+  .action-icons button {
+    margin: 0 3px;
+  }
+
+  .badge-available {
+    background-color: #198754;
+  }
+
+  .badge-outofstock {
+    background-color: #ffc107;
+    color: black;
+  }
+
+  .badge-discontinued {
+    background-color: #6c757d;
+  }
+
+  /* ======= RESPONSIVE FIXES ======= */
+  @media (max-width: 992px) {
     .table-responsive {
       overflow-x: auto;
-      width: 100%;
       -webkit-overflow-scrolling: touch;
     }
-  </style>
-</head>
-<body>
 
-<div class="d-flex justify-content-between align-items-center mb-4 mt-5">
-  <h3>Products Management</h3>
-  <form id="searchForm" method="GET" action="/admin/products" class="d-flex align-items-center">
-    <input
-      type="text"
-      name="search"
-      id="searchInput"
-      placeholder="Search products or brands"
-      class="form-control"
-      style="width: 300px;"
-      value=""
-      autocomplete="off"
-    />
-    <button type="submit" class="btn btn-outline-dark ms-2" title="Search">
-      <i class="fas fa-search"></i>
-    </button>
-    <a href="/admin/products" class="btn btn-outline-secondary ms-2">Clear</a>
-  </form>
-</div>
+    .table th,
+    .table td {
+      white-space: nowrap;
+    }
 
-<div class="card rounded">
-  <div class="card-body p-0">
+    h4 {
+      font-size: 1.1rem;
+    }
+
+    .btn,
+    input,
+    select {
+      font-size: 0.85rem;
+    }
+
+    .btn-custom,
+    .btn-outline-custom {
+      padding: 0.25rem 0.6rem;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .d-flex.gap-2 {
+      flex-direction: column;
+      gap: 0.5rem !important;
+    }
+
+    #searchInput {
+      width: 100% !important;
+    }
+
+    .table img {
+      width: 30px;
+      height: 30px;
+    }
+
+    .btn {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+    }
+  }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<main class="col-12 col-md-10 px-3 pt-3">
+  <!-- ======= PAGE HEADER & SEARCH ======= -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center my-3 gap-2">
+    <h4 class="fw-bold mb-0">Products</h4>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <form class="d-flex flex-wrap gap-2" role="search">
+        <input
+          type="text"
+          name="search"
+          id="searchInput"
+          placeholder="Search product..."
+          class="form-control form-control-sm"
+          style="width: 250px;"
+          value="<%= typeof search !== 'undefined' ? search : '' %>"
+          autocomplete="off"
+        />
+        <button class="btn btn-dark btn-sm" type="submit">Search</button>
+        <% if (search) { %>
+          <a href="/admin/brands" class="btn btn-outline-secondary btn-sm">Clear</a>
+        <% } %>
+      </form>
+
+      <button class="btn btn-sm btn-custom" onclick="window.location.href='/admin/addProduct'">
+        <i class="bi bi-plus-lg me-1"></i> Add Product
+      </button>
+    </div>
+  </div>
+
+  <!-- ======= PRODUCTS TABLE ======= -->
+  <div class="bg-white p-3 rounded shadow-sm">
     <div class="table-responsive">
-      <table class="table table-hover mb-0" style="min-width: 1200px;">
-        <thead class="table-dark">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-head">
           <tr>
             <th>SL NO</th>
             <th>Product Name</th>
-            <th>Images</th>
-            <th style="text-align: center;">Brand</th>
+            <th>Brand</th>
             <th>Category</th>
             <th>Subcategory</th>
             <th>Regular Price</th>
@@ -88,76 +161,429 @@
           </tr>
         </thead>
         <tbody>
-          <!-- Example Row -->
-          <tr>
-            <td>1</td>
-            <td>Sample Product</td>
-            <td>
-              <img src="/placeholder.svg" alt="No image" width="40" height="40" />
-            </td>
-            <td>Brand Name</td>
-            <td>Category Name</td>
-            <td>Subcategory Name</td>
-            <td>₹1000.00</td>
-            <td>₹800.00</td>
-            <td>Cotton</td>
-            <td><span class="badge badge-available">Available</span></td>
-            <td>10%</td>
-            <td>10/10/2025</td>
-            <td>
-              <button class="btn btn-danger btn-sm">Block</button>
-              <button class="btn btn-danger btn-sm ms-1">
-                <i class="fas fa-trash-alt"></i>
-              </button>
-            </td>
-            <td>
-              <button class="btn btn-sm btn-primary me-1">Add Offer</button>
-            </td>
-            <td>
-              <a href="/admin/editProduct" class="btn btn-info btn-sm text-white">
-                <i class="fas fa-edit"></i> Edit
-              </a>
-            </td>
-            <td>
-              <a href="/admin/product/variants" class="btn btn-primary mt-3">
-                <i class="fas fa-plus"></i> Add/View Variants
-              </a>
-            </td>
-          </tr>
-          <!-- Add more rows here -->
+          <% if (!products || products.length === 0) { %>
+            <tr>
+              <td colspan="15" class="text-center py-3">No products found</td>
+            </tr>
+          <% } else { %>
+            <% products.forEach((product, index) => { %>
+              <tr>
+                <td><%= index + 1 + (currentPage - 1) * limit %></td>
+                <td><%= product.name %></td>
+                <td><%= product.brand?.brandName || 'N/A' %></td>
+                <td><%= product.category?.name || 'N/A' %></td>
+                <td><%= product.subCategory?.name || 'N/A' %></td>
+                <td>₹<%= product.price.toFixed(2) %></td>
+                <td>₹<%= product.finalPrice.toFixed(2) %></td>
+                <td><%= product.material %></td>
+                <td>
+                  <% if (product.isBlocked) { %>
+                    <span class="badge bg-dark">Not Available</span>
+                  <% } else if (product.status?.toLowerCase() === 'available') { %>
+                    <span class="badge badge-available">Available</span>
+                  <% } else if (product.status?.toLowerCase() === 'out_of_stock') { %>
+                    <span class="badge badge-outofstock">Out of Stock</span>
+                  <% } else { %>
+                    <span class="badge badge-discontinued">Discontinued</span>
+                  <% } %>
+                </td>
+                <td><%= product.offer ? product.offer + "%" : "-" %></td>
+                <% let formattedDate = product.offerValidUntil
+                  ? new Date(product.offerValidUntil).toLocaleDateString('en-GB')
+                  : "-"; %>
+                <td><%= formattedDate %></td>
+
+                <!-- ======= ACTIONS ======= -->
+                <td class="action-icons">
+                  <% if (!product.isBlocked) { %>
+                    <button
+                      class="btn btn-outline-danger btn-sm"
+                      title="Block Product"
+                      onclick="confirmBlockProduct('<%= product._id %>', event)">
+                      <i class="bi bi-slash-circle"></i> Block
+                    </button>
+                  <% } else { %>
+                    <button
+                      class="btn btn-outline-success btn-sm"
+                      title="Unblock Product"
+                      onclick="confirmUnblockProduct('<%= product._id %>')">
+                      <i class="bi bi-check-circle"></i> Unblock
+                    </button>
+                  <% } %>
+                  <button
+                    class="btn btn-outline-danger btn-sm"
+                    title="Delete Product"
+                    onclick="confirmDeleteProduct('<%= product._id %>')">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+
+                <!-- ======= OFFER ======= -->
+                <td>
+                  <% if (!product.offer || product.offer === 0) { %>
+                    <button
+                      class="btn btn-outline-custom btn-sm"
+                      title="Add Offer"
+                      onclick="addOffer('<%= product._id %>')"
+                      data-bs-toggle="modal"
+                      data-bs-target="#addProductOfferModal">
+                      <i class="bi bi-tag"></i> Add Offer
+                    </button>
+                  <% } else { %>
+                    <button
+                      class="btn btn-outline-danger btn-sm"
+                      title="Remove Offer"
+                      onclick="removeOffer('<%= product._id %>')">
+                      <i class="bi bi-x-circle"></i> Remove Offer
+                    </button>
+                  <% } %>
+                </td>
+
+                <!-- ======= EDIT ======= -->
+                <td>
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary btn-sm"
+                    onclick="window.location.href='/admin/edit-product/<%= product._id %>'"
+                    title="Edit Product">
+                    <i class="bi bi-pencil"></i> Edit
+                  </button>
+                </td>
+
+                <!-- ======= VARIANT ======= -->
+                <td>
+                  <a
+                    href="/admin/product/<%= product._id %>/variants"
+                    class="btn btn-outline-custom btn-sm"
+                    title="Add/View Variants">
+                    <i class="bi bi-grid"></i> Variants
+                  </a>
+                </td>
+              </tr>
+            <% }); %>
+          <% } %>
         </tbody>
       </table>
     </div>
-  </div>
-</div>
 
-<!-- Pagination -->
-<nav aria-label="Page navigation" class="mt-4">
-  <ul class="pagination justify-content-center">
-    <li class="page-item disabled"><span class="page-link">Previous</span></li>
-    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-    <li class="page-item"><a class="page-link" href="#">2</a></li>
-    <li class="page-item"><a class="page-link" href="#">3</a></li>
-    <li class="page-item"><a class="page-link" href="#">Next</a></li>
-  </ul>
-</nav>
-
-<!-- Image Preview Modal -->
-<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-sm">
-    <div class="modal-content p-3 text-center">
-      <img
-        id="modalImage"
-        src=""
-        alt="Full Image"
-        class="img-fluid rounded"
-        style="max-height: 400px; width: auto; object-fit: contain;"
-      />
-      <button type="button" class="btn btn-secondary mt-3" data-bs-dismiss="modal">Close</button>
+    <!-- ======= PAGINATION ======= -->
+    <div class="d-flex justify-content-center mt-4">
+      <nav>
+        <ul class="pagination pagination-sm mb-0">
+          <% for (let i = 1; i <= totalPages; i++) { %>
+            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+              <a class="page-link" href="/admin/products?page=<%= i %><%= search ? '&search=' + search : '' %>"><%= i %></a>
+            </li>
+          <% } %>
+        </ul>
+      </nav>
     </div>
   </div>
-</div>
+</main>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+
+<script>
+  // Sidebar Toggle Fix (same as variant page)
+  const toggleBtn = document.getElementById("sidebarToggle");
+  const sidebar = document.querySelector(".sidebar");
+  const mainContent = document.querySelector("main");
+
+  if (toggleBtn && sidebar) {
+    toggleBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("collapsed");
+      mainContent.classList.toggle("sidebar-collapsed");
+    });
+  }
+</script>
+
+<script>
+  async function confirmBlockProduct(id, e) {
+    const page =<%= currentPage%>
+      e.preventDefault()
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'This will block the product.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, block it!',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch('/admin/blockProduct', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          Swal.fire(
+            'Unlisted!',
+            'The Brand listed Succesfully.',
+            'success'
+          ).then(() => {
+            window.location.href = `/admin/products?page=${page}`;
+          });
+        } else {
+          Swal.fire('Error!', data.message || 'Failed to block product.', 'error');
+        }
+      } catch (error) {
+        Swal.fire('Error!', 'Something went wrong while blocking the product.', 'error');
+        console.error(error);
+      }
+    }
+  }
+
+  async function confirmUnblockProduct(id) {
+
+    const result= await Swal.fire({
+      title:'Are you sure?',
+      text:'This will unblock the product',
+      icon:'warning',
+      showCancelButton:true,
+      confirmButtonColor:'#3085d6',
+      confirmButtonText:'Yes unblock!',
+      cancelButtonColor:'#d33'
+    })
+
+    if(result.isConfirmed){
+     
+      try{
+        const res=await fetch('/admin/unblockProduct',{
+        method:"PATCH",
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({id})
+      })
+
+      const response=await res.json()
+      if(response.success){
+        Swal.fire({
+          icon:'success',
+          title:'success',
+          text: response.message,
+          confirmButtonColor: '#198754'
+        }).then(()=>{
+          location.reload()
+        })
+      }else{
+        Swal.fire({
+          icon:'error',
+          title:'Error',
+          text: result.message,
+          confirmButtonColor: '#198754'
+        })
+      }
+      }catch(error){
+         Swal.fire({
+          icon:'error',
+          title:'success',
+          text:'Some thing went wrong',
+          confirmButtonColor: '#198754'
+        })
+      }
+    }
+  }
+
+  async function confirmDeleteProduct(id) {
+
+    const result= await Swal.fire({
+      title:'Are you sure?',
+      text:'This will delete the product',
+      icon:'warning',
+      showCancelButton:true,
+      confirmButtonColor:'#3085d6',
+      confirmButtonText:'Yes delete!',
+      cancelButtonColor:'#d33'
+    })
+
+    if(result.isConfirmed){
+      
+      try{
+        const res=await fetch('/admin/deleteProduct',{
+        method:"DELETE",
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({id})
+      })
+
+      const response=await res.json()
+      if(response.success){
+        Swal.fire({
+          icon:'success',
+          title:'success',
+          text: response.message,
+          confirmButtonColor: '#198754'
+        }).then(()=>{
+          location.reload()
+        })
+      }else{
+        Swal.fire({
+          icon:'error',
+          title:'Error',
+          text: result.message,
+          confirmButtonColor: '#198754'
+        })
+      }
+      }catch(error){
+         Swal.fire({
+          icon:'error',
+          title:'success',
+          text:'Some thing went wrong',
+          confirmButtonColor: '#198754'
+        })
+      }
+    }
+  }
+
+  function addOffer(id){
+    document.getElementById('offerProductId').value=id
+  }
+
+  async function addProductOffer(e) {
+    e.preventDefault()
+    let form =e.target
+    const formdata=new FormData(form)
+    const productId=formdata.get('productId')
+    const offerPercentage=formdata.get('offerPercentage')
+    const startDate=formdata.get('startDate')
+    const endDate=formdata.get('endDate')
+
+     document.getElementById('offer-error').innerText = '';
+    document.getElementById('date1-error').innerText = '';
+    document.getElementById('date2-error').innerText = '';
+    
+    let hasError=false
+
+    if(!offerPercentage){
+      document.getElementById('offer-error').innerText='offer percentage is required'
+      hasError=true
+    }
+    if(!startDate){
+      document.getElementById('date1-error').innerText='Start date is required'
+      hasError=true
+    }
+
+    if(!endDate){
+      document.getElementById('date2-error').innerText='End date is required'
+      hasError=true
+    }
+
+    if(offerPercentage<=0||offerPercentage>100){
+      document.getElementById('offer-error').innerText='Offer should be between 1 and 100'
+      hasError=true
+    }
+
+    if(new Date(startDate)>new Date(endDate)){
+      document.getElementById('date1-error').innerText='Invalid date- start date shoould be less than end date'
+      document.getElementById('date2-error').innerText='Invalid date- start date shoould be less than end date'
+      hasError=true
+    }
+
+    if(hasError==false){
+
+      try{
+        const response=await fetch('/admin/addProductOffer',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            productId,
+            offer:offerPercentage,
+            startDate,
+            endDate
+          })
+        })
+
+        const result=await response.json()
+        if(result.success){
+        Swal.fire({
+          icon:'success',
+          title:'success',
+          text: result.message,
+          confirmButtonColor: '#198754'
+        }).then(()=>{
+          location.reload()
+        })
+      }else{
+        Swal.fire({
+          icon:'error',
+          title:'Error',
+          text: result.message,
+          confirmButtonColor: '#198754'
+        })
+      }
+      }catch(error){
+         Swal.fire({
+          icon:'error',
+          title:'success',
+          text:'Some thing went wrong',
+          confirmButtonColor: '#198754'
+        })
+      }
+    }
+        
+      }
+
+
+      async function removeOffer(id) {
+        
+    const result= await Swal.fire({
+      title:'Are you sure?',
+      text:'This will remove Offer',
+      icon:'warning',
+      showCancelButton:true,
+      confirmButtonColor:'#3085d6',
+      confirmButtonText:'Yes Remove!',
+      cancelButtonColor:'#d33'
+    })
+
+    if(result.isConfirmed){
+      
+      try{
+        const res=await fetch('/admin/removeProductOffer',{
+        method:"PATCH",
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({id})
+      })
+
+      const response=await res.json()
+      if(response.success){
+        Swal.fire({
+          icon:'success',
+          title:'success',
+          text: response.message,
+          confirmButtonColor: '#198754'
+        }).then(()=>{
+          location.reload()
+        })
+      }else{
+        Swal.fire({
+          icon:'error',
+          title:'Error',
+          text: result.message,
+          confirmButtonColor: '#198754'
+        })
+      }
+      }catch(error){
+         Swal.fire({
+          icon:'error',
+          title:'success',
+          text:'Some thing went wrong',
+          confirmButtonColor: '#198754'
+        })
+      }
+    }
+        
+      }
+    
+
+
+
+</script>
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

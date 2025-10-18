@@ -14,11 +14,8 @@ const loadsignup=async(req,res)=>{
 }
 const loadLogin=async(req,res)=>{
     try{
-        if(!req.session.user){
-            return res.render('login')
-        }else{
-            res.redirect('/')
-        }
+        
+         res.render('login')
         
     }catch(error){
         console.log('login page is not loading:',error)
@@ -228,20 +225,28 @@ const verify_otp=async(req,res)=>{
 
     }
 
-    const logout=async(req,res)=>{
-        try{
-            req.session.destroy((err)=>{
-            if(err){
-                console.log('Session destruction error:',err)
-                res.redirect('/pagenotfound')
-            }
-            res.redirect('/login')
-        })
-        }catch(error){
-            console.log('Logout error:',error)
-            res.redirect('/pagenotfound')
-        }
-    }
+   const logout = async (req, res) => {
+       try {
+           if (req.session.user) {
+               
+               delete req.session.user;
+   
+               req.session.save((err) => {
+                   if (err) {
+                       console.log('Error saving session during logout:', err);
+                       return res.redirect('/pageNotFound');
+                   }
+                   return res.redirect('/login');
+               });
+           } else {
+            
+               return res.redirect('/login');
+           }
+       } catch (error) {
+           console.log('Logout error:', error);
+           return res.redirect('/pageNotFound');
+       }
+   };
 
 module.exports={
     loadHomepage,

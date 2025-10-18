@@ -1,0 +1,603 @@
+<%- include("../../views/partials/admin/header") %>
+
+  <style>
+    /* ======= TABLE STYLES ======= */
+    .table-head th {
+      background-color: #a3654b !important;
+      color: #1b1919 !important;
+      text-align: center;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .table th,
+    .table td {
+      text-align: center;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ======= BUTTONS ======= */
+    .btn-custom {
+      background-color: #a05a3b;
+      color: white;
+      border: none;
+    }
+
+    .btn-custom:hover {
+      background-color: #8e4e35;
+    }
+
+    .btn-outline-custom {
+      border: 1px solid #a05a3b;
+      color: #a05a3b;
+    }
+
+    .btn-outline-custom:hover {
+      background-color: #a05a3b;
+      color: white;
+    }
+
+    .action-icons a {
+      margin: 0 5px;
+      font-size: 1.1rem;
+    }
+
+    .color-box {
+      display: inline-block;
+      width: 25px;
+      height: 25px;
+      border: 1px solid #aaa;
+      vertical-align: middle;
+      margin-right: 8px;
+      border-radius: 4px;
+    }
+
+    /* ======= RESPONSIVE FIXES ======= */
+    @media (max-width: 992px) {
+      .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .table th,
+      .table td {
+        white-space: nowrap;
+      }
+
+      h4 {
+        font-size: 1.1rem;
+      }
+
+      .btn,
+      input,
+      select {
+        font-size: 0.85rem;
+      }
+
+      .btn-custom,
+      .btn-outline-custom {
+        padding: 0.25rem 0.6rem;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .d-flex.gap-2 {
+        flex-direction: column;
+        gap: 0.5rem !important;
+      }
+
+      #searchInput {
+        width: 100% !important;
+      }
+
+      .table img {
+        width: 30px;
+        height: 30px;
+      }
+
+      .color-box {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <main class="col-12 col-md-10 px-3 pt-3">
+    <!-- ======= PAGE HEADER & SEARCH ======= -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center my-3 gap-2">
+      <h4 class="fw-bold mb-0">Products</h4>
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <form class="d-flex flex-wrap gap-2" role="search">
+          <input type="text" name="search" id="searchInput" placeholder="Search product..."
+            class="form-control form-control-sm" style="width: 250px;"
+            value="<%= typeof search !== 'undefined' ? search : '' %>" autocomplete="off" />
+          <button class="btn btn-dark btn-sm" type="submit">Search</button>
+          <% if (search) { %>
+            <a href="/admin/brands" class="btn btn-outline-secondary btn-sm">Clear</a>
+            <% } %>
+        </form>
+
+        <button class="btn btn-sm btn-custom" data-bs-toggle="modal" data-bs-target="#addVariantModal"
+          onclick="setproductId('<%= variants[0].product._id%>')">
+          <i class="bi bi-plus-lg me-1"></i> Add Variant
+        </button>
+      </div>
+    </div>
+
+    <!-- ======= VARIANTS TABLE ======= -->
+    <div class="bg-white p-3 rounded shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-head">
+            <tr>
+              <th>SL NO</th>
+              <th>Product</th>
+              <th>Color</th>
+              <th>Size</th>
+              <th>Image</th>
+              <th>Price</th>
+              <th>Quantity</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% if (!variants || variants.length===0) { %>
+              <tr>
+                <td colspan="9" class="text-center py-3">No variants found</td>
+              </tr>
+              <% } else { %>
+                <% variants.forEach((variant, index)=> { %>
+                  <tr>
+                    <td>
+                      <%= index + 1 + (currentPage - 1) * limit %>
+                    </td>
+                    <td>
+                      <%= variant.product?.name || 'N/A' %>
+                    </td>
+                    <td>
+                      <div class="color-box" style="background-color:<%= variant.color %>"></div>
+                      <span id="colorName-<%= variant._id %>">
+                        <%= variant.color %>
+                      </span>
+                    </td>
+                    <td>
+                      <%= variant.size %>
+                    </td>
+                    <td>
+                      <% if (variant.images && variant.images.length> 0) { %>
+                        <img
+                          src="<%= variant.images[0] ? '/uploads/variants/' + variant.images[0] : 'https://via.placeholder.com/40' %>"
+                          alt="variant image" class="img-thumbnail" width="40" height="40"
+                          onclick="openImageModal('/uploads/variants/<%= variant.images[0] %>')"
+                          style="cursor: pointer;" />
+                        <% } else { %>
+                          <img src="/placeholder.svg" alt="No image" width="40" height="40" class="img-thumbnail" />
+                          <% } %>
+                    </td>
+                    <td>₹<%= variant.product.price.toFixed(2) %>
+                    </td>
+                    <td>
+                      <%= variant.quantity %>
+                    </td>
+                    <td>
+                      <% if (!variant.isBlocked) { %>
+                        <button class="btn btn-outline-danger btn-sm" title="Block Variant"
+                          onclick="confirmBlockVariant('<%= variant._id %>')">
+                          <i class="bi bi-slash-circle"></i> Block
+                        </button>
+                        <% } else { %>
+                          <button class="btn btn-outline-success btn-sm" title="Unblock Variant"
+                            onclick="confirmUnblockVariant('<%= variant._id %>')">
+                            <i class="bi bi-check-circle"></i> Unblock
+                          </button>
+                          <% } %>
+                    </td>
+                    <td>
+                      <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#editVariantModal" onclick="setEditmodal('<%= variant._id%>')"
+                        title="Edit Variant">
+                        <i class="bi bi-pencil"></i> Edit
+                      </button>
+                    </td>
+                  </tr>
+                  <% }); %>
+                    <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ADD VARIANT MODAL -->
+    <div class="modal fade" id="addVariantModal" tabindex="-1" aria-labelledby="addVariantModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content p-4 rounded-4 border-0">
+          <form id="addVariantForm" enctype="multipart/form-data" method="POST" action="/admin/addVariant">
+
+
+            <!-- Modal Header -->
+            <div class="modal-header p-3 mb-3" style="background-color: #a05a3b; border-radius: 0.5rem;">
+              <h5 class="modal-title text-white fw-bold" id="addVariantModalLabel">Add Variant</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                aria-label="Close"></button>
+            </div>
+
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+              <div class="row g-3">
+
+                <!-- Color -->
+                <div class="col-md-6">
+                  <label for="variantColor" class="form-label fw-semibold">Color</label>
+                  <input type="text" name="color" id="variantColor" class="form-control rounded-3"
+                    placeholder="e.g. Red" />
+                  <div id="colorError" class="error-msg"></div>
+                </div>
+                <input type="hidden" name="productId" id="productId">
+                <!-- Size -->
+                <div class="col-md-6">
+                  <label for="variantSize" class="form-label fw-semibold">Size</label>
+                  <input type="text" name="size" id="variantSize" class="form-control rounded-3"
+                    placeholder="e.g. M, L, XL" />
+                  <div id="sizeError" class="error-msg"></div>
+                </div>
+
+                <!-- Quantity -->
+                <div class="col-md-6">
+                  <label for="variantQuantity" class="form-label fw-semibold">Quantity</label>
+                  <input type="number" name="quantity" id="variantQuantity" class="form-control rounded-3" min="0" />
+                  <div id="quantityError" class="error-msg"></div>
+                </div>
+
+                <!-- Image Upload -->
+                <div class="col-12">
+                  <h5>Product Images</h5>
+                  <div class="row">
+                    <% for (let i=1; i <=4; i++) { %>
+                      <div class="col-md-6 mb-3">
+                        <label for="image<%= i %>">Image <%= i %></label>
+                        <input type="file" id="image<%= i %>" name="image<%= i %>" class="form-control" accept="image/*"
+                          onchange="previewImage(event, <%= i %>)">
+                        <div class="mt-2 text-center">
+                          <div class="preview-container" style="border: 1px solid #ccc; padding: 5px; display:none;">
+                            <img id="preview<%= i %>" class="img-fluid rounded" src="#" alt="Preview"
+                              style="max-height:200px;">
+                          </div>
+                          <button type="button" class="btn btn-sm btn-outline-info mt-2" id="cropBtn<%= i %>"
+                            style="display:none;" onclick="cropImage(<%= i %>)">Crop</button>
+                          <input type="hidden" id="croppedImage<%= i %>" name="croppedImage<%= i %>">
+                          <div id="image<%= i %>-error" class="text-danger mt-1"></div>
+                        </div>
+                      </div>
+                      <% } %>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer border-0 mt-3">
+              <div class="d-flex justify-content-end gap-2">
+                <button type="reset" class="btn btn-outline-secondary rounded-3 px-4"
+                  data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn" style="background-color: #a05a3b; color: white;">Save Variant</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT VARIANT MODAL -->
+    <div class="modal fade" id="editVariantModal" tabindex="-1" aria-labelledby="editVariantModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content p-4 rounded-4 border-0">
+          <form id="editVariantForm" enctype="multipart/form-data" method="POST" action="/admin/editVariant">
+
+            <!-- Modal Header -->
+            <div class="modal-header p-3 mb-3" style="background-color: #a05a3b; border-radius: 0.5rem;">
+              <h5 class="modal-title text-white fw-bold" id="editVariantModalLabel">Edit Variant</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                aria-label="Close"></button>
+            </div>
+
+            <!-- Hidden Variant ID -->
+            <input type="hidden" name="variantId" id="editVariantId">
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+              <div class="row g-3">
+
+                <!-- Color -->
+                <div class="col-md-6">
+                  <label for="editVariantColor" class="form-label fw-semibold">Color</label>
+                  <input type="text" name="color" id="editVariantColor" class="form-control rounded-3"
+                    placeholder="e.g. Red" required />
+                  <div id="editColorError" class="error-msg"></div>
+                </div>
+
+                <!-- Size -->
+                <div class="col-md-6">
+                  <label for="editVariantSize" class="form-label fw-semibold">Size</label>
+                  <input type="text" name="size" id="editVariantSize" class="form-control rounded-3"
+                    placeholder="e.g. M, L, XL" required />
+                  <div id="editSizeError" class="error-msg"></div>
+                </div>
+
+                <!-- Quantity -->
+                <div class="col-md-6">
+                  <label for="editVariantQuantity" class="form-label fw-semibold">Quantity</label>
+                  <input type="number" name="quantity" id="editVariantQuantity" class="form-control rounded-3" min="0"
+                    required />
+                  <div id="editQuantityError" class="error-msg"></div>
+                </div>
+
+                <!-- Image Upload -->
+                <div class="col-12">
+                  <h5>Product Images</h5>
+                  <div class="row">
+                    <% for (let i=1; i <=4; i++) { %>
+                      <div class="col-md-6 mb-3">
+                        <label for="editImage<%= i %>">Image <%= i %></label>
+                        <input type="file" id="editImage<%= i %>" name="image<%= i %>" class="form-control"
+                          accept="image/*" onchange="previewImage(event, <%= i %>, true)">
+                        <div class="mt-2 text-center">
+                          <div class="preview-container" style="border: 1px solid #ccc; padding: 5px; display:none;">
+                            <img id="editPreview<%= i %>" class="img-fluid rounded" src="#" alt="Preview"
+                              style="max-height:200px;">
+                          </div>
+                          <button type="button" class="btn btn-sm btn-outline-info mt-2" id="editCropBtn<%= i %>"
+                            style="display:none;" onclick="cropImage(<%= i %>, true)">Crop</button>
+                          <input type="hidden" id="editCroppedImage<%= i %>" name="croppedImage<%= i %>">
+                          <div id="editImage<%= i %>-error" class="text-danger mt-1"></div>
+                        </div>
+                      </div>
+                      <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer border-0 mt-3">
+              <div class="d-flex justify-content-end gap-2">
+                <button type="reset" class="btn btn-outline-secondary rounded-3 px-4"
+                  data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn" style="background-color: #a05a3b; color: white;">Update
+                  Variant</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- ======= IMAGE PREVIEW MODAL ======= -->
+    <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content p-3 text-center">
+          <img id="modalImage" src="" alt="Full Image" class="img-fluid rounded"
+            style="max-height: 400px; object-fit: contain;" />
+          <button type="button" class="btn btn-secondary mt-3" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======= PAGINATION ======= -->
+    <div class="d-flex justify-content-center mt-4">
+      <nav>
+        <ul class="pagination pagination-sm mb-0">
+          <% for (let i=1; i <=totalPages; i++) { %>
+            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+              <a class="page-link" href="/admin/variant?page=<%= i %><%= search ? '&search=' + search : '' %>">
+                <%= i %>
+              </a>
+            </li>
+            <% } %>
+        </ul>
+      </nav>
+    </div>
+  </main>
+
+  <!-- ======= COLOR DISPLAY SCRIPT ======= -->
+  <script>
+    function getValidColor(value) {
+      const ctx = document.createElement("canvas").getContext("2d");
+      ctx.fillStyle = value;
+      return ctx.fillStyle || null;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll("[id^='colorName-']").forEach(el => {
+        const colorValue = el.textContent.trim();
+        const colorBox = el.previousElementSibling;
+        const validColor = getValidColor(colorValue);
+        colorBox.style.backgroundColor = validColor || "#ccc";
+      });
+    });
+
+    function openImageModal(src) {
+      const modalImg = document.getElementById("modalImage");
+      modalImg.src = src;
+      const modal = new bootstrap.Modal(document.getElementById("imagePreviewModal"));
+      modal.show();
+    }
+  </script>
+
+
+
+  <!-- Cropper.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.min.css" rel="stylesheet" />
+
+  <script>
+    const croppers = {}; // Cropper instances
+function previewImage(event, index, isEdit = false) {
+  const input = event.target;
+  const previewId = isEdit ? `editPreview${index}` : `preview${index}`;
+  const croppedInputId = isEdit ? `editCroppedImage${index}` : `croppedImage${index}`;
+  const cropBtnId = isEdit ? `editCropBtn${index}` : `cropBtn${index}`;
+  const errorId = isEdit ? `editImage${index}-error` : `image${index}-error`;
+
+  const previewImage = document.getElementById(previewId);
+  const previewContainer = previewImage.parentElement;
+  const cropBtn = document.getElementById(cropBtnId);
+  const errorDiv = document.getElementById(errorId);
+
+  previewContainer.style.display = 'none';
+  cropBtn.style.display = 'none';
+  errorDiv.textContent = '';
+  document.getElementById(croppedInputId).value = '';
+
+  const key = isEdit ? `edit${index}` : index;
+  if (croppers[key]) {
+    croppers[key].destroy();
+    delete croppers[key];
+  }
+
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      errorDiv.textContent = 'Invalid image type';
+      input.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      errorDiv.textContent = 'Image size must be <5MB';
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      previewImage.src = e.target.result;
+      previewContainer.style.display = 'block';
+      cropBtn.style.display = 'inline-block';
+
+      croppers[key] = new Cropper(previewImage, {
+        aspectRatio: 1,
+        viewMode: 1,
+        autoCropArea: 1,
+        background: false
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function cropImage(index, isEdit = false) {
+  const key = isEdit ? `edit${index}` : index;
+  if (!croppers[key]) return;
+
+  const previewId = isEdit ? `editPreview${index}` : `preview${index}`;
+  const croppedInputId = isEdit ? `editCroppedImage${index}` : `croppedImage${index}`;
+  const cropBtnId = isEdit ? `editCropBtn${index}` : `cropBtn${index}`;
+
+  const croppedDataURL = croppers[key]
+    .getCroppedCanvas({ width: 500, height: 500 })
+    .toDataURL('image/jpeg');
+
+  document.getElementById(previewId).src = croppedDataURL;
+  document.getElementById(croppedInputId).value = croppedDataURL;
+
+  // Destroy cropper instance after cropping
+  croppers[key].destroy();
+  delete croppers[key];
+
+  document.getElementById(cropBtnId).style.display = 'none';
+}
+
+    // Reset modal
+    document.getElementById("addVariantModal").addEventListener("hidden.bs.modal", () => {
+      for (let i = 1; i <= 4; i++) {
+        if (croppers[i]) croppers[i].destroy();
+        document.getElementById(`preview${i}`).src = "#";
+        document.getElementById(`croppedImage${i}`).value = "";
+        document.getElementById(`image${i}`).value = "";
+        document.getElementById(`image${i}-error`).textContent = "";
+        document.getElementById(`preview${i}`).parentElement.style.display = 'none';
+        document.getElementById(`cropBtn${i}`).style.display = 'none';
+      }
+    });
+
+    function setproductId(productId) {
+      document.getElementById('productId').value = productId
+    }
+    function setEditmodal(variantId) {
+      const variant = <% - JSON.stringify(variants) %>.find(v => v._id === variantId);
+      if (!variant) return;
+
+      document.getElementById('editVariantId').value = variant._id;
+      document.getElementById('editVariantColor').value = variant.color || '';
+      document.getElementById('editVariantSize').value = variant.size || '';
+      document.getElementById('editVariantQuantity').value = variant.quantity || '';
+
+      const editModalEl = document.getElementById('editVariantModal');
+
+      // Wait for modal to show before initializing Cropper
+      const modal = new bootstrap.Modal(editModalEl);
+
+      editModalEl.addEventListener('shown.bs.modal', function handler() {
+        // Remove previous croppers if any
+        for (let i = 1; i <= 4; i++) {
+          if (croppers[`edit${i}`]) {
+            croppers[`edit${i}`].destroy();
+            delete croppers[`edit${i}`];
+          }
+
+          const preview = document.getElementById(`editPreview${i}`);
+          const croppedInput = document.getElementById(`editCroppedImage${i}`);
+          const cropBtn = document.getElementById(`editCropBtn${i}`);
+          const previewContainer = preview.closest('.preview-container');
+
+          if (variant.images && variant.images[i - 1]) {
+            preview.src = `/uploads/variants/${variant.images[i - 1]}`;
+            croppedInput.value = '';
+            previewContainer.style.display = 'block';
+            cropBtn.style.display = 'inline-block';
+
+            // Initialize Cropper after modal is visible
+            croppers[`edit${i}`] = new Cropper(preview, {
+              aspectRatio: 1,
+              viewMode: 1,
+              autoCropArea: 1,
+              background: false
+            });
+          } else {
+            preview.src = '#';
+            croppedInput.value = '';
+            previewContainer.style.display = 'none';
+            cropBtn.style.display = 'none';
+          }
+        }
+
+        // Remove the listener so it doesn't fire again next time
+        editModalEl.removeEventListener('shown.bs.modal', handler);
+      });
+
+      modal.show();
+    }
+
+
+
+
+  </script>
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.js"></script>

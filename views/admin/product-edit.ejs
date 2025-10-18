@@ -1,0 +1,340 @@
+<%- include("../../views/partials/admin/header") %>
+
+<style>
+/* Sidebar styles */
+.header .sidebar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100vh;
+  background: #2c2c2c;
+  padding: 20px;
+  color: #fff;
+  z-index: 1000;
+}
+.header .sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.header .sidebar ul li {
+  margin-bottom: 15px;
+}
+.header .sidebar ul li a {
+  color: #fff;
+  text-decoration: none;
+}
+
+/* Main content */
+.main-content {
+  margin-left: 250px;
+  padding: 30px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* Form container */
+.form-container {
+  background: #fff;
+  padding: 25px 30px;
+  border-radius: 12px;
+  max-width: 900px;
+  margin: auto;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+.form-container h2 {
+  margin-bottom: 5px;
+  font-size: 24px;
+  font-weight: 600;
+}
+.form-container p {
+  margin-bottom: 20px;
+  color: #555;
+}
+
+/* Form layout */
+.form-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.form-group.full-width {
+  flex: 100%;
+}
+.form-group label {
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* Buttons */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+.cancel-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: 1px solid #b4654b;
+  background: #fff;
+  color: #b4654b;
+  cursor: pointer;
+}
+.add-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  background: #b4654b;
+  color: #fff;
+  cursor: pointer;
+}
+</style>
+
+<main class="col-12 col-md-10 px-3 pt-3">
+  <h2>Edit Product</h2>
+  <p>Update the product details below</p>
+
+  <form id="editProduct" action="/admin/editproduct" enctype="multipart/form-data">
+    <input type="hidden" name="productId" value="<%= product._id %>">
+
+    <!-- Product Name & Material -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Product Name</label>
+        <input type="text" name="productName" value="<%= product.name %>" placeholder="Enter product name">
+        <div id="productName-error" class="text-danger"></div>
+      </div>
+
+      <div class="form-group">
+        <label>Material</label>
+        <input type="text" name="material" value="<%= product.material %>" placeholder="Enter material">
+        <div id="material-error" class="text-danger"></div>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="form-group">
+      <label>Status</label>
+      <select name="status" id="status">
+        <option value="">Select Status</option>
+        <option value="available" <%= product.status === 'available' ? 'selected' : '' %>>Available</option>
+        <option value="out_of_stock" <%= product.status === 'out_of_stock' ? 'selected' : '' %>>Out of Stock</option>
+        <option value="discontinued" <%= product.status === 'discontinued' ? 'selected' : '' %>>Discontinued</option>
+      </select>
+      <div id="status-error" class="text-danger"></div>
+    </div>
+
+    <!-- Price -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Regular Price</label>
+        <input type="number" name="regprice" value="<%= product.price %>" placeholder="0.00">
+        <div id="regularprice-error" class="text-danger"></div>
+      </div>
+      <div class="form-group">
+        <label>Final Price</label>
+        <input type="number" name="finalPrice" value="<%= product.finalPrice %>" placeholder="0.00">
+        <div id="finalPrice-error" class="text-danger"></div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="form-group full-width">
+      <label>Product Description</label>
+      <textarea name="description"><%= product.description %></textarea>
+      <div id="description-error" class="text-danger"></div>
+    </div>
+
+    <!-- Category, Subcategory, Brand -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Category</label>
+        <select name="category" id="category">
+          <option value="">Select Category</option>
+          <% category.forEach(cat => { %>
+            <option value="<%= cat._id %>" <%= cat._id.toString() === product.category.toString() ? 'selected' : '' %>><%= cat.name %></option>
+          <% }) %>
+        </select>
+        <div id="category-error" class="text-danger"></div>
+      </div>
+
+      <div class="form-group">
+        <label>Subcategory</label>
+        <select name="subcategory" id="subcategory">
+          <option value="">Select Subcategory</option>
+          <% subcategory
+              .filter(sc => sc.categoryId.toString() === product.category.toString())
+              .forEach(sc => { %>
+                <option value="<%= sc._id %>" <%= sc._id.toString() === product.subcategory.toString() ? 'selected' : '' %>>
+                  <%= sc.name %>
+                </option>
+          <% }) %>
+        </select>
+        <div id="subcategory-error" class="text-danger"></div>
+      </div>
+
+      <div class="form-group">
+        <label>Brand</label>
+        <select name="brand">
+          <option value="">Select Brand</option>
+          <% brand.forEach(b => { %>
+            <option value="<%= b._id %>" <%= b._id.toString() === product.brand.toString() ? 'selected' : '' %>>
+              <%= b.brandName %>
+            </option>
+          <% }) %>
+        </select>
+        <div id="brand-error" class="text-danger"></div>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="form-actions">
+      <button type="button" class="cancel-btn" onclick="window.history.back()">Cancel</button>
+      <button type="submit" class="add-btn">Save Changes</button>
+    </div>
+  </form>
+</main>
+
+<script>
+const category = <%- JSON.stringify(category) %>;
+const subcategory = <%- JSON.stringify(subcategory) %>;
+
+const categorySelect = document.getElementById('category');
+const subcategorySelect = document.getElementById('subcategory');
+
+categorySelect.addEventListener('change', function() {
+  const categoryId = this.value;
+  subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
+
+  if (!categoryId) return;
+
+  const filtered = subcategory.filter(sc => sc.categoryId === categoryId);
+  filtered.forEach(sc => {
+    const opt = document.createElement('option');
+    opt.value = sc._id;
+    opt.textContent = sc.name;
+    subcategorySelect.appendChild(opt);
+  });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('editProduct').addEventListener('submit', async function(e){
+    e.preventDefault();
+    console.log("Form submit clicked");
+
+    document.querySelectorAll('.text-danger').forEach(el => el.textContent = '');
+
+    const form = e.target;
+
+    // Collect values from form fields
+    const productData = {
+        productId:form.productId.value,
+      productName: form.productName.value.trim(),
+      material: form.material.value.trim(),
+      status: form.status.value,
+      regprice: form.regprice.value,
+      finalPrice: form.finalPrice.value,
+      category: form.category.value,
+      subcategory: form.subcategory.value,
+      brand: form.brand.value,
+      description: form.description.value.trim()
+    };
+
+    // Frontend validation
+    let hasError = false;
+
+    if(!productData.productName){
+      document.getElementById('productName-error').innerText='Product name is required';
+      hasError = true;
+    }
+    if(!productData.material){
+      document.getElementById('material-error').innerText='Material is required';
+      hasError = true;
+    }
+    if(!productData.status){
+      document.getElementById('status-error').innerText='Please select the status';
+      hasError = true;
+    }
+    if(!productData.regprice || Number(productData.regprice) <= 0){
+      document.getElementById('regularprice-error').innerText='Please enter valid price';
+      hasError = true;
+    }
+    if(!productData.finalPrice || Number(productData.finalPrice) <= 0 || Number(productData.finalPrice) >= Number(productData.regprice)){
+      document.getElementById('finalPrice-error').innerText='Final price must be less than regular price and greater than 0';
+      hasError = true;
+    }
+    if(!productData.category){
+      document.getElementById('category-error').innerText='Please select category';
+      hasError = true;
+    }
+    if(!productData.subcategory){
+      document.getElementById('subcategory-error').innerText='Please select subcategory';
+      hasError = true;
+    }
+    if(!productData.brand){
+      document.getElementById('brand-error').innerText='Please select brand';
+      hasError = true;
+    }
+    if(!productData.description){
+      document.getElementById('description-error').innerText='Please add description';
+      hasError = true;
+    }
+
+    if(!hasError){
+      try{
+        const response = await fetch('/admin/editproduct', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(productData)
+        });
+
+        const result = await response.json();
+        if(result.success){
+          Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: result.message,
+            confirmButtonColor: '#198754'
+          }).then(() => window.location.href='/admin/products');
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: result.message,
+            confirmButtonColor: '#dc3545'
+          });
+        }
+      } catch(error){
+        Swal.fire({
+          icon: 'error',
+          title: 'Server Error',
+          text: "Something went wrong",
+          confirmButtonColor: '#dc3545'
+        });
+      }
+    }
+  });
+});
+</script>
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
