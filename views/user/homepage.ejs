@@ -1,69 +1,344 @@
- <%-include("../../views/partials/user/header")%>
-    <section class="container-fluid p-0">
-        <div class="row">
-            <div class="col-12">
-                <div id="carouselExampleCaptions" class="carousel slide">
-                    <div class="carousel-indicators">
-                        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-                        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
-                        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
-                    </div>
-                    <div class="carousel-inner">
-                        <div class="carousel-item active">
-                        <img src="/images/photo-1516882058351-3601a7f420cc.jpg" class="img-fluid" alt="...">
-                        <div class="carousel-caption d-none d-md-block">
-                            <h5>Discover the world</h5>
-                            <p>Step into a world of breathtaking landscapes</p>
-                        </div>
-                        </div>
-                        <div class="carousel-item">
-                        <img src="/images/premium_photo-1690576837258-8750545fb430.jpg" class="img-fluid" alt="...">
-                        <div class="carousel-caption d-none d-md-block">
-                            <h5>Capture Every Moment</h5>
-                            <p>Embark on a journey where every path leads to new wonders</p>
-                        </div>
-                        </div>
-                        <div class="carousel-item">
-                        <img src="/images/wide-d.jpg" class="d-block w-100" alt="...">
-                        <div class="carousel-caption d-none d-md-block">
-                            <h5>Share Your Perspective</h5>
-                            <p>From hidden gems to iconic landmarks</p>
-                        </div>
-                        </div>
-                    </div>
-                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                    </button>
-                    </div>
-                
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<%- include("../../views/partials/user/header") %>
+<style>
+  @media (max-width: 992px) {
+    #newArrivalsCarousel .carousel-item > div > div {
+      flex: 0 0 33.33%; /* 3 items per slide on medium screens */
+      max-width: 33.33%;
+    }
+  }
 
-            </div>
+  @media (max-width: 768px) {
+    #newArrivalsCarousel .carousel-item > div > div {
+      flex: 0 0 50%; /* 2 items per slide on small screens */
+      max-width: 50%;
+    }
+  }
 
+  @media (max-width: 576px) {
+    #newArrivalsCarousel .carousel-item > div > div {
+      flex: 0 0 100%; /* 1 item per slide on mobile */
+      max-width: 100%;
+    }
+  }
+</style>
+<style>
+  
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f5f3;
+    color: #1b1919;
+  }
+
+  /* Section Titles */
+  h2.section-title {
+    text-align: center;
+    font-weight: 600;
+    margin: 40px 0 20px;
+    color: #1b1919;
+  }
+
+  /* Product Cards */
+  .product-card {
+    border: none;
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  .product-card img {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+  }
+  .product-card .card-body {
+    text-align: center;
+    padding: 15px;
+  }
+  .product-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+  .product-price {
+    color: #a3654b;
+    font-weight: 500;
+  }
+
+  /* Carousel Controls */
+  .carousel-control-prev-icon,
+  .carousel-control-next-icon {
+    background-color: #a3654b;
+    border-radius: 50%;
+    width: 40px;
+    height: 50px;
+  }
+
+  /* Hero Carousel Styling */
+  #heroCarousel {
+    margin-top: 40px;
+  }
+  #heroCarousel .carousel-item img {
+    width: 100%;
+    height: 80vh;
+    object-fit: cover;
+    object-position: center;
+  }
+  @media (max-width: 768px) {
+    #heroCarousel .carousel-item img {
+      height: 50vh;
+    }
+  }
+
+  /* Feature Section */
+  .features-section {
+    background-color: #f3ebe7;
+    padding: 60px 0;
+    text-align: center;
+  }
+  .feature-box {
+    text-align: center;
+  }
+  .feature-box i {
+    font-size: 40px;
+    color: #a3654b;
+    margin-bottom: 15px;
+  }
+  .feature-box h5 {
+    font-weight: 600;
+    color: #1b1919;
+  }
+  .feature-box p {
+    color: #555;
+    font-size: 15px;
+  }
+
+  /* Brand Grid Section */
+  .brand-grid {
+    background-color: #f8f5f3;
+    padding: 60px 0;
+  }
+  .brand-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .brand-card img {
+    width: 100%;
+    height: 450px;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  .brand-card:hover img {
+    transform: scale(1.05);
+  }
+  .brand-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(163, 101, 75, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 2px;
+  }
+
+  @media (max-width: 768px) {
+    .brand-card img {
+      height: 300px;
+    }
+  }
+</style>
+
+<body>
+
+  <!-- Hero Carousel -->
+  <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <img src="/images/video-image.jpg" class="d-block w-100" alt="Fashion 1">
+      </div>
+      <div class="carousel-item">
+        <img src="/images/carousal 4.jpg" class="d-block w-100" alt="Fashion 2">
+      </div>
+      <div class="carousel-item">
+        <img src="/images/carousal6.jpg" class="d-block w-100" alt="Fashion 3">
+      </div>
+      <div class="carousel-item">
+        <img src="/images/carousal2.jpg" class="d-block w-100" alt="Fashion 4">
+      </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon"></span>
+    </button>
+  </div>
+<!-- New Arrivals -->
+<section class="container py-5">
+  <h2 class="section-title mb-4">New Arrivals</h2>
+  <div id="newArrivalsCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+
+      <% 
+        const chunkSize = 4; // max items per slide for large screens
+        for (let i = 0; i < newArrivals.length; i += chunkSize) { 
+          const chunk = newArrivals.slice(i, i + chunkSize);
+      %>
+        <div class="carousel-item <%= i === 0 ? 'active' : '' %>">
+          <div class="row">
+            <% chunk.forEach(product => { %>
+              <div class="col-6 col-sm-4 col-lg-3 mb-3">
+                <div class="card product-card shadow-sm border-0 h-100">
+                  <% 
+                    const matchingVariant = productVariant.find(v => 
+                      v.product && v.product._id.toString() === product._id.toString()
+                    ); 
+                  %>
+                  <% if (matchingVariant && matchingVariant.images && matchingVariant.images.length > 0) { %>
+                    <img src="/uploads/variants/<%= matchingVariant.images[0] %>" class="card-img-top" alt="<%= product.name %>">
+                  <% } else { %>
+                    <img src="/images/placeholder.jpg" class="card-img-top" alt="No image">
+                  <% } %>
+                  <div class="card-body text-center">
+                    <p class="product-name fw-light mb-1"><%= product.name %></p>
+                    <p class="product-price text-muted mb-0">₹<%= product.finalPrice %></p>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
         </div>
-
-    </section>
-    <div class="container my-5 ">
-        <div class="row align-items-center">
-            <div class="col-4"> 
-                <img src="/images/snapvista.png" class="img-fluid">
-
-            </div>
-            <div class="col-7"> 
-                <h4>Join world's largest photography community</h4>
-                <h1>Showcase High quality Photos</h1>
-                <p>
-                    Connect with millions of passionate photographers, share your best shots, and get inspired by stunning visuals from around the globe. Whether you're a beginner or a pro, this is your space to learn, grow, and let your creativity shine.
-                </p>
-
-            </div>
-
-        </div>
+      <% } %>
 
     </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#newArrivalsCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#newArrivalsCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon"></span>
+    </button>
+  </div>
+</section>
+  <!-- 🌿 Feature Section -->
+  <section class="features-section">
+    <div class="container">
+      <div class="row gy-4">
+        <div class="col-md-4">
+          <div class="feature-box">
+            <i class="bi bi-truck"></i>
+            <h5>Complimentary Shipping</h5>
+            <p>Enjoy free delivery on all orders with no hidden charges.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-box">
+            <i class="bi bi-flower3"></i>
+            <h5>Consciously Crafted</h5>
+            <p>Each piece is designed with care and sustainable materials.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-box">
+            <i class="bi bi-heart"></i>
+            <h5>Ethically Made</h5>
+            <p>We support fair labor and eco-friendly production methods.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🛍 Brand Grid Section -->
+  <section class="brand-grid">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="brand-card">
+            <img src="/images/only.jpg" alt="ONLY">
+            <div class="brand-overlay">ONLY</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="brand-card">
+            <img src="/images/taavi.jpg" alt="TAAVI">
+            <div class="brand-overlay">TAAVI</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="brand-card">
+            <img src="/images/h&m.jpg" alt="H&M">
+            <div class="brand-overlay">H&M</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<!-- Top Trends -->
+<section class="container py-5">
+  <h2 class="section-title mb-4">Top Trends</h2>
+
+  <div id="topTrendsCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+
+      <% 
+        const chunkSizes = 4; // max items per slide
+        for (let i = 0; i < topTrends.length; i += chunkSizes) { 
+          const chunk = topTrends.slice(i, i + chunkSizes);
+      %>
+        <div class="carousel-item <%= i === 0 ? 'active' : '' %>">
+          <div class="row">
+            <% chunk.forEach(product => { %>
+              <div class="col-6 col-sm-4 col-lg-3 mb-3">
+                <div class="card product-card shadow-sm border-0 h-100">
+                  <% 
+                    const matchingVariant = productVariant.find(v => 
+                      v.product && v.product._id.toString() === product._id.toString()
+                    ); 
+                  %>
+                  <% if (matchingVariant && matchingVariant.images && matchingVariant.images.length > 0) { %>
+                    <img src="/uploads/variants/<%= matchingVariant.images[0] %>" class="card-img-top" alt="<%= product.name %>">
+                  <% } else { %>
+                    <img src="/images/placeholder.jpg" class="card-img-top" alt="No image">
+                  <% } %>
+                  <div class="card-body text-center">
+                    <p class="product-name fw-semibold mb-1"><%= product.name %></p>
+                    <p class="product-price text-muted mb-0">₹<%= product.finalPrice %></p>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+
+    </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#topTrendsCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#topTrendsCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon"></span>
+    </button>
+  </div>
+</section>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
+
 
 <%-include("../../views/partials/user/footer")%>

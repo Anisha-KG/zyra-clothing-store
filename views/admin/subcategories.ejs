@@ -5,6 +5,27 @@
             background-color: #a3654b !important;
             color: #0e0d0d !important;
         }
+        .btn-custom {
+            background-color: #a05a3b;
+            color: white;
+            border: none;
+        }
+
+        .btn-custom:hover {
+            background-color: #8e4e35;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #a3654b;
+            border-color: #a3654b;
+            color: white;
+            /* Text color */
+        }
+
+        .pagination .page-link:hover {
+            background-color: #a3654b;
+            color: white;
+        }
+
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -28,8 +49,8 @@
                 </form>
 
                 <!-- Add Subcategory Button -->
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addSubcategoryModal">
-                    <i class="bi bi-plus-lg me-1"></i> Add Subcategory
+                <button class="btn btn-custom btn-sm " data-bs-toggle="modal" data-bs-target="#addSubcategoryModal">
+                    <i class="bi bi-plus-lg me-1 "></i> Add Subcategory
                 </button>
             </div>
         </div>
@@ -73,10 +94,10 @@
                             <td class="action-icons">
                                 <% if (subcategory.isListed) { %>
                                     <button onclick="unlistSubcategory('<%= subcategory._id%>')"
-                                        class="btn btn-success btn-sm" title="Click to Unlist">Listed</button>
+                                        class="btn btn-outline-success btn-sm" title="Click to Unlist">Listed</button>
                                     <% } else { %>
                                         <button onclick="listSubcategory('<%= subcategory._id%>')"
-                                            class="btn btn-danger btn-sm" title="Click to List">Unlisted</button>
+                                            class="btn btn-outline-danger btn-sm" title="Click to List">Unlisted</button>
                                         <% } %>
                             </td>
                             <td>
@@ -104,7 +125,7 @@
                                                 onclick="setEditmodal('<%= subcategory._id%>','<%= subcategory.name%>','<%= subcategory.image%>', `<%= subcategory.description%>`)">
                                                 <i class="fas fa-edit text-primary"></i>
                                             </a>
-                                            <a href="#" title="Delete" onclick="deleteBrand('<%= subcategory._id %>')">
+                                            <a href="#" title="Delete" onclick="deleteSubcategory('<%= subcategory._id %>')">
                                                 <i class="fas fa-trash text-danger"></i>
                                             </a>
                                         </td>
@@ -137,14 +158,14 @@
                                     <input type="text" name="subcategoryName" class="form-control rounded-3"
                                         id="subcategoryName" />
                                     <input type="hidden" name="categoryId" value="<%= category._id %>">
-                                    <div id="subNameError" class="error-msg"></div>
+                                    <div id="subNameError" class="error-msg text-danger"></div>
                                 </div>
 
                                 <div class="col-12">
                                     <label for="subcategoryImage" class="form-label fw-semibold">Image</label>
                                     <input type="file" name="subcategoryImage" id="subcategoryImage"
                                         class="form-control rounded-3" accept="image/png, image/jpeg" />
-                                    <div id="subImageError" class="error-msg"></div>
+                                    <div id="subImageError" class="error-msg text-danger"></div>
                                 </div>
 
                                 <div class="col-12">
@@ -152,7 +173,7 @@
                                         class="form-label fw-semibold">Description</label>
                                     <textarea name="description" class="form-control rounded-3"
                                         id="subcategoryDescription" rows="3"></textarea>
-                                    <div id="subDescriptionError" class="error-msg"></div>
+                                    <div id="subDescriptionError" class="error-msg text-danger"></div>
                                 </div>
                             </div>
                         </div>
@@ -192,16 +213,19 @@
                                     <input type="number" name="offerPercentage" class="form-control rounded-3"
                                         id="OfferPercentage" placeholder="Enter percentage (e.g. 10)" />
                                     <input type="hidden" name="subcategoryId" id="subcategoryId">
+                                    <div id="offerError" class="error-msg text-danger"></div>
                                 </div>
                                 <div class="col-12">
                                     <label for="subStartDate" class="form-label fw-semibold">Start Date & Time</label>
                                     <input type="datetime-local" name="startDate" class="form-control rounded-3"
                                         id="startDate" />
+                                        <div id="dateError" class="error-msg text-danger"></div>
                                 </div>
                                 <div class="col-12">
                                     <label for="subEndDate" class="form-label fw-semibold">End Date & Time</label>
                                     <input type="datetime-local" name="endDate" class="form-control rounded-3"
                                         id="endDate" />
+                                        <div id="date1Error" class="error-msg text-danger"></div>
                                 </div>
                             </div>
                         </div>
@@ -278,7 +302,7 @@
                         <% for(let i=1;i<=totalPages;i++){ %>
                             <li class="page-item <%= i==currentPage?'active':''%>">
                                 <a class="page-link"
-                                    href="/admin/subcategories?page=<%= i%><%= search?'&search='+search:'' %>">
+                                    href="/admin/subcategories/<%= category._id%>?page=<%= i%><%= search?'&search='+search:'' %>">
                                     <%= i %>
                                 </a>
                             </li>
@@ -298,36 +322,27 @@
             const subcategoryImage = formdata.get('subcategoryImage')
             const description = formdata.get('description').trim()
             const categoryId = formdata.get('categoryId')
-
-            if (!subcategoryName || !subcategoryImage || !description) {
-                Swal.fire({
-                    icon: "warning",
-                    title: 'All fields are required',
-                    text: 'Please fill all details',
-                    confirmButtonColor: '#dc3545'
-                })
-                return
+            let hasError=false
+            if (!subcategoryName) {
+                document.getElementById('subNameError').textContent="subcategory name is required"
+                hasError=true
             }
-            if (!subcategoryImage || subcategoryImage.size === 0) {
-                Swal.fire({
-                    icon: "warning",
-                    title: 'Image required',
-                    text: 'Please select an image',
-                    confirmButtonColor: '#dc3545'
-                })
-                return
+             if (!subcategoryImage || subcategoryImage.size === 0) {
+                document.getElementById('subImageError').textContent="subcategory image is required"
+                 hasError=true
+            }
+             if (!description) {
+                document.getElementById('subDescriptionError').textContent="subcategory Description is required"
+                 hasError=true
             }
 
             const allowedImageType = ['image/jpeg', 'image/png']
-            if (!allowedImageType.includes(subcategoryImage.type)) {
-                Swal.fire({
-                    icon: "warning",
-                    title: 'Wrong file type',
-                    text: 'Only JPEG or PNG files are allowed',
-                    confirmButtonColor: '#dc3545'
-                })
-                return
+            if ((subcategoryImage)&&(!allowedImageType.includes(subcategoryImage.type))) {
+                document.getElementById('subImageError').textContent="Only JPG or PNG files are allowed"
+                hasError=true
             }
+
+            if(hasError) return
 
             try {
                 const response = await fetch('/admin/addSubcategory', {
@@ -379,34 +394,35 @@
             const subcategoryId = formdata.get('subcategoryId')
             const now = new Date()
 
-            if (!offerPercentage || !startDate || !endDate) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'All fields are required',
-                    text: 'Please fill all details',
-                    confirmButtonColor: '#dc3545'
-                })
-                return
+             document.getElementById('offerError').textContent = "";
+            document.getElementById('dateError').textContent = "";
+            document.getElementById('date1Error').textContent = "";
+
+            let hasError=false
+
+            if (!offerPercentage) {
+                document.getElementById('offerError').textContent = "Offer percentage is required";
+                hasError = true;
+            }
+            if (!startDate) {
+                document.getElementById('dateError').textContent = "Date is required";
+                hasError = true;
+            }
+            if (!endDate) {
+                document.getElementById('date1Error').textContent = "Date is required";
+                hasError = true;
+            }
+            if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+                document.getElementById('dateError').textContent = "Start date should be less than end date";
+                hasError = true;
+            }
+            if (offerPercentage && (offerPercentage < 0 || offerPercentage > 100)) {
+                document.getElementById('offerError').textContent = "Invalid offer Percentage";
+                hasError = true;
             }
 
-            if (new Date(startDate) > new Date(endDate)) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Dates are not valid',
-                    text: 'Start date should be less than end date',
-                    confirmButtonColor: '#dc3545'
-                })
-                return
-            }
-            if (offerPercentage < 0 || offerPercentage > 100) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid offer',
-                    text: 'Offer percentage between 0 and 99',
-                    confirmButtonColor: '#dc3545'
-                })
-                return
-            }
+            if (hasError) return;
+
 
             try {
                 const response = await fetch('/admin/addSubcategoryOffer', {
@@ -450,52 +466,51 @@
         }
         //remove offer
         async function removeSubOffer(id) {
-            const subcategoryId = id
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "This will remove the offer!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Remove!'
-            })
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "This will remove the offer!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Remove!'
+    });
 
-            try {
-                const response = await fetch('/admin/removesubcatOffer', {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ subcategoryId })
-                })
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch('/admin/removesubcatOffer', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
 
-                const result = await response.json()
-                if (result.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: result.message,
-                        confirmButtonColor: '#198754'
-                    }).then(() => {
-                        window.location.reload()
-                    })
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: result.message,
-                        confirmButtonColor: '#dc3545'
-                    })
-                }
-            } catch (error) {
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Removed!',
+                    text: data.message,
+                    confirmButtonColor: '#198754'
+                }).then(() => window.location.reload());
+            } else {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Server Error',
-                    text: "Something went wrong",
+                    title: 'Error',
+                    text: data.message,
                     confirmButtonColor: '#dc3545'
-                })
+                });
             }
+        } catch (err) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Server Error',
+                text: "Something went wrong",
+                confirmButtonColor: '#dc3545'
+            });
         }
-
+    }
+}
 
         //unlist subcategory
         function unlistSubcategory(subcategoryId) {
@@ -594,51 +609,51 @@
         }
         //delete subcategory
         async function deleteSubcategory(id) {
-            const subcategoryId = id
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "This will delete subcategory!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Remove!'
-            })
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "This will delete subcategory!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Remove!'
+    });
 
-            try {
-                const response = await fetch('/admin/deleteSubcategory', {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ subcategoryId })
-                })
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch('/admin/deleteSubcategory', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subcategoryId: id })
+            });
 
-                const result = await response.json()
-                if (result.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: result.message,
-                        confirmButtonColor: '#198754'
-                    }).then(() => {
-                        window.location.reload()
-                    })
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: result.message,
-                        confirmButtonColor: '#dc3545'
-                    })
-                }
-            } catch (error) {
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Deleted!',
+                    text: data.message,
+                    confirmButtonColor: '#198754'
+                }).then(() => window.location.reload());
+            } else {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Server Error',
-                    text: "Something went wrong",
+                    title: 'Error',
+                    text: data.message,
                     confirmButtonColor: '#dc3545'
-                })
+                });
             }
+        } catch (err) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Server Error',
+                text: "Something went wrong",
+                confirmButtonColor: '#dc3545'
+            });
         }
+    }
+}
 
         //edit subcategory
         function setEditmodal(id, subcategoryName, image, description) {

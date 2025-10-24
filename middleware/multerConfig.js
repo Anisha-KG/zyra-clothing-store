@@ -9,24 +9,23 @@ const allowedMimeTypes = [
   'image/gif'
 ];
 
-
 const storage=multer.diskStorage({
-    destination:function(req,file,cb){
-        cb(null,'./public/uploads/categories')                                                                                 
-    },
-    filename:function(req,file,cb){
-        const ext = path.extname(file.originalname);
-        const filename=Date.now()+ext
-        cb(null,filename)
-    }
+  destination:function(req,file,cb){
+    cb(null,'./public/uploads/categories')
+  },
+  filename:function(req,file,cb){
+    const ext = path.extname(file.originalname);
+    const filename=Date.now()+ext
+    cb(null,filename)
+  }
 })
 
 const fileFilter=(req,file,cb)=>{
-    if(allowedMimeTypes.includes(file.mimetype)){
-        cb(null,true)
-    }else{
-        cb(new Error('Only .png, .jpeg, .jpg, .gif, or .webp files are allowed'),false)
-    }
+  if(allowedMimeTypes.includes(file.mimetype)){
+    cb(null,true)
+  }else{
+    cb(new Error('Only .png, .jpeg, .jpg, .gif, or .webp files are allowed'),false)
+  }
 }
 
 const upload=multer({storage,fileFilter})

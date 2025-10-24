@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-
-
 const productSchema = new Schema({
   name: {
     type: String,
@@ -26,12 +24,12 @@ const productSchema = new Schema({
   },
   baseFinalPrice: {type: Number},
   discount: {
-    type: Number, 
+    type: Number,
     default: 0
   },
   material: {
     type: String, // example: "Cotton", "Denim"
-    
+
     default: "Cotton"
   },
   category: {
@@ -43,14 +41,14 @@ const productSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'subcategories',
     required: true
-     
+
   },
   brand: {
     type: Schema.Types.ObjectId,
     ref: 'Brand',
     required: true
   },
-  
+
   isBlocked: {
     type: Boolean,
     default: false
@@ -86,13 +84,13 @@ const productSchema = new Schema({
     type: Date,
     default:null
   },
-   status: {
+  status: {
     type: String,
     enum: ['available', 'out_of_stock', 'discontinued'],
     default: 'available'
   },
 
- createdAt: {
+  createdAt: {
     type: Date,
     default: Date.now
   },
@@ -104,5 +102,4 @@ const productSchema = new Schema({
 
 const Product = mongoose.model('Product', productSchema);
 module.exports = Product
-
 

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop Page</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    body { background-color: #f8f5f4; font-family: 'Poppins', sans-serif; color: #4b2e2f; }
+
+    .sidebar { background-color: #fffdfd; min-height: 100vh; padding: 1.5rem; border-right: 1px solid #e2d3d0; position: sticky; top: 0; border-radius: 12px; box-shadow: 0 0 10px rgba(123, 44, 47, 0.05); }
+
+    .filter-header { display: flex; justify-content: space-between; align-items: center; font-weight: 600; letter-spacing: 0.04em; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 1rem; color: #4a2d2e; }
+    .filter-header a { font-size: 0.85rem; color: #9b6a6c; text-decoration: none; }
+
+    .filter-section { margin-bottom: 1.5rem; text-align: left; }
+    .filter-title { font-weight: 600; margin-bottom: 0.5rem; color: #4a2d2e; font-size: 0.95rem; }
+    .form-check-label { font-size: 0.9rem; color: #4a2d2e; }
+    .form-check-input { border-color: #c2a8a4; cursor: pointer; }
+
+    .search-box { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+    .search-box input { border-radius: 50px; border: 1px solid #d9c7c3; padding: 0.45rem 1rem; background-color: #fffdfd; width: 100%; }
+    .search-box button { border-radius: 50px; border: 1px solid #7b2c2f; background-color: #fff; color: #7b2c2f; padding: 0.45rem 0.8rem; cursor: pointer; transition: 0.3s ease; }
+    .search-box button:hover { background-color: #7b2c2f; color: #fff; }
+
+    hr { margin: 1.2rem 0; color: #e2d2ce; }
+
+    .main-content { padding: 2rem 2.5rem; }
+    .top-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid #e2d2ce; padding-bottom: 1rem; }
+    .filters { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+
+    .zyra-btn, .zyra-dropdown-btn { border: 1px solid #7b2c2f; color: #7b2c2f; border-radius: 25px; padding: 0.4rem 1.2rem; background-color: #fff; transition: 0.3s ease; }
+    .zyra-btn:hover, .zyra-dropdown-btn:hover { background-color: #7b2c2f; color: #fff; }
+
+    .zyra-dropdown-menu { min-width: 8rem; border-radius: 12px; padding: 0.3rem 0; }
+    .zyra-dropdown-menu .dropdown-item:hover { background-color: #f8f0ef; color: #7b2c2f; }
+
+    .product-card { background-color: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #e7d8d6; text-align: center; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+    .product-card img { width: 100%; height: 230px; object-fit: cover; }
+    .product-info { padding: 1rem; }
+    .product-name { font-weight: 600; color: #3b1f20; font-size: 1rem; margin-bottom: 0.3rem; }
+    .product-price { color: #7b2c2f; font-weight: 600; font-size: 0.95rem; }
+    .old-price { color: #b8a4a3; text-decoration: line-through; font-size: 0.85rem; margin-left: 5px; }
+    .offer-badge { position: absolute; top: 12px; left: 12px; background-color: #7b2c2f; color: #fff; padding: 0.25em 0.6em; border-radius: 4px; font-size: 0.8rem; }
+
+    @media (max-width: 991px) {
+      .sidebar { position: relative; min-height: auto; border-right: none; border-bottom: 1px solid #e2d3d0; }
+      .main-content { padding: 1.5rem; }
+      .search-box input { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-lg-3 col-md-4 mb-4 mb-md-0">
+      <div class="sidebar">
+        <div class="filter-header">
+          <span>Filters & Sort</span>
+          <a href="#">Clear All</a>
+        </div>
+
+        <div class="search-box">
+          <input type="text" placeholder="Search Products" id="searchInput"/>
+          <button type="button" id="searchBtn">Search</button>
+        </div>
+
+        <!-- Sort -->
+        <div class="filter-section">
+          <div class="filter-title">Sort By</div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="sort" id="lowhigh"><label class="form-check-label" for="lowhigh">Price: Low to High</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="sort" id="highlow"><label class="form-check-label" for="highlow">Price: High to Low</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="sort" id="az"><label class="form-check-label" for="az">A-Z</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="sort" id="za"><label class="form-check-label" for="za">Z-A</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="sort" id="newest"><label class="form-check-label" for="newest">Newest</label></div>
+        </div>
+
+        <hr>
+
+        <!-- Size -->
+        <div class="filter-section">
+          <div class="filter-title">Size</div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" value="S" id="sizeS"><label class="form-check-label" for="sizeS">S</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" value="M" id="sizeM"><label class="form-check-label" for="sizeM">M</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" value="L" id="sizeL"><label class="form-check-label" for="sizeL">L</label></div>
+        </div>
+
+        <hr>
+
+        <!-- Color -->
+        <div class="filter-section">
+          <div class="filter-title">Color</div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" value="Red" id="colorRed"><label class="form-check-label" for="colorRed">Red</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" value="Blue" id="colorBlue"><label class="form-check-label" for="colorBlue">Blue</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" value="Green" id="colorGreen"><label class="form-check-label" for="colorGreen">Green</label></div>
+        </div>
+
+        <hr>
+
+        <!-- Price -->
+        <div class="filter-section">
+          <div class="filter-title">Price</div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" value="price1" id="price1"><label class="form-check-label" for="price1">Under $25</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" value="price2" id="price2"><label class="form-check-label" for="price2">$25 - $50</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" value="price3" id="price3"><label class="form-check-label" for="price3">$50 - $100</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" value="price4" id="price4"><label class="form-check-label" for="price4">Over $100</label></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-lg-9 col-md-8">
+      <div class="main-content">
+        <div class="top-bar">
+          <div class="filters">
+            <button class="zyra-btn">All Products</button>
+            <!-- Category Dropdown -->
+            <div class="dropdown zyra-dropdown">
+              <button class="zyra-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="categoryDropdown">Category</button>
+              <ul class="dropdown-menu zyra-dropdown-menu" id="categoryMenu">
+                <li><a class="dropdown-item" href="#" data-id="1">Shirts</a></li>
+                <li><a class="dropdown-item" href="#" data-id="2">Pants</a></li>
+              </ul>
+            </div>
+
+            <!-- Subcategory Dropdown -->
+            <div class="dropdown zyra-dropdown">
+              <button class="zyra-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="subcategoryDropdown">Subcategory</button>
+              <ul class="dropdown-menu zyra-dropdown-menu" id="subcategoryMenu">
+                <li><span class="dropdown-item disabled">Select a category first</span></li>
+              </ul>
+            </div>
+
+            <!-- Brand Dropdown -->
+            <div class="dropdown zyra-dropdown">
+              <button class="zyra-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="brandDropdown">Brand</button>
+              <ul class="dropdown-menu zyra-dropdown-menu" id="brandMenu">
+                <li><a class="dropdown-item" href="#" data-id="b1">Brand A</a></li>
+                <li><a class="dropdown-item" href="#" data-id="b2">Brand B</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="row g-4 mt-2" id="productGrid">
+          <div class="col-6 col-md-4 col-lg-3">
+            <div class="product-card position-relative">
+              <span class="offer-badge">20% OFF</span>
+              <img src="https://via.placeholder.com/300x300" alt="Product">
+              <div class="product-info">
+                <div class="product-name">Casual Cotton Shirt</div>
+                <div class="product-price">$39.99 <span class="old-price">$49.99</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // Example dynamic subcategories
+  const subcategories = [
+    { id: 's1', name: 'Formal Shirts', categoryId: '1' },
+    { id: 's2', name: 'Casual Shirts', categoryId: '1' },
+    { id: 's3', name: 'Jeans', categoryId: '2' },
+    { id: 's4', name: 'Chinos', categoryId: '2' }
+  ];
+
+  const categoryDropdown = document.getElementById('categoryDropdown');
+  const subcategoryDropdown = document.getElementById('subcategoryDropdown');
+  const categoryMenu = document.getElementById('categoryMenu');
+  const subcategoryMenu = document.getElementById('subcategoryMenu');
+
+  // Populate subcategories on category select
+  categoryMenu.addEventListener('click', e => {
+    if (e.target.tagName === 'A') {
+      e.preventDefault();
+      const catId = e.target.dataset.id;
+      categoryDropdown.textContent = e.target.textContent;
+
+      const filteredSubs = subcategories.filter(s => s.categoryId === catId);
+      subcategoryMenu.innerHTML = '';
+
+      if (filteredSubs.length === 0) {
+        subcategoryMenu.innerHTML = '<li><span class="dropdown-item disabled">No subcategories</span></li>';
+      } else {
+        filteredSubs.forEach(sub => {
+          const li = document.createElement('li');
+          li.innerHTML = `<a class="dropdown-item" href="#" data-id="${sub.id}">${sub.name}</a>`;
+          subcategoryMenu.appendChild(li);
+        });
+      }
+    }
+  });
+
+  // Search button (example: just logs the search term)
+  document.getElementById('searchBtn').addEventListener('click', () => {
+    const searchTerm = document.getElementById('searchInput').value;
+    console.log('Search for:', searchTerm);
+    alert('Search triggered for: ' + searchTerm);
+  });
+</script>
+<script>
+  // Categories and subcategories data from server
+  const categories = <%- JSON.stringify(category) %>;
+  const subcategories = <%- JSON.stringify(subcategory) %>;
+
+  const categorySelect = document.getElementById('category');
+  const subcategorySelect = document.getElementById('subcategory');
+
+  categorySelect.addEventListener('change', function () {
+    const selectedCatId = this.value;
+
+    // Clear subcategory options
+    subcategorySelect.innerHTML = '<option value="" disabled selected>Select Subcategory</option>';
+
+    if (!selectedCatId) return;
+
+    // Filter subcategories that belong to selected category
+    const filteredSubcategories = subcategories.filter(subcat => {
+      // Make sure category is defined
+      return subcat.category && subcat.category.toString() === selectedCatId;
+    });
+
+    // Populate subcategory dropdown
+    filteredSubcategories.forEach(subcat => {
+      const option = document.createElement('option');
+      option.value = subcat._id;
+      option.textContent = subcat.name;
+      subcategorySelect.appendChild(option);
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Detail</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- EasyZoom CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easyzoom@2.5.0/css/easyzoom.css" />
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f5f4;
+  }
+
+  .easyzoom img {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 6px;
+    border: 1px solid #eee;
+  }
+
+  .custom-qty-wrap {
+    display: inline-flex;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    overflow: hidden;
+    align-items: center;
+  }
+  .btn-qty {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background-color: #f2f2f2;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  .btn-qty:hover { background-color: #ddd; }
+  .num-product-input {
+    width: 60px;
+    text-align: center;
+    border: none;
+    font-size: 16px;
+    outline: none;
+  }
+
+  .btn-primary {
+    border-radius: 30px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<section class="sec-product-detail bg0 p-t-65 p-b-60 mt-5">
+  <div class="container">
+    <div class="row">
+      <!-- Product Images -->
+      <div class="col-md-6 col-lg-7 p-b-30">
+        <div class="p-l-25 p-r-30 p-lr-0-lg">
+          <div class="wrap-slick3 flex-sb flex-w">
+            <div class="slick3 gallery-lb">
+              <!-- Example images -->
+              <div class="item-slick3" data-thumb="images/product1.jpg">
+                <div class="wrap-pic-w pos-relative">
+                  <div class="easyzoom easyzoom--overlay">
+                    <a href="images/product1.jpg">
+                      <img src="images/product1.jpg" alt="Product Image">
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div class="item-slick3" data-thumb="images/product2.jpg">
+                <div class="wrap-pic-w pos-relative">
+                  <img src="images/product2.jpg" alt="Product Image">
+                  <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="images/product2.jpg">
+                    <i class="fa fa-expand"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Info -->
+      <div class="col-md-6 col-lg-5 p-b-30">
+        <div class="p-r-50 p-t-5 p-lr-0-lg">
+          <h1 class="mtext-105 cl2 js-name-detail p-b-14 ms-5">
+            Sample Product Name
+          </h1>
+
+          <span class="mtext-106 cl2 ms-5">
+            ₹ 999.00
+          </span>
+
+          <p class="stext-102 cl3 p-t-23 ms-5">
+            <b>Brand: <span style="color: red;">ZYRA</span></b>
+          </p>
+
+          <!-- Size & Color -->
+          <div class="p-t-33">
+            <div class="flex-w flex-r-m p-b-10">
+              <div class="size-203 flex-c-m respon6">Size</div>
+              <div class="size-204 respon6-next">
+                <select class="form-select">
+                  <option selected disabled>Choose an option</option>
+                  <option>Small</option>
+                  <option>Medium</option>
+                  <option>Large</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flex-w flex-r-m p-b-10">
+              <div class="size-203 flex-c-m respon6">Color</div>
+              <div class="size-204 respon6-next">
+                <select class="form-select">
+                  <option selected disabled>Choose an option</option>
+                  <option>Red</option>
+                  <option>Blue</option>
+                  <option>Black</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flex-w flex-r-m p-b-10">
+              <div class="size-204 flex-w flex-m respon6-next">
+                Availability: <span class="ms-2" style="color: green;">In Stock</span>
+              </div>
+            </div>
+
+            <!-- Quantity and Add to Cart -->
+            <div class="flex-w flex-r-m p-b-10 mt-3">
+              <div class="custom-qty-wrap d-flex align-items-center">
+                <button class="btn btn-outline-secondary btn-decrease">−</button>
+                <input type="number" class="form-control text-center mx-2 quantity-input" value="1" min="1" max="10" readonly>
+                <button class="btn btn-outline-secondary btn-increase">+</button>
+              </div>
+              <button class="btn btn-primary btn-lg px-4 py-2 ms-3">Add to Cart</button>
+            </div>
+          </div>
+
+          <!-- Social & Wishlist -->
+          <div class="flex-w flex-m p-t-40">
+            <a href="#" class="me-3"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#" class="me-3"><i class="fa-brands fa-x-twitter"></i></a>
+            <a href="#" class="me-3"><i class="fa-brands fa-google-plus-g"></i></a>
+            <a href="#"><i class="fa fa-heart"></i></a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bor10 m-t-50 p-t-43 p-b-40">
+      <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#description">Description</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#information">Additional Info</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#reviews">Reviews (2)</a></li>
+      </ul>
+
+      <div class="tab-content p-t-43">
+        <div class="tab-pane fade show active" id="description">
+          <p>Sample product description goes here. This product is made with high-quality materials and offers excellent performance.</p>
+        </div>
+
+        <div class="tab-pane fade" id="information">
+          <ul>
+            <li>Material: Cotton</li>
+            <li>Color: Red, Blue, Black</li>
+            <li>Size: S, M, L</li>
+          </ul>
+        </div>
+
+        <div class="tab-pane fade" id="reviews">
+          <p>No reviews yet.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="bg6 flex-c-m flex-w size-302 m-t-73 p-tb-15">
+      <span class="stext-107 cl6 p-lr-25">Categories: Tops</span>
+    </div>
+  </div>
+</section>
+
+<!-- Related Products -->
+<section class="sec-relate-product bg0 p-t-45 p-b-105">
+  <div class="container">
+    <h3 class="ltext-106 cl5 text-center p-b-45">Related Products</h3>
+    <div class="row">
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card">
+          <img src="images/product2.jpg" class="card-img-top" alt="Related Product">
+          <div class="card-body text-center">
+            <h6 class="card-title">Related Product 1</h6>
+            <p class="card-text">₹ 799.00</p>
+            <a href="#" class="btn btn-outline-primary btn-sm">Quick View</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card">
+          <img src="images/product3.jpg" class="card-img-top" alt="Related Product">
+          <div class="card-body text-center">
+            <h6 class="card-title">Related Product 2</h6>
+            <p class="card-text">₹ 899.00</p>
+            <a href="#" class="btn btn-outline-primary btn-sm">Quick View</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/easyzoom@2.5.0/dist/easyzoom.js"></script>
+
+<script>
+  // Quantity increase/decrease
+  const decreaseBtn = document.querySelector(".btn-decrease");
+  const increaseBtn = document.querySelector(".btn-increase");
+  const qtyInput = document.querySelector(".quantity-input");
+
+  decreaseBtn.addEventListener("click", () => {
+    let val = parseInt(qtyInput.value);
+    if (val > 1) qtyInput.value = val - 1;
+  });
+
+  increaseBtn.addEventListener("click", () => {
+    let val = parseInt(qtyInput.value);
+    if (val < 10) qtyInput.value = val + 1;
+  });
+
+  // EasyZoom init
+  const $easyzoom = $('.easyzoom').easyZoom();
+</script>
+
+</body>
+</html>

@@ -1,6 +1,18 @@
 <%- include("../../views/partials/admin/header") %>
 
 <style>
+  /* Active page link color */
+  .pagination .page-item.active .page-link {
+      background-color: #a3654b;
+      border-color: #a3654b;
+      color: white; /* Text color */
+  }
+
+  /* Optional: Hover effect for non-active pages */
+  .pagination .page-link:hover {
+      background-color: #a3654b;
+      color: white;
+  }
   /* ======= TABLE STYLES ======= */
   .table-head th {
     background-color: #a3654b !important;
@@ -172,7 +184,7 @@
                 <td><%= product.name %></td>
                 <td><%= product.brand?.brandName || 'N/A' %></td>
                 <td><%= product.category?.name || 'N/A' %></td>
-                <td><%= product.subCategory?.name || 'N/A' %></td>
+                <td><%= product.subcategory?.name || 'N/A' %></td>
                 <td>₹<%= product.price.toFixed(2) %></td>
                 <td>₹<%= product.finalPrice.toFixed(2) %></td>
                 <td><%= product.material %></td>

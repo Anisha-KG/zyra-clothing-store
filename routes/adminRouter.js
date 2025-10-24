@@ -12,7 +12,7 @@ const brandUpload=require('../middleware/brandUpload')
 const subcategoryUpload=require('../middleware/subcategoryUpload')
 const product_editController=require('../controller/admin/product-editController')
 const variantController=require('../controller/admin/variantController')
-
+const categoryUpload=require('../middleware/categoryMulter')
 
 router.get('/pageerror',adminController.pageerror)
 router.get('/login',isAdminLogin,adminController.loadLogin)
@@ -20,18 +20,17 @@ router.post('/login',adminController.login)
 router.get('/dashboard',adminAuth,adminController.loadDashboard)
 router.get('/adminlogout',adminController.logout)
 
-
 router.get('/customers',adminAuth,customersController.customerInfo)
 router.post('/blockCustomer',adminAuth,customersController.customerBlocked)
 router.post('/unblockCustomer',adminAuth,customersController.customerUnblocked)
 
 router.get('/categories',adminAuth,categoryController.categoryInfo)
-router.post('/addcategory',adminAuth,upload.single('categoryImage'),categoryController.addCategory)
+router.post('/addcategory',adminAuth,categoryUpload.single('categoryImage'),categoryController.addCategory)
 router.post('/addCategoryOffer',adminAuth,categoryController.addCategoryOffer)
 router.patch('/removeCategoryOffer',adminAuth,categoryController.removeCategoryOffer)
 router.patch('/unlistCategory',adminAuth,categoryController.unlistCategory)
 router.patch('/listCategory',adminAuth,categoryController.listCategory)
-router.patch('/editCategory/:id',adminAuth,upload.single('categoryImage'),categoryController.editCategory)
+router.patch('/editCategory/:id',adminAuth,categoryUpload.single('categoryImage'),categoryController.editCategory)
 router.delete('/deleteCategory',adminAuth,categoryController.deleteCategory)
 
 router.get('/brands',adminAuth,brandController.getBrands)
@@ -44,13 +43,13 @@ router.patch('/removeOffer',adminAuth,brandController.removeOffer)
 router.delete('/deleteBrand',adminAuth,brandController.deleteBrand)
 
 router.get('/subcategories/:id',adminAuth,subcategoryController.loadSubcategories)
-router.post('/addSubcategory',adminAuth,upload.single('subcategoryImage'),subcategoryController.addSubcategory)
+router.post('/addSubcategory',adminAuth,subcategoryUpload.single('subcategoryImage'),subcategoryController.addSubcategory)
 router.post('/addSubcategoryOffer',adminAuth,subcategoryController.addSubcategoryOffer)
 router.patch('/removesubcatOffer',adminAuth,subcategoryController.removeOffer)
 router.patch('/unlistSubcategory',adminAuth,subcategoryController.unlistSubcategory)
 router.patch('/listSubcategory',adminAuth,subcategoryController.listSubcategory)
 router.delete('/deleteSubcategory',adminAuth,subcategoryController.deteleSubcategory)
-router.patch('/editSubcategory',adminAuth,upload.single('subcategoryImage'),subcategoryController.editSubcategory)
+router.patch('/editSubcategory',adminAuth,subcategoryUpload.single('subcategoryImage'),subcategoryController.editSubcategory)
 
 router.get('/products',adminAuth,productController.getProducts)
 router.get('/addProduct',adminAuth,productController.getaddProduct)
@@ -65,12 +64,18 @@ router.patch('/editproduct',adminAuth,product_editController.editProduct)
 
 router.get('/product/:productId/variants',adminAuth,variantController.getVariant)
 router.post('/addVariant',adminAuth,upload.fields([
-            { name: 'image1', maxCount: 1 },
-            { name: 'image2', maxCount: 1 },
-            { name: 'image3', maxCount: 1 },
-            { name: 'image4', maxCount: 1 }
+  { name: 'image1', maxCount: 1 },
+  { name: 'image2', maxCount: 1 },
+  { name: 'image3', maxCount: 1 },
+  { name: 'image4', maxCount: 1 }
 ]),variantController.addVariant)
-
-
+router.patch('/editVariant',adminAuth,upload.fields([
+  { name: 'image1', maxCount: 1 },
+  { name: 'image2', maxCount: 1 },
+  { name: 'image3', maxCount: 1 },
+  { name: 'image4', maxCount: 1 }
+]),variantController.editVariant)
+router.patch('/listVariant',adminAuth,variantController.listVariant)
+router.patch('/unlistVariant',adminAuth,variantController.unlistVariant)
 
 module.exports=router

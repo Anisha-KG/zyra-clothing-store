@@ -1,127 +1,146 @@
 <%- include("../../views/partials/admin/header")%>
     <style>
-        /* Table header dark brown */
+        .text-brown {
+            color: #a3654b !important;
+        }
+
+        .text-brown:hover {
+            color: #8e4e35;
+            /* slightly darker on hover */
+        }
+
+        /* Pagination Styles */
+        .pagination .page-item.active .page-link {
+            background-color: #a3654b;
+            border-color: #a3654b;
+            color: white;
+            /* Text color */
+        }
+
+        .pagination .page-link:hover {
+            background-color: #a3654b;
+            color: white;
+        }
+
+        /* Table Header */
         .table-head th {
             background-color: #a3654b !important;
             color: #0e0d0d !important;
         }
-        /* ======= BUTTONS ======= */
-  .btn-custom {
-    background-color: #a05a3b;
-    color: white;
-    border: none;
-  }
 
-  .btn-custom:hover {
-    background-color: #8e4e35;
-  }
+        /* Buttons */
+        .btn-custom {
+            background-color: #a05a3b;
+            color: white;
+            border: none;
+        }
 
-  .btn-outline-custom {
-    border: 1px solid #a05a3b;
-    color: #a05a3b;
-  }
+        .btn-custom:hover {
+            background-color: #8e4e35;
+        }
 
-  .btn-outline-custom:hover {
-    background-color: #a05a3b;
-    color: white;
-  }
+        .btn-outline-custom {
+            border: 1px solid #a05a3b;
+            color: #a05a3b;
+        }
 
-  .action-icons a {
-    margin: 0 5px;
-    font-size: 1.1rem;
-  }
+        .btn-outline-custom:hover {
+            background-color: #a05a3b;
+            color: white;
+        }
 
-  .color-box {
-    display: inline-block;
-    width: 25px;
-    height: 25px;
-    border: 1px solid #aaa;
-    vertical-align: middle;
-    margin-right: 8px;
-    border-radius: 4px;
-  }
+        /* Action Icons */
+        .action-icons a {
+            margin: 0 5px;
+            font-size: 1.1rem;
+        }
 
-  /* ======= RESPONSIVE FIXES ======= */
-  @media (max-width: 992px) {
-    .table-responsive {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
+        /* Color Box */
+        .color-box {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            border: 1px solid #aaa;
+            vertical-align: middle;
+            margin-right: 8px;
+            border-radius: 4px;
+        }
 
-    .table th,
-    .table td {
-      white-space: nowrap;
-    }
+        /* Responsive Fixes */
+        @media (max-width: 992px) {
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
 
-    h4 {
-      font-size: 1.1rem;
-    }
+            .table th,
+            .table td {
+                white-space: nowrap;
+            }
 
-    .btn,
-    input,
-    select {
-      font-size: 0.85rem;
-    }
+            h4 {
+                font-size: 1.1rem;
+            }
 
-    .btn-custom,
-    .btn-outline-custom {
-      padding: 0.25rem 0.6rem;
-    }
-  }
+            .btn,
+            input,
+            select {
+                font-size: 0.85rem;
+            }
 
-  @media (max-width: 576px) {
-    .d-flex.gap-2 {
-      flex-direction: column;
-      gap: 0.5rem !important;
-    }
+            .btn-custom,
+            .btn-outline-custom {
+                padding: 0.25rem 0.6rem;
+            }
+        }
 
-    #searchInput {
-      width: 100% !important;
-    }
+        @media (max-width: 576px) {
+            .d-flex.gap-2 {
+                flex-direction: column;
+                gap: 0.5rem !important;
+            }
 
-    .table img {
-      width: 30px;
-      height: 30px;
-    }
+            #searchInput {
+                width: 100% !important;
+            }
 
-    .color-box {
-      width: 20px;
-      height: 20px;
-    }
-  }
+            .table img {
+                width: 30px;
+                height: 30px;
+            }
+
+            .color-box {
+                width: 20px;
+                height: 20px;
+            }
+        }
     </style>
+
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Main Content -->
     <main class="col-12 col-md-10 px-3 pt-3">
 
-         <!-- ======= PAGE HEADER & SEARCH ======= -->
-  <div class="d-flex flex-wrap justify-content-between align-items-center my-3 gap-2">
-    <h4 class="fw-bold mb-0">Products</h4>
-    <div class="d-flex flex-wrap gap-2 align-items-center">
-      <form class="d-flex flex-wrap gap-2" role="search">
-        <input
-          type="text"
-          name="search"
-          id="searchInput"
-          placeholder="Search product..."
-          class="form-control form-control-sm"
-          style="width: 250px;"
-          value="<%= typeof search !== 'undefined' ? search : '' %>"
-          autocomplete="off"
-        />
-        <button class="btn btn-dark btn-sm" type="submit">Search</button>
-        <% if (search) { %>
-          <a href="/admin/brands" class="btn btn-outline-secondary btn-sm">Clear</a>
-        <% } %>
-      </form>
+        <!-- ======= PAGE HEADER & SEARCH ======= -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center my-3 gap-2">
+            <h4 class="fw-bold mb-0">Products</h4>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <form class="d-flex flex-wrap gap-2" role="search">
+                    <input type="text" name="search" id="searchInput" placeholder="Search product..."
+                        class="form-control form-control-sm" style="width: 250px;"
+                        value="<%= typeof search !== 'undefined' ? search : '' %>" autocomplete="off" />
+                    <button class="btn btn-dark btn-sm" type="submit">Search</button>
+                    <% if (search) { %>
+                        <a href="/admin/brands" class="btn btn-outline-secondary btn-sm">Clear</a>
+                        <% } %>
+                </form>
 
-      <button class="btn btn-sm btn-custom" onclick="window.location.href='/admin/addProduct'">
-        <i class="bi bi-plus-lg me-1"></i> Add Product
-      </button>
-    </div>
-  </div>
+                <button class="btn btn-sm btn-custom" data-bs-toggle="modal" data-bs-target="#addBrandModal">
+                    <i class="bi bi-plus-lg me-1"></i> Add Brand
+                </button>
+            </div>
+        </div>
 
         <!-- Brands Table -->
         <div class="table-responsive bg-white p-3 rounded shadow-sm">
@@ -157,13 +176,18 @@
                                             class="brand-img" width="40" height="40">
                                     </td>
                                     <td class="action-icons">
-                                        <% if (brand.isListed) { %>
-                                            <button onclick="unlistBrand('<%= brand._id%>')"
-                                                class="btn btn-success btn-sm" title="Click to Unlist">Listed</button>
+                                        <% if (!brand.isListed) { %>
+                                            <button class="btn btn-outline-danger btn-sm" title="Block brand"
+                                                onclick="listBrand('<%= brand._id %>', event)">
+                                                <i class="bi bi-slash-circle"></i> Unlisted
+                                            </button>
                                             <% } else { %>
-                                                <button onclick="listBrand('<%= brand._id%>')"
-                                                    class="btn btn-danger btn-sm"
-                                                    title="Click to List">Unlisted</button>
+
+
+                                                <button class="btn btn-outline-success btn-sm" title="Unblock brand"
+                                                    onclick="unlistBrand('<%= brand._id %>')">
+                                                    <i class="bi bi-check-circle"></i> Listed
+                                                </button>
                                                 <% } %>
                                     </td>
                                     <td>
@@ -182,6 +206,7 @@
                                                 </button>
                                                 <% } else { %>
                                                     <button class="btn btn-sm btn-outline-primary"
+                                                        data-bs-toggle="modal" data-bs-target="#addOfferModal"
                                                         onclick="openAddOfferModal('<%= brand._id %>')">
                                                         Add Offer
                                                     </button>
@@ -191,7 +216,7 @@
                                             <a href="#" title="Edit" data-bs-toggle="modal"
                                                 data-bs-target="#editBrandModal"
                                                 onclick="setEditmodal('<%= brand._id%>','<%= brand.brandName%>','<%= brand.brandLogo%>')">
-                                                <i class="fas fa-edit text-primary"></i>
+                                                <i class="fas fa-edit text-brown"></i>
                                             </a>
                                             <a href="#" title="Delete" onclick="deleteBrand('<%= brand._id %>')">
                                                 <i class="fas fa-trash text-danger"></i>
@@ -223,14 +248,15 @@
                                         <label for="brandName" class="form-label fw-semibold">Brand Name</label>
                                         <input type="text" name="brandName" class="form-control rounded-3"
                                             id="brandName" />
-                                        <div id="nameError" class="error-msg"></div>
+                                        <div id="nameError" class="error-msg text-danger"></div>
+
                                     </div>
 
                                     <div class="col-12">
                                         <label for="brandImage" class="form-label fw-semibold">Logo</label>
                                         <input type="file" name="brandLogo" id="brandImage"
                                             class="form-control rounded-3" accept="image/png, image/jpeg" />
-                                        <div id="imageError" class="error-msg"></div>
+                                        <div id="imageError" class="error-msg text-danger"></div>
                                     </div>
                                 </div>
                             </div>
@@ -273,18 +299,21 @@
                                             (%)</label>
                                         <input type="number" name="offerPercentage" class="form-control rounded-3"
                                             id="offerPercentage" placeholder="Enter percentage (e.g. 10)" />
+                                        <div id="offerError" class="error-msg text-danger"></div>
                                     </div>
 
                                     <div class="col-12">
                                         <label for="startDate" class="form-label fw-semibold">Start Date & Time</label>
                                         <input type="datetime-local" name="startDate" class="form-control rounded-3"
                                             id="startDate" />
+                                        <div id="dateError" class="error-msg text-danger"></div>
                                     </div>
 
                                     <div class="col-12">
                                         <label for="endDate" class="form-label fw-semibold">End Date & Time</label>
                                         <input type="datetime-local" name="endDate" class="form-control rounded-3"
                                             id="endDate" />
+                                        <div id="dateError" class="error-msg text-danger"></div>
                                     </div>
                                 </div>
                             </div>
@@ -369,7 +398,7 @@
                 <nav>
                     <ul class="pagination pagination-sm mb-0">
                         <% for(let i=1;i<=totalPages;i++){ %>
-                            <li class="page-item <%= i===currentPage?'active':''%>">
+                            <li class="page-item <%= i===Number(currentPage)?'active':''%>">
                                 <a class="page-link"
                                     href="/admin/brands?page=<%= i%><%= search?'&search='+search:'' %>">
                                     <%= i %>
@@ -391,27 +420,24 @@
 
             const brandName = formdata.get('brandName')
             const logo = formdata.get('brandLogo')
+            let hasError = false
+            if (!brandName) {
+                document.getElementById('nameError').textContent = "Brand name is required"
+                hasError = true
+            }
 
-            if (!brandName || !logo.name) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'All fields are required',
-                    text: 'Please fill all details',
-                    confirmButtonColor: '#dc3545'
-                })
-                return
+            if (!logo.name) {
+                document.getElementById('imageError').textContent = "Brand logo is required"
+                hasError = true
             }
 
             const allowedTypes = ["image/jpeg", "image/png"];
-            if (!allowedTypes.includes(logo.type)) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid File Type',
-                    text: 'Only JPG or PNG images are allowed.',
-                    confirmButtonColor: '#dc3545'
-                });
-                return;
+            if (logo.name && !allowedTypes.includes(logo.type)) {
+                document.getElementById('imageError').textContent = "Only jpeg and png images are allowed"
+                hasError = true
             }
+
+            if (hasError) return
 
             try {
                 const response = await fetch('/admin/addBrand', {
@@ -448,48 +474,46 @@
 
         function openAddOfferModal(id) {
             document.getElementById('offerBrandId').value = id;
-            const offerModal = new bootstrap.Modal(document.getElementById('addOfferModal'));
-            offerModal.show();
+
         }
 
         async function addBrandOffer(e) {
-            e.preventDefault()
-            const form = document.getElementById('addOfferForm')
-            const formdata = new FormData(form)
-            const offerPercentage = formdata.get('offerPercentage')
-            const startDate = formdata.get('startDate')
-            const endDate = formdata.get('endDate')
-            const brandId = document.getElementById('offerBrandId').value
-            const now = new Date()
+            e.preventDefault();
+            const form = document.getElementById('addOfferForm');
+            const formdata = new FormData(form);
+            const offerPercentage = formdata.get('offerPercentage');
+            const startDate = formdata.get('startDate');
+            const endDate = formdata.get('endDate');
+            const brandId = document.getElementById('offerBrandId').value;
 
-            if (!offerPercentage || !startDate || !endDate) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'All fields are required',
-                    text: 'Please fill al details',
-                    confirmButtonColor: '#dc3545'
-                })
-                return
+            let hasError = false;
+
+
+            document.getElementById('offerError').textContent = "";
+            document.getElementById('dateError').textContent = "";
+
+            if (!offerPercentage) {
+                document.getElementById('offerError').textContent = "Offer percentage is required";
+                hasError = true;
+            }
+            if (!startDate) {
+                document.getElementById('dateError').textContent = "Date is required";
+                hasError = true;
+            }
+            if (!endDate) {
+                document.getElementById('dateError').textContent = "Date is required";
+                hasError = true;
+            }
+            if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+                document.getElementById('dateError').textContent = "Start date should be less than end date";
+                hasError = true;
+            }
+            if (offerPercentage && (offerPercentage < 0 || offerPercentage > 100)) {
+                document.getElementById('offerError').textContent = "Invalid offer Percentage";
+                hasError = true;
             }
 
-            if (new Date(startDate) > new Date(endDate)) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Dates are not valid',
-                    text: 'Start date should be less than end date',
-                    confirmButtonColor: '#dc3545'
-                })
-                return
-            }
-            if (offerPercentage < 0 || offerPercentage > 100) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid offer',
-                    text: 'Offer percentage between 0 and 99',
-                    confirmButtonColor: '#dc3545'
-                })
-                return
-            }
+            if (hasError) return;
 
             try {
                 const response = await fetch('/admin/addBrandOffer', {
@@ -501,9 +525,9 @@
                         startDate,
                         endDate
                     })
-                })
+                });
 
-                const result = await response.json()
+                const result = await response.json();
                 if (result.success) {
                     Swal.fire({
                         icon: 'success',
@@ -511,15 +535,15 @@
                         text: result.message,
                         confirmButtonColor: '#198754'
                     }).then(() => {
-                        window.location.reload()
-                    })
+                        window.location.reload();
+                    });
                 } else {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
                         text: result.message,
                         confirmButtonColor: '#dc3545'
-                    })
+                    });
                 }
             } catch (error) {
                 Swal.fire({
@@ -527,9 +551,8 @@
                     title: 'Server Error',
                     text: "Something went wrong",
                     confirmButtonColor: '#dc3545'
-                })
+                });
             }
-
         }
 
         function setEditmodal(id, brandName, logo) {
@@ -674,7 +697,7 @@
                         .then(data => {
                             if (data.success) {
                                 Swal.fire(
-                                    'Unlisted!',
+                                    'listed!',
                                     'The Brand listed Succesfully.',
                                     'success'
                                 ).then(() => {

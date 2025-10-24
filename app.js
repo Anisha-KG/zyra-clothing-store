@@ -17,19 +17,18 @@ app.use(express.static(path.join(__dirname,'public')))
 app.use(express.urlencoded({extended:true}))
 app.use(express.json())
 app.use(session({
-        secret:process.env.SECRET_KEY,
-        resave:false,
-        saveUninitialized:false,
-        cookie:{
-            httpOnly:true,
-            secure:false,
-            maxAge:72*60*60*1000
-        }
+  secret:process.env.SECRET_KEY,
+  resave:false,
+  saveUninitialized:false,
+  cookie:{
+    httpOnly:true,
+    secure:false,
+    maxAge:72*60*60*1000
+  }
 }))
 
 app.use(passport.initialize());
 app.use(passport.session());
-
 
 app.use('/',userRouter)
 app.use('/admin',adminRouter)
@@ -49,7 +48,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-
 app.listen(process.env.PORT,()=>{
-    console.log('server started')
+  console.log('server started')
 })

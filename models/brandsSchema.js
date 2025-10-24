@@ -37,7 +37,7 @@ const brandSchema = new Schema({
     type: Boolean,
     default: false
   }
-   
+
 });
 
 // Optional: Index brandName for faster search

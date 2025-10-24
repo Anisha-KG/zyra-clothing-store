@@ -1,5 +1,34 @@
 <%- include("../../views/partials/admin/header")%>
     <style>
+        .text-brown {
+    color: #a3654b !important;
+}
+.pagination .page-item.active .page-link {
+      background-color: #a3654b;
+      border-color: #a3654b;
+      color: white; /* Text color */
+  }
+
+  /* Optional: Hover effect for non-active pages */
+  .pagination .page-link:hover {
+      background-color: #a3654b;
+      color: white;
+  }
+
+/* Optional: Hover effect */
+.text-brown:hover {
+    color: #8e4e35; /* slightly darker on hover */
+}
+.btn-brown {
+    background-color: #a3654b;
+    color: white;
+    border: none;
+}
+
+.btn-brown:hover {
+    background-color: #8e4e35; /* slightly darker on hover */
+    color: white;
+}
         /* Table header dark brown */
         .table-head th {
             background-color: #a3654b !important;
@@ -19,7 +48,7 @@
             <h4><strong>Categories</strong></h4>
             <div class="d-flex gap-2">
                 <form class="d-flex gap-2">
-                    <!--form submits with GET query string.if you don’t put an action, the form will submit to the same URL of the page it’s currently-->
+                   
                     <input type="text" name="search" id="searchInput" placeholder="Search category..."
                         class="form-control" style="width: 250px;"
                         value="<%= typeof search !== 'undefined' ? search : '' %>" autocomplete="off" />
@@ -30,8 +59,8 @@
                 </form>
 
                 <!-- Add Category Button -->
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
-                    <i class="bi bi-plus-lg me-1"></i> Add Category
+                <button class="btn btn-sm btn-brown " data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                    <i class="bi bi-plus-lg me-1 "></i> Add Category
                 </button>
             </div>
         </div>
@@ -72,10 +101,10 @@
                             <td class="action-icons">
                                 <% if (category.isListed) { %>
                                     <button onclick="unlistCategory('<%= category._id%>')"
-                                        class="btn btn-success btn-sm" title="Click to Unlist">Listed</button>
+                                        class="btn btn-outline-success btn-sm" title="Click to Unlist">Listed</button>
                                     <% } else { %>
                                         <button onclick="listCategory('<%= category._id%>')"
-                                            class="btn btn-danger btn-sm" title="Click to List">Unlisted</button>
+                                            class="btn btn-outline-danger btn-sm" title="Click to List">Unlisted</button>
                                         <% } %>
                             </td>
                             <td>
@@ -102,7 +131,7 @@
                                 </td>
                                 <td class="text-center">
                                     <a href="/admin/subcategories/<%= category._id %>" title="View Subcategories">
-                                        <i class="fas fa-layer-group text-success"></i>
+                                        <i class="fas fa-layer-group text-brown"></i>
                                 </td>
                                 <td class="action-icons">
 
@@ -110,7 +139,7 @@
                                         data-id="<%= category._id %>" data-name="<%= category.name %>"
                                         data-description="<%= category.description %>"
                                         data-image="/uploads/<%= category.image %>">
-                                        <i class="fas fa-edit text-primary"></i>
+                                        <i class="fas fa-edit text-brown"></i>
                                     </a>
                                     <a href="#" title="Delete" onclick="deleteCategory('<%= category._id %>')">
                                         <i class="fas fa-trash text-danger"></i>
@@ -142,7 +171,7 @@
                                     <label for="categoryName" class="form-label fw-semibold">Category Name</label>
                                     <input type="text" name="categoryName" class="form-control rounded-3"
                                         id="categoryName" />
-                                    <div id="nameError" class="error-msg"></div>
+                                    <div id="nameError" class="error-msg text-danger"></div>
                                 </div>
 
                                 <!-- Image -->
@@ -150,7 +179,7 @@
                                     <label for="categoryImage" class="form-label fw-semibold">Image</label>
                                     <input type="file" name="categoryImage" id="categoryImage"
                                         class="form-control rounded-3" accept="image/png, image/jpeg" />
-                                    <div id="imageError" class="error-msg"></div>
+                                    <div id="imageError" class="error-msg text-danger"></div>
                                 </div>
 
                                 <!-- Description -->
@@ -158,7 +187,7 @@
                                     <label for="categoryDescription" class="form-label fw-semibold">Description</label>
                                     <textarea name="description" class="form-control rounded-3" id="categoryDescription"
                                         rows="3"></textarea>
-                                    <div id="descriptionError" class="error-msg"></div>
+                                    <div id="descriptionError" class="error-msg text-danger"></div>
                                 </div>
                             </div>
                         </div>
@@ -198,6 +227,7 @@
                                         (%)</label>
                                     <input type="number" name="offerPercentage" class="form-control rounded-3"
                                         id="offerPercentage" placeholder="Enter percentage (e.g. 10)" />
+                                        <div id="offerError" class="error-msg text-danger"></div>
                                 </div>
 
                                 <!-- Start Date & Time -->
@@ -205,6 +235,7 @@
                                     <label for="startDate" class="form-label fw-semibold">Start Date & Time</label>
                                     <input type="datetime-local" name="startDate" class="form-control rounded-3"
                                         id="startDate" />
+                                        <div id="dateError" class="error-msg text-danger"></div>
                                 </div>
 
                                 <!-- End Date & Time -->
@@ -212,6 +243,7 @@
                                     <label for="endDate" class="form-label fw-semibold">End Date & Time</label>
                                     <input type="datetime-local" name="endDate" class="form-control rounded-3"
                                         id="endDate" />
+                                        <div id="date1Error" class="error-msg text-danger"></div>
                                 </div>
 
                             </div>
@@ -334,31 +366,29 @@
             const name = formdata.get('categoryName').trim()
             const image = formdata.get('categoryImage')
             const description = formdata.get('description').trim()
-
-            if (!name || !image || !description || !image.name) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'All fields are required',
-                    text: 'Please fill in all the details before submiting',
-                    confirmButtonColor: '#dc3545'
-                })
-                return false
+            let hasError=false
+            if (!name) {
+                document.getElementById('nameError').textContent="Category name is required"
+                hasError=true
+            }
+            if ( !image || !image.name) {
+                document.getElementById('imageError').textContent="Image name is required"
+                hasError=true
+            }
+            if (!description ) {
+                document.getElementById('descriptionError').textContent="Description name is required"
+                hasError=true
             }
 
 
 
             const allowedTypes = ["image/jpeg", "image/png"];
-            if (!allowedTypes.includes(image.type)) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid File Type',
-                    text: 'Only JPG or PNG images are allowed.',
-                    confirmButtonColor: '#dc3545'
-                });
-                return false
+            if (!allowedTypes.includes(image.type)&& image.name) {
+                document.getElementById('imageError').textContent="Only JPEG and PNG files are required"
+                hasError=true
             }
 
-            return true
+            return hasError? false:true
         }
 
 
@@ -417,45 +447,35 @@
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
 
-            if (!selectedCategoryId) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'No Category Selected',
-                    text: 'Please select a category',
-                    confirmButtonColor: '#dc3545'
-                });
-                return;
+           let hasError = false;
+
+
+            document.getElementById('offerError').textContent = "";
+            document.getElementById('dateError').textContent = "";
+            document.getElementById('date1Error').textContent = "";
+
+            if (!offer) {
+                document.getElementById('offerError').textContent = "Offer percentage is required";
+                hasError = true;
+            }
+            if (!startDate) {
+                document.getElementById('dateError').textContent = "Date is required";
+                hasError = true;
+            }
+            if (!endDate) {
+                document.getElementById('date1Error').textContent = "Date is required";
+                hasError = true;
+            }
+            if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+                document.getElementById('dateError').textContent = "Start date should be less than end date";
+                hasError = true;
+            }
+            if (offer && (offer < 0 || offer > 100)) {
+                document.getElementById('offerError').textContent = "Invalid offer Percentage";
+                hasError = true;
             }
 
-            if (!offer || !startDate || !endDate) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'All details are required',
-                    text: 'Please enter all data',
-                    confirmButtonColor: '#dc3545'
-                });
-                return;
-            }
-
-            if (offer <= 0 || offer > 100) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Invalid Offer',
-                    text: 'Offer percentage should be between 1 and 99',
-                    confirmButtonColor: '#dc3545'
-                });
-                return;
-            }
-
-            if (new Date(startDate) >= new Date(endDate)) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Invalid Date',
-                    text: 'Start date should be less than end date',
-                    confirmButtonColor: '#dc3545'
-                });
-                return;
-            }
+            if (hasError) return;
 
             try {
                 const response = await fetch('/admin/addCategoryOffer', {

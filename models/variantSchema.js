@@ -17,7 +17,7 @@ const variantSchema = new Schema({
   },
   createdAt:{
     type:Date,
-    default:Date.now()
+    default:Date.now
   },
   isListed:{
     type:Boolean,

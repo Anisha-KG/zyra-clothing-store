@@ -1,6 +1,18 @@
 <%- include("../../views/partials/admin/header") %>
 
   <style>
+    /* Active page link color */
+  .pagination .page-item.active .page-link {
+      background-color: #a3654b;
+      border-color: #a3654b;
+      color: white; /* Text color */
+  }
+
+  /* Optional: Hover effect for non-active pages */
+  .pagination .page-link:hover {
+      background-color: #a3654b;
+      color: white;
+  }
     /* ======= TABLE STYLES ======= */
     .table-head th {
       background-color: #a3654b !important;
@@ -123,7 +135,7 @@
         </form>
 
         <button class="btn btn-sm btn-custom" data-bs-toggle="modal" data-bs-target="#addVariantModal"
-          onclick="setproductId('<%= variants[0].product._id%>')">
+          onclick="setproductId('<%= productId%>')">
           <i class="bi bi-plus-lg me-1"></i> Add Variant
         </button>
       </div>
@@ -171,33 +183,42 @@
                       <%= variant.size %>
                     </td>
                     <td>
-                      <% if (variant.images && variant.images.length> 0) { %>
-                        <img
-                          src="<%= variant.images[0] ? '/uploads/variants/' + variant.images[0] : 'https://via.placeholder.com/40' %>"
-                          alt="variant image" class="img-thumbnail" width="40" height="40"
-                          onclick="openImageModal('/uploads/variants/<%= variant.images[0] %>')"
-                          style="cursor: pointer;" />
-                        <% } else { %>
-                          <img src="/placeholder.svg" alt="No image" width="40" height="40" class="img-thumbnail" />
-                          <% } %>
-                    </td>
+  <% if (variant.images && variant.images.length > 0) { %>
+    <img
+      src="/uploads/variants/<%= variant.images[0] %>"
+      alt="variant image"
+      class="img-thumbnail"
+      width="70" height="70"
+      style="object-fit: cover; border-radius: 8px; cursor: pointer;"
+      onclick="openImageModal('/uploads/variants/<%= variant.images[0] %>')"
+    />
+  <% } else { %>
+    <img src="/placeholder.svg" alt="No image" width="70" height="70" class="img-thumbnail" />
+  <% } %>
+</td>
                     <td>₹<%= variant.product.price.toFixed(2) %>
                     </td>
                     <td>
                       <%= variant.quantity %>
                     </td>
                     <td>
-                      <% if (!variant.isBlocked) { %>
-                        <button class="btn btn-outline-danger btn-sm" title="Block Variant"
-                          onclick="confirmBlockVariant('<%= variant._id %>')">
-                          <i class="bi bi-slash-circle"></i> Block
-                        </button>
-                        <% } else { %>
-                          <button class="btn btn-outline-success btn-sm" title="Unblock Variant"
-                            onclick="confirmUnblockVariant('<%= variant._id %>')">
-                            <i class="bi bi-check-circle"></i> Unblock
-                          </button>
-                          <% } %>
+                      <% if (!variant.isListed) { %>
+                      <button
+                      class="btn btn-outline-danger btn-sm"
+                      title="Block variant"
+                      onclick="confirmListvariant('<%= variant._id %>', event)">
+                      <i class="bi bi-slash-circle"></i> Unlisted
+                    </button>
+                  <% } else { %>
+                    
+                  
+                    <button
+                      class="btn btn-outline-success btn-sm"
+                      title="Unblock variant"
+                      onclick="confirmUnlistvariant('<%= variant._id %>')">
+                      <i class="bi bi-check-circle"></i> Listed
+                    </button>
+                  <% } %>
                     </td>
                     <td>
                       <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
@@ -237,9 +258,9 @@
                 <!-- Color -->
                 <div class="col-md-6">
                   <label for="variantColor" class="form-label fw-semibold">Color</label>
-                  <input type="text" name="color" id="variantColor" class="form-control rounded-3"
+                  <input type="text" name="color" id="variantColor" class="form-control rounded-3 "
                     placeholder="e.g. Red" />
-                  <div id="colorError" class="error-msg"></div>
+                  <div id="colorError" class="error-msg text-danger"></div>
                 </div>
                 <input type="hidden" name="productId" id="productId">
                 <!-- Size -->
@@ -247,14 +268,14 @@
                   <label for="variantSize" class="form-label fw-semibold">Size</label>
                   <input type="text" name="size" id="variantSize" class="form-control rounded-3"
                     placeholder="e.g. M, L, XL" />
-                  <div id="sizeError" class="error-msg"></div>
+                  <div id="sizeError" class="error-msg text-danger"></div>
                 </div>
 
                 <!-- Quantity -->
                 <div class="col-md-6">
                   <label for="variantQuantity" class="form-label fw-semibold">Quantity</label>
                   <input type="number" name="quantity" id="variantQuantity" class="form-control rounded-3" min="0" />
-                  <div id="quantityError" class="error-msg"></div>
+                  <div id="quantityError" class="error-msg text-danger"></div>
                 </div>
 
                 <!-- Image Upload -->
@@ -401,7 +422,7 @@
         <ul class="pagination pagination-sm mb-0">
           <% for (let i=1; i <=totalPages; i++) { %>
             <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-              <a class="page-link" href="/admin/variant?page=<%= i %><%= search ? '&search=' + search : '' %>">
+              <a class="page-link" href="/admin/product/<%= productId%>/variants?page=<%= i %><%= search ? '&search=' + search : '' %>">
                 <%= i %>
               </a>
             </li>
@@ -488,10 +509,13 @@ function previewImage(event, index, isEdit = false) {
       cropBtn.style.display = 'inline-block';
 
       croppers[key] = new Cropper(previewImage, {
-        aspectRatio: 1,
-        viewMode: 1,
-        autoCropArea: 1,
-        background: false
+        aspectRatio: NaN,      // free ratio
+    viewMode: 1,           // restrict crop box within image
+    autoCropArea: 1,       // cover the whole image initially
+    background: false,
+    responsive: true,
+    zoomable: true,
+    movable: true
       });
     };
     reader.readAsDataURL(file);
@@ -537,64 +561,335 @@ function cropImage(index, isEdit = false) {
       document.getElementById('productId').value = productId
     }
     function setEditmodal(variantId) {
-      const variant = <% - JSON.stringify(variants) %>.find(v => v._id === variantId);
-      if (!variant) return;
+  const variant = <%- JSON.stringify(variants) %>.find(v => v._id === variantId);
+  if (!variant) return;
 
-      document.getElementById('editVariantId').value = variant._id;
-      document.getElementById('editVariantColor').value = variant.color || '';
-      document.getElementById('editVariantSize').value = variant.size || '';
-      document.getElementById('editVariantQuantity').value = variant.quantity || '';
+  document.getElementById('editVariantId').value = variant._id;
+  document.getElementById('editVariantColor').value = variant.color || '';
+  document.getElementById('editVariantSize').value = variant.size || '';
+  document.getElementById('editVariantQuantity').value = variant.quantity || '';
 
-      const editModalEl = document.getElementById('editVariantModal');
+  const editModalEl = document.getElementById('editVariantModal');
+  const modal = new bootstrap.Modal(editModalEl);
 
-      // Wait for modal to show before initializing Cropper
-      const modal = new bootstrap.Modal(editModalEl);
+  // Wait until modal is fully shown
+  editModalEl.addEventListener('shown.bs.modal', function handler() {
+    for (let i = 1; i <= 4; i++) {
+      if (croppers[`edit${i}`]) {
+        croppers[`edit${i}`].destroy();
+        delete croppers[`edit${i}`];
+      }
 
-      editModalEl.addEventListener('shown.bs.modal', function handler() {
-        // Remove previous croppers if any
-        for (let i = 1; i <= 4; i++) {
-          if (croppers[`edit${i}`]) {
-            croppers[`edit${i}`].destroy();
-            delete croppers[`edit${i}`];
-          }
+      const preview = document.getElementById(`editPreview${i}`);
+      const croppedInput = document.getElementById(`editCroppedImage${i}`);
+      const cropBtn = document.getElementById(`editCropBtn${i}`);
+      const previewContainer = preview.closest('.preview-container');
 
-          const preview = document.getElementById(`editPreview${i}`);
-          const croppedInput = document.getElementById(`editCroppedImage${i}`);
-          const cropBtn = document.getElementById(`editCropBtn${i}`);
-          const previewContainer = preview.closest('.preview-container');
+      if (variant.images && variant.images[i - 1]) {
+        preview.src = `/uploads/variants/${variant.images[i - 1]}`;
+        croppedInput.value = '';
+        previewContainer.style.display = 'block';
+        cropBtn.style.display = 'inline-block';
 
-          if (variant.images && variant.images[i - 1]) {
-            preview.src = `/uploads/variants/${variant.images[i - 1]}`;
-            croppedInput.value = '';
-            previewContainer.style.display = 'block';
-            cropBtn.style.display = 'inline-block';
-
-            // Initialize Cropper after modal is visible
-            croppers[`edit${i}`] = new Cropper(preview, {
-              aspectRatio: 1,
-              viewMode: 1,
-              autoCropArea: 1,
-              background: false
-            });
-          } else {
-            preview.src = '#';
-            croppedInput.value = '';
-            previewContainer.style.display = 'none';
-            cropBtn.style.display = 'none';
-          }
-        }
-
-        // Remove the listener so it doesn't fire again next time
-        editModalEl.removeEventListener('shown.bs.modal', handler);
-      });
-
-      modal.show();
+        // Initialize Cropper after modal is visible
+        croppers[`edit${i}`] = new Cropper(preview, {
+          aspectRatio: 1,
+          viewMode: 1,
+          autoCropArea: 1,
+          background: false
+        });
+      } else {
+        preview.src = '#';
+        croppedInput.value = '';
+        previewContainer.style.display = 'none';
+        cropBtn.style.display = 'none';
+      }
     }
+    editModalEl.removeEventListener('shown.bs.modal', handler);
+  });
 
+  modal.show();
+}
 
 
 
   </script>
+
+  <script>
+document.getElementById('addVariantForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const form = e.target;
+  const formData = new FormData(form);
+
+  let hasError = false;
+  const color = document.getElementById('variantColor').value.trim();
+  const size = document.getElementById('variantSize').value;
+  const quantity = document.getElementById('variantQuantity').value;
+  
+  if (!color) {
+    document.getElementById('colorError').textContent = 'Enter color of your product';
+    hasError = true;
+  } else document.getElementById('colorError').textContent = '';
+
+  if (!size) {
+    document.getElementById('sizeError').textContent = 'Enter size of your product';
+    hasError = true;
+  } else document.getElementById('sizeError').textContent = '';
+
+  if (!quantity) {
+    document.getElementById('quantityError').textContent = 'Enter quantity of your product';
+    hasError = true;
+  } else document.getElementById('quantityError').textContent = '';
+
+
+ // Validate at least one image is provided
+let hasImage = false;
+for (let i = 1; i <= 4; i++) {
+  const cropped = document.getElementById(`croppedImage${i}`).value;
+  const fileInput = document.getElementById(`image${i}`).files[0];
+  if (cropped || fileInput) {
+    hasImage = true;
+    break;
+  }
+}
+
+if (!hasImage) {
+  // Show error on the first image input (or any)
+  document.getElementById('image1-error').textContent = 'Please add at least one image';
+  hasError = true;
+} else {
+  // Clear error
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById(`image${i}-error`).textContent = '';
+  }
+}
+
+if(hasError) return
+
+
+  try {
+    const response = await fetch('/admin/addVariant', {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      Swal.fire({
+        icon: 'success',
+        title: "Success!",
+        text: result.message,
+        confirmButtonColor: '#198754'
+      }).then(() => window.location.reload());
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: "Error!",
+        text: result.message,
+        confirmButtonColor: '#dc3545'
+      });
+    }
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Server Error',
+      text: "Something went wrong",
+      confirmButtonColor: '#dc3545'
+    });
+  }
+});
+  </script>
+
+  <script>
+document.getElementById('editVariantForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const form = e.target;
+  const formData = new FormData(form);
+
+  let hasError = false;
+
+  // Validate fields
+  const color = document.getElementById('editVariantColor').value.trim();
+  const size = document.getElementById('editVariantSize').value.trim();
+  const quantity = document.getElementById('editVariantQuantity').value;
+
+  if (!color) {
+    document.getElementById('editColorError').textContent = 'Enter color of your product';
+    hasError = true;
+  } else document.getElementById('editColorError').textContent = '';
+
+  if (!size) {
+    document.getElementById('editSizeError').textContent = 'Enter size of your product';
+    hasError = true;
+  } else document.getElementById('editSizeError').textContent = '';
+
+  if (!quantity) {
+    document.getElementById('editQuantityError').textContent = 'Enter quantity of your product';
+    hasError = true;
+  } else document.getElementById('editQuantityError').textContent = '';
+
+  if (hasError) return;
+
+  // Handle images: only append newly uploaded or recropped images
+  for (let i = 1; i <= 4; i++) {
+    const cropped = document.getElementById(`editCroppedImage${i}`).value;
+    const fileInput = document.getElementById(`editImage${i}`).files[0];
+
+    if (cropped) {
+      // Convert cropped base64 to Blob
+      const blob = await fetch(cropped).then(res => res.blob());
+      formData.delete(`image${i}`); // remove original file if any
+      formData.append(`image${i}`, blob, `cropped${i}.jpg`);
+    } else if (fileInput) {
+      // Only new file, no crop
+      formData.append(`image${i}`, fileInput);
+    } else {
+      // No change: remove from FormData to avoid sending old images
+      formData.delete(`image${i}`);
+    }
+  }
+
+  try {
+    const response = await fetch('/admin/editVariant', {
+      method: 'PATCH', // your server must handle PATCH
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      Swal.fire({
+        icon: 'success',
+        title: "Success!",
+        text: result.message,
+        confirmButtonColor: '#198754'
+      }).then(() => window.location.reload());
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: "Error!",
+        text: result.message,
+        confirmButtonColor: '#dc3545'
+      });
+    }
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Server Error',
+      text: "Something went wrong",
+      confirmButtonColor: '#dc3545'
+    });
+  }
+});
+
+//list variant
+async function confirmListvariant(variantId){
+
+    const result= await Swal.fire({
+      title:'Are you sure?',
+      text:'This will list the variant',
+      icon:'warning',
+      showCancelButton:true,
+      confirmButtonColor:'#3085d6',
+      confirmButtonText:'Yes list!',
+      cancelButtonColor:'#d33'
+    })
+
+    if(result.isConfirmed){
+     
+      try{
+        const res=await fetch('/admin/listVariant',{
+        method:"PATCH",
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({variantId})
+      })
+
+      const response=await res.json()
+      if(response.success){
+        Swal.fire({
+          icon:'success',
+          title:'success',
+          text: response.message,
+          confirmButtonColor: '#198754'
+        }).then(()=>{
+          location.reload()
+        })
+      }else{
+        Swal.fire({
+          icon:'error',
+          title:'Error',
+          text: result.message,
+          confirmButtonColor: '#198754'
+        })
+      }
+      }catch(error){
+         Swal.fire({
+          icon:'error',
+          title:'success',
+          text:'Some thing went wrong',
+          confirmButtonColor: '#198754'
+        })
+      }
+    }
+  }
+
+  //unlistVariant
+
+  
+async function confirmUnlistvariant(variantId){
+
+    const result= await Swal.fire({
+      title:'Are you sure?',
+      text:'This will unlist the variant',
+      icon:'warning',
+      showCancelButton:true,
+      confirmButtonColor:'#3085d6',
+      confirmButtonText:'Yes unlist!',
+      cancelButtonColor:'#d33'
+    })
+
+    if(result.isConfirmed){
+     
+      try{
+        const res=await fetch('/admin/unlistVariant',{
+        method:"PATCH",
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({variantId})
+      })
+
+      const response=await res.json()
+      if(response.success){
+        Swal.fire({
+          icon:'success',
+          title:'success',
+          text: response.message,
+          confirmButtonColor: '#198754'
+        }).then(()=>{
+          location.reload()
+        })
+      }else{
+        Swal.fire({
+          icon:'error',
+          title:'Error',
+          text: result.message,
+          confirmButtonColor: '#198754'
+        })
+      }
+      }catch(error){
+         Swal.fire({
+          icon:'error',
+          title:'success',
+          text:'Some thing went wrong',
+          confirmButtonColor: '#198754'
+        })
+      }
+    }
+  }
+
+
+  </script>
+
 
 
 
