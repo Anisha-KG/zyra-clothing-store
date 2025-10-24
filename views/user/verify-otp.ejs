@@ -84,7 +84,7 @@
       <!-- Resend OTP -->
         <div class="resend">
         <span><span id="timer">00:30</span></span>
-        <a href="#" id="resend-link" onclick="resendOtp()">Resend OTP</a>
+<a href="#" id="resend-link">Resend OTP</a>
         </div>
 
       <!-- Go back -->
@@ -93,127 +93,104 @@
       </div>
     </div>
   </div>
-
-  <script>
-    // OTP Auto focus
-    const inputs = document.querySelectorAll(".otp-input");
-    inputs.forEach((input, index) => {
-      input.addEventListener("input", () => {
-        if (input.value && index < inputs.length - 1) {
-          inputs[index + 1].focus();
-        }
-      });
-    });
-
-    // Timer
-    let countdownInterval;
-const timer = document.getElementById("timer");
+<script>
+const inputs = document.querySelectorAll(".otp-input");
 const resendLink = document.getElementById("resend-link");
+let countdownInterval;
+const timer = document.getElementById("timer");
+
+// OTP Auto-focus
+inputs.forEach((input, index) => {
+  input.addEventListener("input", () => {
+    if (input.value && index < inputs.length - 1) {
+      inputs[index + 1].focus();
+    }
+  });
+
+  input.addEventListener("keydown", (e) => {
+    // handle backspace to go to previous input
+    if (e.key === "Backspace" && !input.value && index > 0) {
+      inputs[index - 1].focus();
+    }
+  });
+});
+
+// Timer
 let timeLeft = 30;
-
-// Start countdown function
 function startCountdown(duration) {
-    clearInterval(countdownInterval);
-    timeLeft = duration;
+  clearInterval(countdownInterval);
+  timeLeft = duration;
+  resendLink.style.pointerEvents = "none";
+  resendLink.style.opacity = 0.5;
 
-    // Disable resend link while timer is running
-    resendLink.style.pointerEvents = 'none';
-    resendLink.style.opacity = 0.5;
+  countdownInterval = setInterval(() => {
+    let minutes = String(Math.floor(timeLeft / 60)).padStart(2, "0");
+    let seconds = String(timeLeft % 60).padStart(2, "0");
+    timer.textContent = `${minutes}:${seconds}`;
+    timeLeft--;
 
-    countdownInterval = setInterval(() => {
-        let minutes = String(Math.floor(timeLeft / 60)).padStart(2, "0");
-        let seconds = String(timeLeft % 60).padStart(2, "0");
-        timer.textContent = `${minutes}:${seconds}`;
-        timeLeft--;
-
-        if (timeLeft < 0) {
-            clearInterval(countdownInterval);
-            // Enable resend link when timer is 0
-            resendLink.style.pointerEvents = 'auto';
-            resendLink.style.opacity = 1;
-        }
-    }, 1000);
+    if (timeLeft < 0) {
+      clearInterval(countdownInterval);
+      resendLink.style.pointerEvents = "auto";
+      resendLink.style.opacity = 1;
+    }
+  }, 1000);
 }
 
 // Initial countdown
 startCountdown(30);
 
-// Restart timer function
 function restartTimer() {
-    startCountdown(60); // start from 01:00
-    // Optional: call your resend OTP ajax here if needed
+  startCountdown(60);
 }
 
-    function validateOtpForm(){
-        const otpValue=Array.from(inputs).map((input)=>input.value).join('')
+resendLink.addEventListener("click", function(event){
+    event.preventDefault();
 
-        $.ajax({
-            type:'POST',
-            url:'/verify-otp',
-            data:{otp:otpValue},
-            success:function(response){
-                if(response.success){
-                    Swal.fire({
-                        icon:'success',
-                        title:'OTP Verified Succesfully',
-                        showConfirmButton: false,
-                        timer: 1500,
-                    }).then(()=>{
-                        window.location.href=response.redirectUrl
-                    })
-                }else{
-                    Swal.fire({
-                        icon:'error',
-                        title:'Error',
-                        text:response.message
-                    })
-                }
-            },
-            error:function(){
+    // Clear all OTP inputs properly
+    inputs.forEach(input => {
+        input.value = '';
+        input.type = 'text'; // reset type to prevent autofill issues
+        input.dispatchEvent(new Event('input')); // trigger auto-focus listeners
+    });
+
+    // Focus first input after a tiny delay
+    setTimeout(() => inputs[0].focus(), 10);
+
+    // Restart timer
+    restartTimer();
+
+    // Make AJAX request to resend OTP
+    $.ajax({
+        type:'POST',
+        url:'/resend-otp',
+        success:function(response){
+            if(response.success){
                 Swal.fire({
-                    icon:'error',
-                    title:'Invalid OTP',
-                    text:'Please Try Again'
+                    icon:'success',
+                    title:'OTP Resent Successfully',
+                    showConfirmButton: false,
+                    timer: 1500,
                 })
-            }
-        })
-        return false
-    }
-    const timerelement=document.getElementById('timer')
-    function resendOtp(){
-        restartTimer()
-        $.ajax({
-            type:'POST',
-            url:'/resend-otp',
-            success:function(response){
-                if(response.success){
-                    Swal.fire({
-                        icon:'success',
-                        title:'OTP Resend Succesfully',
-                        showConfirmButton: false,
-                        timer: 1500,
-                    })
-                }else{
-                    Swal.fire({
-                        icon:'error',
-                        title:'Error',
-                        text:response.message
-                    })
-                }
-            },error:function(response){
+            } else {
                 Swal.fire({
                     icon:'error',
-                    title:'Someth',
+                    title:'Error',
                     text:response.message
                 })
             }
-        })
-        return false
+        },
+        error:function(response){
+            Swal.fire({
+                icon:'error',
+                title:'Something went wrong',
+                text:response.message || 'Try again later'
+            })
+        }
+    });
+});
+</script>
 
-
-    }
-    
-  </script>
   
 </body>
 </html>

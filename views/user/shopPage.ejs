@@ -339,27 +339,28 @@ hr {
           </div>
         </div>
       </div>
-
-        <!-- Product Grid -->
-        <div class="row g-4 mt-2">
-          <% variants.forEach(variant => { 
-                const product = products.find(p => p._id.toString()===variant.product.toString());
-                if(!product) return;
-          %>
-            <div class="col-6 col-md-4 col-lg-3">
-              <div class="product-card position-relative p-2 border rounded">
-                <% if(product.offer){ %>
-                  <span class="offer-badge"><%= product.offer %></span>
-                <% } %>
-                <img src="<%= variant.images && variant.images.length>0 ? '/uploads/variants/'+variant.images[0] : '/uploads/default.png' %>" alt="<%= product.name %>" class="img-fluid">
-                <h5 class="mt-2"><%= product.name %></h5>
-                <p class="mb-0">Size: <%= variant.size %></p>
-                <p class="mb-0">Color: <%= variant.color %></p>
-                <p class="mb-0 text-success"><%= product.price %></p>
-              </div>
-            </div>
-          <% }) %>
+<div class="row g-4 mt-2">
+  <% variants.forEach(variant => { 
+        const product = products.find(p => p._id.toString() === variant.product.toString());
+        if(!product) return;
+  %>
+    <div class="col-6 col-md-4 col-lg-3">
+      <a href="/product/<%= product._id %>" class="text-decoration-none text-dark">
+        <div class="product-card position-relative p-2 border rounded">
+          <% if(product.offer){ %>
+            <span class="offer-badge"><%= product.offer %></span>
+          <% } %>
+          <img src="<%= variant.images && variant.images.length>0 ? '/uploads/variants/'+variant.images[0] : '/uploads/default.png' %>" alt="<%= product.name %>" class="img-fluid">
+          <h5 class="mt-2"><%= product.name %></h5>
+          <p class="mb-0">Size: <%= variant.size %></p>
+          <p class="mb-0">Color: <%= variant.color %></p>
+          <p class="mb-0 text-success"><%= product.price %></p>
         </div>
+      </a>
+    </div>
+  <% }) %>
+</div>
+
 
         <!-- Pagination -->
 <nav aria-label="Page navigation" class="mt-4">

@@ -37,6 +37,8 @@ router.post('/changePassword',forgotPasswordController.changePassword)
 
 router.get('/shop',auth.checkSession,shopPageController.shopPage)
 
+router.get('/product/:productId',auth.checkSession,shopPageController.productDetails)
+
 
 
 

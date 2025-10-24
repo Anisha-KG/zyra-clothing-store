@@ -54,7 +54,7 @@ const loadforgotPasswordPage=async(req,res)=>{
         res.render('forgotPassword')
     }catch(error){
         console.log(error)
-        res.render('pageNotFound')
+        res.redirect('/pageNotFound')
     }
 }
 
@@ -62,6 +62,9 @@ const forgotPassword=async(req,res)=>{
     console.log('controller hit')
     try{
         const {email}=req.body
+        if(!email){
+          return res.render('forgotPassword',{message:'Email is required'})
+        }
 
         const isExist=await User.findOne({email:email})
         if(!isExist){

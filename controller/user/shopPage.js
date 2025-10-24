@@ -49,7 +49,7 @@ const shopPage = async (req, res) => {
     const colorArr = parseMulti(color);
 
     const page = parseInt(req.query.page) || 1;
-    const limit = 5;
+    const limit = 2;
     const skip = (page - 1) * limit;
 
 
@@ -135,6 +135,66 @@ const shopPage = async (req, res) => {
 };
 
 
+const productDetails = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    let user = null;
 
-module.exports = { shopPage };
+    if (userId) {
+      user = await User.findById(userId).lean();
+    }
+
+    const { productId } = req.params;
+
+    // Fetch current product
+    const product = await Product.findOne({ _id: productId, isBlocked: false }).lean();
+    if (!product) {
+      return res.json({ success: false, message: 'Cannot find product' });
+    }
+
+    // Fetch all variants of this product
+    const variants = await Variant.find({ product: productId }).lean();
+    const availableSizes = [...new Set(variants.map(v => v.size))];
+    const availableColors = [...new Set(variants.map(v => v.color))];
+    const defaultVariant = variants[0] || null;
+
+    // Fetch similar products
+    const likeProducts = await Product.find({
+      category: product.category,
+      _id: { $ne: product._id },
+      isBlocked: false
+    }).lean();
+
+    // Attach variant image + color to each similar product
+    const likeProductVariants = await Promise.all(
+      likeProducts.map(async (p) => {
+        const variant = await Variant.findOne({ product: p._id }).lean();
+        return {
+          ...p,
+          variantImage: variant?.images?.[0] || null,
+          variantColor: variant?.color || null
+        };
+      })
+    );
+
+    res.render('productDetails', {
+      product,
+      variants,
+      defaultVariant,
+      user,
+      availableSizes,
+      availableColors,
+      likeProducts: likeProductVariants
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server Error');
+  }
+};
+
+
+module.exports = { shopPage,
+  productDetails
+
+ };
 

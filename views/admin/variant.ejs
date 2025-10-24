@@ -593,10 +593,13 @@ function cropImage(index, isEdit = false) {
 
         // Initialize Cropper after modal is visible
         croppers[`edit${i}`] = new Cropper(preview, {
-          aspectRatio: 1,
-          viewMode: 1,
-          autoCropArea: 1,
-          background: false
+          aspectRatio: NaN,      // free ratio
+    viewMode: 1,           // restrict crop box within image
+    autoCropArea: 1,       // cover the whole image initially
+    background: false,
+    responsive: true,
+    zoomable: true,
+    movable: true
         });
       } else {
         preview.src = '#';

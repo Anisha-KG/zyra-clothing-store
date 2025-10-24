@@ -22,24 +22,23 @@ const constants = require('../Constants/httpStatuscode')
 
 const checkSession = async (req, res, next) => {
   try {
-
     if (!req.session.user) {
       return res.redirect('/login');
     }
 
     const userData = await User.findById(req.session.user);
     if (!userData) {
-      req.session.destroy(() => { });
+      // Remove only user session
+      delete req.session.user;
       return res.redirect('/signup');
     }
 
     if (userData.isBlocked) {
-      req.session.destroy(() => { });
+      delete req.session.user;
       return res.render('login', { message: 'Your account has been blocked by admin.' });
     }
 
     next();
-
   } catch (error) {
     console.log('Error in checkSession middleware:', error);
     res.status(500).send('Server error');
@@ -48,12 +47,11 @@ const checkSession = async (req, res, next) => {
 
 const isLogin = async (req, res, next) => {
   try {
-
     if (req.session.user) {
       const userData = await User.findById(req.session.user);
 
       if (userData && userData.isBlocked) {
-        req.session.destroy(() => { });
+        delete req.session.user;
         return res.render('login', { message: 'Your account has been blocked by admin.' });
       }
 
@@ -61,30 +59,31 @@ const isLogin = async (req, res, next) => {
     }
 
     next();
-
   } catch (error) {
     console.log('Error in isLogin middleware:', error);
     res.status(500).send('Server error');
   }
 };
+
+// Admin middlewares remain the same
 const adminAuth = async (req, res, next) => {
   try {
     if (!req.session.admin) {
-      res.redirect('/admin/login')
+      return res.redirect('/admin/login');
+    }
+
+    const adminId = req.session.admin;
+    const admin = await User.findById(adminId);
+    if (admin && admin.isAdmin) {
+      next();
     } else {
-      const adminId = req.session.admin
-      const admin = await User.findById(adminId)
-      if (admin && admin.isAdmin == true) {
-        next()
-      } else {
-        res.redirect('/admin/login')
-      }
+      return res.redirect('/admin/login');
     }
   } catch (error) {
-    console.log('Access denied:not admin')
-    res.status(INTERNAL_SERVER_ERROR).send('Server Error')
+    console.log('Access denied: not admin');
+    res.status(500).send('Server Error');
   }
-}
+};
 
 const isAdminLogin = async (req, res, next) => {
   try {
@@ -99,9 +98,8 @@ const isAdminLogin = async (req, res, next) => {
 };
 
 module.exports = {
-  // userAuth,
   adminAuth,
   checkSession,
   isLogin,
   isAdminLogin
-}
+};

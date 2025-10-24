@@ -136,11 +136,12 @@
                                 <td class="action-icons">
 
                                     <a href="#" title="Edit" data-bs-toggle="modal" data-bs-target="#editCategoryModal"
-                                        data-id="<%= category._id %>" data-name="<%= category.name %>"
-                                        data-description="<%= category.description %>"
-                                        data-image="/uploads/<%= category.image %>">
-                                        <i class="fas fa-edit text-brown"></i>
-                                    </a>
+    data-id="<%= category._id %>"
+    data-name="<%= category.name %>"
+    data-description="<%= category.description %>"
+    data-image="<%= category.categoryImage ? '/uploads/categories/' + category.categoryImage : 'https://via.placeholder.com/100' %>">
+    <i class="fas fa-edit text-brown"></i>
+</a>
                                     <a href="#" title="Delete" onclick="deleteCategory('<%= category._id %>')">
                                         <i class="fas fa-trash text-danger"></i>
                                     </a>

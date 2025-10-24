@@ -1,254 +1,241 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Product Detail</title>
-
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-
-<!-- Bootstrap CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<!-- EasyZoom CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easyzoom@2.5.0/css/easyzoom.css" />
-
-<!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+<%- include("../../views/partials/user/header") %>
 
 <style>
   body {
     font-family: 'Poppins', sans-serif;
-    background-color: #f8f5f4;
+    background-color: #fdf6f0;
+    color: #1f1f1f;
   }
-
-  .easyzoom img {
+  h1, h2, h3 {
+    font-family: 'Playfair Display', serif;
+  }
+  .product-images img {
     width: 100%;
-    max-width: 100%;
-    border-radius: 6px;
-    border: 1px solid #eee;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
   }
-
-  .custom-qty-wrap {
-    display: inline-flex;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    overflow: hidden;
-    align-items: center;
-  }
-  .btn-qty {
-    width: 40px;
-    height: 40px;
-    border: none;
-    background-color: #f2f2f2;
-    font-size: 18px;
+  .color-swatch {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
     cursor: pointer;
+    border: 1px solid #ccc;
   }
-  .btn-qty:hover { background-color: #ddd; }
-  .num-product-input {
-    width: 60px;
-    text-align: center;
-    border: none;
-    font-size: 16px;
-    outline: none;
+  .color-swatch.selected {
+    border: 2px solid #000;
   }
-
-  .btn-primary {
+  .btn-zyra {
     border-radius: 30px;
+    padding: 10px 25px;
     font-weight: 600;
+  }
+  .btn-wishlist {
+    background-color: #c77c59;
+    color: #fff;
+  }
+  .btn-cart {
+    background-color: #000;
+    color: #fff;
+  }
+  .product-description {
+    line-height: 1.6;
+    font-size: 0.95rem;
+  }
+  .also-like img {
+    border-radius: 5px;
+  }
+  @media (max-width: 768px) {
+    .color-swatch {
+      width: 25px;
+      height: 25px;
+    }
   }
 </style>
 </head>
-<body>
 
-<section class="sec-product-detail bg0 p-t-65 p-b-60 mt-5">
-  <div class="container">
-    <div class="row">
-      <!-- Product Images -->
-      <div class="col-md-6 col-lg-7 p-b-30">
-        <div class="p-l-25 p-r-30 p-lr-0-lg">
-          <div class="wrap-slick3 flex-sb flex-w">
-            <div class="slick3 gallery-lb">
-              <!-- Example images -->
-              <div class="item-slick3" data-thumb="images/product1.jpg">
-                <div class="wrap-pic-w pos-relative">
-                  <div class="easyzoom easyzoom--overlay">
-                    <a href="images/product1.jpg">
-                      <img src="images/product1.jpg" alt="Product Image">
-                    </a>
-                  </div>
-                </div>
+<body>
+  <div class="container my-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/home">Home</a></li>
+        <li class="breadcrumb-item"><a href="/shop">All Products</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><%= product.name %></li>
+      </ol>
+    </nav>
+
+    <!-- Product Section -->
+    <div class="row align-items-start">
+      <!-- LEFT SIDE: Product Images -->
+      <div class="col-lg-6 col-md-12 product-images mb-4">
+        <div class="row g-3">
+          <% if (defaultVariant && defaultVariant.images && defaultVariant.images.length > 0) { %>
+            <% defaultVariant.images.forEach((img) => { %>
+              <div class="col-6">
+                <img src="/uploads/variants/<%= img %>" alt="Product Image" class="img-fluid shadow-sm">
               </div>
-              <div class="item-slick3" data-thumb="images/product2.jpg">
-                <div class="wrap-pic-w pos-relative">
-                  <img src="images/product2.jpg" alt="Product Image">
-                  <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="images/product2.jpg">
-                    <i class="fa fa-expand"></i>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
+            <% }) %>
+          <% } else { %>
+            <p>No images available</p>
+          <% } %>
         </div>
       </div>
 
-      <!-- Product Info -->
-      <div class="col-md-6 col-lg-5 p-b-30">
-        <div class="p-r-50 p-t-5 p-lr-0-lg">
-          <h1 class="mtext-105 cl2 js-name-detail p-b-14 ms-5">
-            Sample Product Name
-          </h1>
+      <!-- RIGHT SIDE: Product Details -->
+      <div class="col-lg-6 col-md-12">
+        <h2 class="mb-2"><%= product.name %></h2>
+        <p class="text-muted">HSN: <%= product.hsn || "N/A" %></p>
 
-          <span class="mtext-106 cl2 ms-5">
-            ₹ 999.00
-          </span>
+        <h5 class="text-decoration-line-through text-muted">₹<%= product.price %></h5>
+        <h4 class="text-danger fw-bold" id="offerPrice">
+          Offer Price: ₹<%= product.finalPrice || product.price %>
+        </h4>
 
-          <p class="stext-102 cl3 p-t-23 ms-5">
-            <b>Brand: <span style="color: red;">ZYRA</span></b>
+        <!-- Size Selection -->
+        <div class="my-3">
+          <label class="form-label fw-bold">Select a size:</label>
+          <div id="sizeOptions">
+            <% availableSizes.forEach(size => { %>
+              <button class="btn btn-outline-dark btn-sm me-2 mb-2 size-btn" data-size="<%= size %>"><%= size %></button>
+            <% }) %>
+          </div>
+        </div>
+
+        <!-- Color Selection -->
+        <div class="my-3">
+          <label class="form-label fw-bold">Color:</label>
+          <div id="colorOptions">
+            <% availableColors.forEach(color => { %>
+              <span class="color-swatch" 
+                    style="background-color:<%= color %>;" 
+                    data-color="<%= color %>" 
+                    title="<%= color %>"></span>
+            <% }) %>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="my-4">
+          <button class="btn btn-zyra btn-wishlist me-3">Add to Wishlist</button>
+          <button class="btn btn-zyra btn-cart">Add to Cart</button>
+        </div>
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs" id="productTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="desc-tab" data-bs-toggle="tab" data-bs-target="#desc" type="button" role="tab">Description</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review" type="button" role="tab">Review</button>
+          </li>
+        </ul>
+
+        <div class="tab-content mt-3">
+          <div class="tab-pane fade show active product-description" id="desc" role="tabpanel">
+            <%= product.description || "No description available." %>
+          </div>
+          <div class="tab-pane fade" id="review" role="tabpanel">
+            <p>No reviews yet.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+<!-- You May Also Like -->
+<div class="mt-5">
+  <h4>You May Also Like</h4>
+  <div class="row g-3 also-like">
+    <% if (likeProducts && likeProducts.length > 0) { %>
+      <% likeProducts.forEach(product => { %>
+        <div class="col-6 col-md-3 text-center">
+          <!-- Product Image -->
+          <% if (product.variantImage) { %>
+            <img src="/uploads/variants/<%= product.variantImage %>" 
+                 alt="<%= product.name %>" 
+                 class="img-fluid rounded">
+          <% } else { %>
+            <img src="https://via.placeholder.com/200x250" alt="No Image" class="img-fluid rounded">
+          <% } %>
+
+          <!-- Product Info -->
+          <p class="mt-2">
+            <%= product.name %><br>
+            <%= product.variantColor || '' %><br>
+            ₹<%= product.price %>
           </p>
 
-          <!-- Size & Color -->
-          <div class="p-t-33">
-            <div class="flex-w flex-r-m p-b-10">
-              <div class="size-203 flex-c-m respon6">Size</div>
-              <div class="size-204 respon6-next">
-                <select class="form-select">
-                  <option selected disabled>Choose an option</option>
-                  <option>Small</option>
-                  <option>Medium</option>
-                  <option>Large</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="flex-w flex-r-m p-b-10">
-              <div class="size-203 flex-c-m respon6">Color</div>
-              <div class="size-204 respon6-next">
-                <select class="form-select">
-                  <option selected disabled>Choose an option</option>
-                  <option>Red</option>
-                  <option>Blue</option>
-                  <option>Black</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="flex-w flex-r-m p-b-10">
-              <div class="size-204 flex-w flex-m respon6-next">
-                Availability: <span class="ms-2" style="color: green;">In Stock</span>
-              </div>
-            </div>
-
-            <!-- Quantity and Add to Cart -->
-            <div class="flex-w flex-r-m p-b-10 mt-3">
-              <div class="custom-qty-wrap d-flex align-items-center">
-                <button class="btn btn-outline-secondary btn-decrease">−</button>
-                <input type="number" class="form-control text-center mx-2 quantity-input" value="1" min="1" max="10" readonly>
-                <button class="btn btn-outline-secondary btn-increase">+</button>
-              </div>
-              <button class="btn btn-primary btn-lg px-4 py-2 ms-3">Add to Cart</button>
-            </div>
-          </div>
-
-          <!-- Social & Wishlist -->
-          <div class="flex-w flex-m p-t-40">
-            <a href="#" class="me-3"><i class="fa-brands fa-facebook-f"></i></a>
-            <a href="#" class="me-3"><i class="fa-brands fa-x-twitter"></i></a>
-            <a href="#" class="me-3"><i class="fa-brands fa-google-plus-g"></i></a>
-            <a href="#"><i class="fa fa-heart"></i></a>
-          </div>
-
+          <!-- View Product Button -->
+          <a href="/product/<%= product._id %>" class="btn btn-sm btn-outline-dark">View</a>
         </div>
-      </div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="bor10 m-t-50 p-t-43 p-b-40">
-      <ul class="nav nav-tabs" role="tablist">
-        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#description">Description</a></li>
-        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#information">Additional Info</a></li>
-        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#reviews">Reviews (2)</a></li>
-      </ul>
-
-      <div class="tab-content p-t-43">
-        <div class="tab-pane fade show active" id="description">
-          <p>Sample product description goes here. This product is made with high-quality materials and offers excellent performance.</p>
-        </div>
-
-        <div class="tab-pane fade" id="information">
-          <ul>
-            <li>Material: Cotton</li>
-            <li>Color: Red, Blue, Black</li>
-            <li>Size: S, M, L</li>
-          </ul>
-        </div>
-
-        <div class="tab-pane fade" id="reviews">
-          <p>No reviews yet.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Categories -->
-    <div class="bg6 flex-c-m flex-w size-302 m-t-73 p-tb-15">
-      <span class="stext-107 cl6 p-lr-25">Categories: Tops</span>
-    </div>
+      <% }) %>
+    <% } else { %>
+      <p class="text-muted">No similar products found.</p>
+    <% } %>
   </div>
-</section>
+</div>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Related Products -->
-<section class="sec-relate-product bg0 p-t-45 p-b-105">
-  <div class="container">
-    <h3 class="ltext-106 cl5 text-center p-b-45">Related Products</h3>
-    <div class="row">
-      <div class="col-md-3 col-sm-6 mb-4">
-        <div class="card">
-          <img src="images/product2.jpg" class="card-img-top" alt="Related Product">
-          <div class="card-body text-center">
-            <h6 class="card-title">Related Product 1</h6>
-            <p class="card-text">₹ 799.00</p>
-            <a href="#" class="btn btn-outline-primary btn-sm">Quick View</a>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3 col-sm-6 mb-4">
-        <div class="card">
-          <img src="images/product3.jpg" class="card-img-top" alt="Related Product">
-          <div class="card-body text-center">
-            <h6 class="card-title">Related Product 2</h6>
-            <p class="card-text">₹ 899.00</p>
-            <a href="#" class="btn btn-outline-primary btn-sm">Quick View</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+  <script>
+    const variants = <%- JSON.stringify(variants) %>;
+    const basePrice = <%= product.finalPrice || product.price %>;
+    
+    let selectedSize = null;
+    let selectedColor = null;
 
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/easyzoom@2.5.0/dist/easyzoom.js"></script>
+    const updateProductView = (variant) => {
+      const imageContainer = document.querySelector('.product-images .row');
+      imageContainer.innerHTML = variant.images.map(img =>
+        `<div class="col-6"><img src="/uploads/variants/${img}" class="img-fluid shadow-sm"></div>`
+      ).join('');
 
-<script>
-  // Quantity increase/decrease
-  const decreaseBtn = document.querySelector(".btn-decrease");
-  const increaseBtn = document.querySelector(".btn-increase");
-  const qtyInput = document.querySelector(".quantity-input");
+      // Always use base product price (since variants don’t have prices)
+      document.getElementById('offerPrice').textContent = "Offer Price: ₹" + basePrice;
+    };
 
-  decreaseBtn.addEventListener("click", () => {
-    let val = parseInt(qtyInput.value);
-    if (val > 1) qtyInput.value = val - 1;
-  });
+    const findVariant = () => {
+      let variant = null;
 
-  increaseBtn.addEventListener("click", () => {
-    let val = parseInt(qtyInput.value);
-    if (val < 10) qtyInput.value = val + 1;
-  });
+      if (selectedSize && selectedColor) {
+        variant = variants.find(v => v.size === selectedSize && v.color === selectedColor);
+      }
+      if (!variant && selectedSize) {
+        variant = variants.find(v => v.size === selectedSize);
+      }
+      if (!variant && selectedColor) {
+        variant = variants.find(v => v.color === selectedColor);
+      }
 
-  // EasyZoom init
-  const $easyzoom = $('.easyzoom').easyZoom();
-</script>
+      if (variant) {
+        updateProductView(variant);
+      }
+    };
 
+    // Size selection
+    document.querySelectorAll('.size-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedSize = btn.getAttribute('data-size');
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        findVariant();
+      });
+    });
+
+    // Color selection
+    document.querySelectorAll('.color-swatch').forEach(colorEl => {
+      colorEl.addEventListener('click', () => {
+        selectedColor = colorEl.getAttribute('data-color');
+        document.querySelectorAll('.color-swatch').forEach(c => c.classList.remove('selected'));
+        colorEl.classList.add('selected');
+        findVariant();
+      });
+    });
+  </script>
 </body>
 </html>
