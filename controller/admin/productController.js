@@ -59,7 +59,7 @@ const getaddProduct = async (req, res) => {
   }
 }
 
-const addProduct = async (req, res) => {
+const addProduct = async (req, res,next) => {
   console.log('controller hit')
   try {
     const { productName, material, status, regprice, finalPrice, description, category, subcategory, brand } = req.body
@@ -76,6 +76,8 @@ const addProduct = async (req, res) => {
     if (existing) {
       return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: 'Product already esist' })
     }
+
+    
 
     const newProdut = new Products({
       name: productName,
@@ -94,8 +96,7 @@ const addProduct = async (req, res) => {
 
     res.status(httpStatus.OK).json({ success: true, message: 'Product added successfully' })
   } catch (error) {
-    console.log("Error while ading Product:", error)
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Server error' })
+    next(error)
   }
 }
 

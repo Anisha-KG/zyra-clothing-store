@@ -77,7 +77,7 @@
         <input type="text" maxlength="1" class="otp-input" id="otp5">
         <input type="text" maxlength="1" class="otp-input" id="otp6">
       </div>
-
+      <div class="text-danger" id="otp-error"></div>
       <!-- Confirm Button -->
       <button type="button" class="confirm-btn mb-3" onclick="validateOtpForm()">Confirm</button>
 
@@ -189,6 +189,50 @@ resendLink.addEventListener("click", function(event){
         }
     });
 });
+</script>
+<script>
+function validateOtpForm() {
+  const otpInputs = Array.from(document.querySelectorAll(".otp-input"));
+  const otpErrorDiv = document.getElementById("otp-error");
+
+  // Get OTP value
+  const otp = otpInputs.map(input => input.value.trim()).join('');
+
+  // Check if all inputs are filled
+  if (otp.length < otpInputs.length) {
+    otpErrorDiv.textContent = "Please enter the complete OTP!";
+    otpErrorDiv.style.display = "block";
+    return false;
+  }
+
+  // Clear error if everything is filled
+  otpErrorDiv.textContent = "";
+  
+  // Proceed to send OTP via AJAX or form submission
+  // Example: you can send AJAX request here
+  $.ajax({
+    type: "POST",
+    url: "/verify-otp",
+    data: { otp: otp },
+    success: function(response) {
+      if (response.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'OTP Verified Successfully',
+          showConfirmButton: false,
+          timer: 1500
+        }).then(() => {
+          window.location.href = response.redirectUrl; // redirect to home or desired page
+        });
+      } else {
+        otpErrorDiv.textContent = response.message || "Invalid OTP!";
+      }
+    },
+    error: function() {
+      otpErrorDiv.textContent = "Something went wrong. Please try again.";
+    }
+  });
+}
 </script>
 
   

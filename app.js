@@ -2,6 +2,8 @@ const express=require('express')
 const app=new express()
 const path=require('path')
 const multer=require('multer')
+const morgan=require('morgan')
+const logger=require('../Zyra/logger')
 const userRouter=require('./routes/userRoutes')
 const adminRouter=require('./routes/adminRouter')
 const passport = require('./config/passport');
@@ -29,19 +31,23 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(morgan('combined', {
+  stream: {
+    write: (message) => logger.info(message.trim())
+  }
+}));
 
 app.use('/',userRouter)
 app.use('/admin',adminRouter)
 
 app.use((err, req, res, next) => {
-  console.error('Error:', err.message);
+  logger.error({
+    message: err.message,
+    stack: err.stack,
+    route: req.originalUrl,
+    method: req.method
+  });
 
-  // Multer file size or fileFilter errors
-  if (err instanceof multer.MulterError) {
-    return res.status(400).json({ success: false, message: err.message });
-  }
-
-  // Custom errors or other thrown errors
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Internal Server Error'

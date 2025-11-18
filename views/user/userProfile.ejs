@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zyra - My Profile</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Nanum+Myeongjo&family=Roboto:wght@400;500;700&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    body {
+      background-color: #f9ebe3;
+      font-family: "Poppins", sans-serif;
+    }
+
+
+    /*  Profile Card */
+    .profile-card {
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+    }
+
+    .profile-header {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 600;
+      border-bottom: 1px solid #000;
+      margin-bottom: 25px;
+      padding-bottom: 10px;
+    }
+
+    .profile-img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: #f1f1f1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: #6c757d;
+      margin: 0 auto 15px;
+    }
+
+    .info-label {
+      font-weight: 500;
+      color: #7a1f1f;
+    }
+
+    .info-value {
+      color: #000;
+    }
+
+    .btn-edit,
+    .btn-save,
+    .btn-cancel {
+      background-color: #a05a3b;
+      color: #fff;
+      border-radius: 30px;
+      font-weight: 500;
+      padding: 8px 20px;
+      border: none;
+    }
+
+    .btn-edit:hover,
+    .btn-save:hover,
+    .btn-cancel:hover {
+      background-color: #944828;
+    }
+
+    footer {
+      background-color: #f9ebe3;
+      padding: 40px 0;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    #otpInput {
+      height: 50px;
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        margin-bottom: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+
+
+  <%- include("../../views/partials/user/header") %>
+
+    <!-- Main Content -->
+    <div class="container py-5">
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 mb-4">
+          <%- include("../../views/partials/user/userProfile-sidebar") %>
+        </div>
+
+        <!-- Profile Section -->
+        <div class="col-md-9">
+          <!-- View Profile -->
+          <div id="viewProfile" class="profile-card">
+            <div class="text-center profile-header">PROFILE</div>
+            <div class="text-center">
+              <div class="profile-img">
+                <i class="bi bi-person-circle"></i>
+              </div>
+              <h5 class="fw-semibold mb-1">
+                <%= user.name %>
+              </h5>
+              <p class="text-muted">Customer since 2023</p>
+            </div>
+
+            <hr class="my-4" />
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <p class="info-label mb-1">Email</p>
+                <p class="info-value">
+                  <%= user.email %>
+                </p>
+              </div>
+              <div class="col-md-6 mb-3">
+                <p class="info-label mb-1">Phone</p>
+                <p class="info-value">
+                  <%= user && user.phone ? user.phone : 'Not provided' %>
+                </p>
+              </div>
+              <div class="col-md-6 mb-3">
+                <p class="info-label mb-1">Gender</p>
+                <p class="info-value">
+                  <%= user.gender %>
+                </p>
+              </div>
+            </div>
+
+            <hr class="my-4" />
+
+            <div class="row">
+              <h6 class="fw-semibold mb-3">Address Details</h6>
+
+
+
+              <% if (defaultAddress) { %>
+                <div class="col-md-6 mb-3">
+                  <p class="info-label mb-1">
+                    <%= defaultAddress.addressType %> Address
+                  </p>
+                  <p class="info-value mb-1">
+                    <%= defaultAddress.name %>
+                  </p>
+                  <p class="info-value mb-1">
+                    <%= defaultAddress.addressName %>
+                  </p>
+                  <p class="info-value mb-1">
+                    <%= defaultAddress.city %>, <%= defaultAddress.state %>
+                  </p>
+                  <p class="info-value mb-1">
+                    <%= defaultAddress.landmark %>
+                  </p>
+                  <p class="info-value mb-3">Pincode: <%= defaultAddress.pincode %>
+                  </p>
+                </div>
+                <% } else { %>
+                  <div class="col-md-6 mb-3">
+                    <p class="text-muted">No default address added</p>
+                  </div>
+                  <% } %>
+            </div>
+
+            <div class="text-center mt-4">
+              <button class="btn btn-edit" onclick="showEditProfile()">
+                <i class="bi bi-pencil me-2"></i>Edit Profile
+              </button>
+            </div>
+          </div>
+
+          <!-- Edit Profile Form -->
+          <div id="editProfile" class="profile-card" style="display: none;">
+            <div class="text-center profile-header">EDIT PROFILE</div>
+            <form action="/profile/update" id="editProfileForm" >
+              <div class="mb-3">
+                <label class="form-label info-label">Name</label>
+                <input type="text" class="form-control" name="name" value="<%= user.name %>" />
+                <small id="nameError" class="text-danger"></small>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label info-label">Email</label>
+
+                <input type="email" class="form-control" name="email" value="<%= user.email %>" <%=user.googleId
+                  ? "readonly" : "" %>
+                />
+
+                <% if (user.googleId) { %>
+                  <small class="text-body-tertiary">
+                    This email is linked with Google. You cannot edit it.
+                  </small>
+                  <% } %>
+
+                  <small id="emailError" class="text-danger"></small>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label info-label">Phone</label>
+                <input type="text" class="form-control" name="phone" value="<%= user && user.phone ? user.phone : '' %>"
+                  placeholder="Enter phone number" />
+                  <small id="phoneError" class="text-danger"></small>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label info-label">Address</label>
+
+               <select class="form-select" name="addressId">
+  <option value="" disabled>Select an address</option>
+
+  <% if (addresses && addresses.length > 0) { %>
+    <% addresses.forEach(addr => { %>
+      <option value="<%= addr._id %>" <%= addr.isDefault ? 'selected' : '' %>>
+        <%= addr.name %> — <%= addr.addressName %>, <%= addr.city %>, <%= addr.state %> - <%= addr.pincode %>
+      </option>
+    <% }) %>
+  <% } else { %>
+    <option disabled>No addresses available</option>
+  <% } %>
+</select>
+
+                <small id="addressError" class="text-danger"></small>
+              </div>
+
+              <div class="d-flex justify-content-center gap-2 mt-4">
+                <button type="submit" class="btn btn-save">Save Changes</button>
+                <button type="button" class="btn btn-cancel" onclick="cancelEdit()">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- OTP Verification Section -->
+          <div id="otpSection" class="profile-card" style="display:none;">
+
+            <div class="text-center profile-header">VERIFY OTP</div>
+
+            <p class="text-center text-muted">Enter the OTP sent to your email.</p>
+
+            <div class="mb-3 text-center">
+              <input type="text" id="otpInput" class="form-control text-center" maxlength="6"
+                placeholder="Enter 6-digit OTP"
+                style="max-width: 250px; margin: auto; font-size: 20px; letter-spacing: 4px;" />
+            </div>
+
+            <div id="otp-error" class="text-danger text-center mb-2"></div>
+
+            <div class="text-center mt-3">
+              <button class="btn btn-save" onclick="validateOtpForm()">Verify</button>
+            </div>
+
+            <div class="text-center mt-3">
+              <span id="timer" class="fw-semibold">00:30</span>
+              <a href="#" id="resend-link" class="ms-2">Resend OTP</a>
+            </div>
+
+            <div class="text-center mt-4">
+              <button class="btn btn-cancel" onclick="cancelOtp()">Cancel</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      © 2025 Zyra. All Rights Reserved.
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JS -->
+    <script>
+
+      history.scrollRestoration = "manual";
+
+        window.addEventListener("load", () => {
+          setTimeout(() => {
+            window.scrollTo(0, 0);
+          }, 50);
+        });
+
+
+
+      function showEditProfile() {
+        document.getElementById("viewProfile").style.display = "none";
+        document.getElementById("editProfile").style.display = "block";
+      }
+
+      function cancelEdit() {
+        document.getElementById("editProfile").style.display = "none";
+        document.getElementById("viewProfile").style.display = "block";
+      }
+    </script>
+
+    <script>
+      
+
+      function cancelOtp() {
+        document.getElementById("otpSection").style.display = "none";
+        document.getElementById("viewProfile").style.display = "block";
+      }
+
+      // Timer Logic
+      let countdownInterval;
+
+      function startCountdown(seconds) {
+        clearInterval(countdownInterval);
+
+        const resendLink = document.getElementById("resend-link");
+        const timer = document.getElementById("timer");
+
+        resendLink.style.pointerEvents = "none";
+        resendLink.style.opacity = "0.5";
+
+        let timeLeft = seconds;
+
+        countdownInterval = setInterval(() => {
+          const m = String(Math.floor(timeLeft / 60)).padStart(2, "0");
+          const s = String(timeLeft % 60).padStart(2, "0");
+
+          timer.textContent = `${m}:${s}`;
+
+          if (timeLeft-- <= 0) {
+            clearInterval(countdownInterval);
+            resendLink.style.pointerEvents = "auto";
+            resendLink.style.opacity = "1";
+          }
+        }, 1000);
+      }
+//resend otp
+      document.getElementById("resend-link").addEventListener("click", async function (e) {
+  e.preventDefault();
+
+  // clear input
+  document.getElementById("otpInput").value = "";
+
+  try {
+    const response = await fetch('/profile/resendOtp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+
+      // Start timer *after* success
+      startCountdown(30);
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: result.message,
+        confirmButtonColor: '#198754'
+      });
+
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: result.message,
+        confirmButtonColor: '#198754'
+      });
+    }
+
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: "Server Error",
+      confirmButtonColor: '#198754'
+    });
+  }
+});
+
+
+    </script>
+
+    <script>
+      function showOtpSection() {
+        document.getElementById('editProfile').style.display = 'none';
+        document.getElementById('otpSection').style.display = 'block';
+        startCountdown(30);
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      document.getElementById('editProfileForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const formdata = new FormData(form);
+
+        const name = formdata.get('name');
+        const email = formdata.get('email');
+        const phone = formdata.get('phone');
+        const selectedAddress = formdata.get('addressId');
+
+        // Reset error messages
+        document.getElementById('nameError').innerText = '';
+        document.getElementById('emailError').innerText = '';
+        document.getElementById('phoneError').innerText = '';
+        document.getElementById('addressError').innerText = '';
+
+        let hasError = false;
+
+        if (!name) {
+          document.getElementById('nameError').innerText = 'Enter your name';
+          hasError = true;
+        }
+        if (!email) {
+          document.getElementById('emailError').innerText = 'Enter your email id';
+          hasError = true;
+        }
+
+        const phonePattern = /^[0-9]{10}$/;
+
+        if (!phone.trim()) {
+          document.getElementById('phoneError').innerText = 'Enter your phone number';
+          hasError = true;
+        } else if (!phonePattern.test(phone.trim())) {
+          document.getElementById('phoneError').innerText = 'Enter a valid 10 digit phone number';
+          hasError = true;
+        }
+
+        if (!selectedAddress) {
+          document.getElementById('addressError').innerText = 'Select an address';
+          hasError = true;
+        }
+
+        if (hasError) return;
+
+        const data = Object.fromEntries(formdata.entries());
+
+        try {
+          const response = await fetch('/profile/update', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: result.message,
+              confirmButtonColor: '#198754'
+            }).then(() => window.location.reload());
+          } else if (result.otpVerification) {
+            showOtpSection();
+            
+          }
+
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Server error',
+            confirmButtonColor: '#198754'
+          });
+        }
+
+      });
+async function validateOtpForm() {
+  const otp = document.getElementById('otpInput').value.trim();
+  const otpError = document.getElementById('otp-error');
+  otpError.innerText = '';
+
+  
+  if (!otp) {
+    otpError.innerText = 'Enter OTP';
+    return;
+  }
+
+  
+  if (otp.length !== 6) {
+    otpError.innerText = 'Enter a 6 digit OTP';
+    return;
+  }
+
+  
+  if (!/^\d{6}$/.test(otp)) {
+    otpError.innerText = 'OTP should contain only digits';
+    return;
+  }
+
+  
+  try {
+    const response = await fetch('/profile/verifyOtp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ otp })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: result.message,
+        confirmButtonColor: '#198754'
+      }).then(() => window.location.reload());
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: result.message,
+        confirmButtonColor: '#198754'
+      });
+    }
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Server error',
+      confirmButtonColor: '#198754'
+    });
+  }
+}
+
+
+      
+    </script>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</body>
+
+</html>

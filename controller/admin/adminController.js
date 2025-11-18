@@ -1,6 +1,7 @@
 const User = require('../../models/userScema')
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
+const logger=require('../../logger')
 
 const pageerror = async (req, res) => {
   res.render('pageerror')
@@ -32,9 +33,24 @@ const login = async (req, res) => {
     }
 
     req.session.admin = admin._id
+    logger.info('Admin logged in successfully', {
+      controller: 'adminLogin',
+      action: 'login',
+      route: req.originalUrl,
+      method: req.method,
+      status: 'success'
+    });
     res.redirect('/admin/dashboard')
+    
   } catch (error) {
-    console.log("Login eror:", error)
+    logger.error('Error while admin login',{
+      controller:'admninLogin',
+      action:'post login',
+      message: error.message,
+      stack: error.stack,
+      route: req.originalUrl,
+      method: req.method
+    })
     res.redirect('/pageerror')
   }
 

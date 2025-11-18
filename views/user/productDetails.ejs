@@ -106,6 +106,7 @@
               <button class="btn btn-outline-dark btn-sm me-2 mb-2 size-btn" data-size="<%= size %>"><%= size %></button>
             <% }) %>
           </div>
+          <p id="sizeError" class="text-danger small"></p>
         </div>
 
         <!-- Color Selection -->
@@ -119,12 +120,23 @@
                     title="<%= color %>"></span>
             <% }) %>
           </div>
+          <p id="ColorError" class="text-danger small"></p>
         </div>
+
+        <!-- Quantity Selection -->
+<div class="my-3">
+  <label class="form-label fw-bold">Quantity:</label>
+  <div class="d-flex align-items-center" style="max-width: 140px;">
+    <button class="btn btn-outline-dark btn-sm" id="qtyMinus">−</button>
+    <input type="number" id="quantity" class="form-control mx-2 text-center" value="1" min="1" max="5" style="width: 60px;">
+    <button class="btn btn-outline-dark btn-sm" id="qtyPlus">+</button>
+  </div>
+</div>
 
         <!-- Buttons -->
         <div class="my-4">
           <button class="btn btn-zyra btn-wishlist me-3">Add to Wishlist</button>
-          <button class="btn btn-zyra btn-cart">Add to Cart</button>
+          <button class="btn btn-zyra btn-cart" onclick="addToCart('<%= product._id%>')">Add to Cart</button>
         </div>
 
         <!-- Tabs -->
@@ -236,6 +248,84 @@
         findVariant();
       });
     });
+     const qtyInput = document.getElementById("quantity");
+  const qtyMinus = document.getElementById("qtyMinus");
+  const qtyPlus = document.getElementById("qtyPlus");
+
+  qtyMinus.addEventListener("click", () => {
+    let value = parseInt(qtyInput.value);
+    if (value > 1) qtyInput.value = value - 1;
+  });
+
+  qtyPlus.addEventListener("click", () => {
+    let value = parseInt(qtyInput.value);
+    if (value < 5) qtyInput.value = value + 1;
+  });
+
+async function addToCart(id) {
+  let hasError = false;
+
+  if (!selectedSize) {
+    document.getElementById('sizeError').innerText = 'Select size';
+    hasError = true;
+  }
+
+  if (!selectedColor) {
+    document.getElementById('ColorError').innerText = 'Select color';
+    hasError = true;
+  }
+
+  const productId = id;
+
+  
+
+  const quantity = document.getElementById('quantity').value; // FIXED
+
+  if (hasError) return;
+
+  try {
+    const response = await fetch('/cart/addProduct', {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        productId,
+         
+        size: selectedSize,              
+        color: selectedColor,             
+        quantity
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: result.message,
+      }).then(() => {
+        window.location.reload();
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: result.message,
+      });
+    }
+
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Something went wrong'
+    });
+  }
+}
+
+    
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </body>
 </html>

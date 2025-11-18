@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zyra Cart Page</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <style>
+    body {
+      background: #f3e2da;
+      font-family: Arial, sans-serif;
+    }
+
+    .cart-container {
+      padding: 40px 0;
+    }
+
+    .product-card {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .order-summary {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      border: 3px solid #b9d5ff;
+    }
+
+    .qty-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .qty-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 5px;
+      border: 1px solid #777;
+      background: white;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0;
+    }
+
+    .qty-number {
+      min-width: 22px;
+      text-align: center;
+    }
+
+    .continue-btn {
+      width: 100%;
+      background: black;
+      color: white;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .total-box {
+      background: #f7f7f7;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+    }
+
+    .summary-title {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+<%- include("../../views/partials/user/header") %>
+
+<h2 class="text-center mt-4">YOUR CART</h2>
+
+<div class="container cart-container">
+  <div class="row g-4">
+
+    <!-- CART ITEMS -->
+    <div class="col-lg-8">
+
+      <% if (!cartItems || cartItems.length === 0) { %>
+        <h4 class="text-center mt-5">Your cart is empty</h4>
+      <% } else { %>
+        <% cartItems.forEach(item => { %>
+          <div class="product-card d-flex gap-3">
+
+            <!-- Image -->
+            <img src="/uploads/variants/<%= item.variant.images?.length ? item.variant.images[0] : '' %>"
+                 width="120" height="120" class="rounded" />
+
+            <div class="flex-grow-1">
+
+              <h6><%= item.product.name %></h6>
+              <p class="text-muted m-0"><%= item.variant.color %></p>
+              <p class="text-muted m-0">Size: <%= item.variant.size %></p>
+
+              <p class="fw-bold mt-2">₹<%= item.price %></p>
+
+              <!-- Quantity Buttons -->
+              <div class="qty-box">
+
+                <button class="qty-btn"
+                        onclick="decrement('<%= item._id%>')">−</button>
+
+                <span class="qty-number" id="qty-<%= item._id %>"><%= item.quantity %></span>
+
+                <button class="qty-btn" 
+                        onclick="increment('<%= item._id%>')">+</button>
+              </div>
+              <button class="btn btn-sm text-danger border-0"
+        onclick="deleteItem('<%= item._id %>')">
+  <i class="bi bi-trash" style="font-size:18px;"></i>
+</button>
+
+            </div>
+            
+          </div>
+          
+        <% }) %>
+      <% } %>
+
+    </div>
+
+    <!-- ORDER SUMMARY -->
+    <div class="col-lg-4">
+      <div class="order-summary">
+        <p class="summary-title">Order Summary</p>
+
+        <% if (cartItems && cartItems.length > 0) { %>
+          <% cartItems.forEach(item => { %>
+  <div class="d-flex justify-content-between mb-1" id="summary-item-<%= item._id %>">
+<div class="d-flex gap-0">
+  <span id="summary-qty-price-<%= item._id %>"><%= item.quantity %> ×</span>
+  <span>₹<%= item.price %></span>
+</div>
+
+    <span id="summary-itemTotal-<%= item._id %>">
+      ₹<%= item.itemsTotal %>
+    </span>
+  </div>
+<% }) %>
+
+          <hr/>
+
+          <div class="d-flex justify-content-between">
+            <span>Subtotal</span>
+            <strong id="subTotal">₹<%= subTotal || 0 %></strong>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <span>Delivery Charges</span>
+            <span class="text-success">Free</span>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <span>Tax (2%)</span>
+            <strong id="tax">₹<%= tax || 0 %></strong>
+          </div>
+
+          <div class="total-box d-flex justify-content-between">
+            <strong>Total</strong>
+            <strong id="total">₹<%= total || 0 %></strong>
+          </div>
+
+          <button class="continue-btn mt-3">Continue</button>
+        <% } %>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <%- include("../../views/partials/user/footer") %>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<script>
+  // Update summary
+  function updateSummary(summary) {
+    if (!summary) return;
+    document.getElementById("subTotal").innerText = "₹" + (summary.subTotal ?? 0);
+    document.getElementById("tax").innerText = "₹" + (summary.tax ?? 0);
+    document.getElementById("total").innerText = "₹" + (summary.total ?? 0);
+    
+    
+  }
+
+  // Increment quantity
+  async function increment(itemId) {
+    try {
+      const response = await fetch('/cart/incrementQuantity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemId })
+      });
+
+      const result = await response.json();
+      const qtyElement = document.getElementById(`qty-${itemId}`);
+      
+
+      if (!response.ok) {
+        Swal.fire({ icon: 'warning', title: 'Error', text: result.message || 'Server error' });
+        return;
+      }
+
+      if (result.insufficientStock) {
+        qtyElement.innerText = result.quantity;
+        // Update item total
+    document.getElementById(`summary-itemTotal-${itemId}`).innerText =
+        "₹" + result.itemTotal;
+
+    // Update quantity × price
+    document.getElementById(`summary-qty-price-${itemId}`).innerText =
+        result.quantity + " ×";
+
+        updateSummary(result.summary);
+        Swal.fire({ icon: 'warning', title: 'Stock Limit', text: result.message });
+        return;
+      }
+
+      if (result.success) {
+        qtyElement.innerText = result.quantity;
+        // Update item total
+    document.getElementById(`summary-itemTotal-${itemId}`).innerText =
+        "₹" + result.itemTotal;
+
+    // Update quantity × price
+    document.getElementById(`summary-qty-price-${itemId}`).innerText =
+        result.quantity + " ×";
+
+        updateSummary(result.summary);
+        return;
+      }
+
+    } catch (error) {
+      console.error(error); // Check console for details
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong' });
+    }
+  }
+
+  // decrement quantity
+  async function decrement(itemId) {
+    try {
+      const response = await fetch('/cart/decrementQuantity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemId })
+      });
+
+      const result = await response.json();
+       const qtyElement = document.getElementById(`qty-${itemId}`);
+       const currentQty = parseInt(qtyElement.innerText);
+  
+
+ 
+  if (currentQty <= 1) return;
+      if (!response.ok) {
+        Swal.fire({ icon: 'warning', title: 'Error', text: result.message || 'Server error' });
+        return;
+      }
+
+      if (result.insufficientStock) {
+        qtyElement.innerText = result.quantity;
+        // Update item total
+    document.getElementById(`summary-itemTotal-${itemId}`).innerText =
+        "₹" + result.itemTotal;
+
+    // Update quantity × price
+    document.getElementById(`summary-qty-price-${itemId}`).innerText =
+        result.quantity + " ×";
+
+        updateSummary(result.summary);
+        Swal.fire({ icon: 'warning', title: 'Stock Limit', text: result.message });
+        return;
+      }
+
+      if (result.success) {
+        qtyElement.innerText = result.quantity;
+        // Update item total
+    document.getElementById(`summary-itemTotal-${itemId}`).innerText =
+        "₹" + result.itemTotal;
+
+    // Update quantity × price
+    document.getElementById(`summary-qty-price-${itemId}`).innerText =
+        result.quantity + " ×";
+
+        updateSummary(result.summary);
+        return;
+      }
+
+    } catch (error) {
+      console.error(error); // Check console for details
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong' });
+    }
+  }
+
+  // Attach event listeners AFTER DOM is loaded
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".qty-btn.increment").forEach(btn => {
+      btn.addEventListener("click", () => increment(btn.dataset.itemId));
+    });
+
+    document.querySelectorAll(".qty-btn.decrement").forEach(btn => {
+      btn.addEventListener("click", () => decrement(btn.dataset.itemId));
+    });
+  });
+
+
+  async function deleteItem(itemId) {
+    try{
+      const response=await fetch('/cart/removeItem',{
+      method:'DELETE',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({itemId})
+    })
+
+    const result=await response.json()
+   
+    if (result.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: result.message,
+      }).then(() => {
+        window.location.reload();
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: result.message,
+      });
+    }
+    }catch(error){
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Something went wrong',
+      });
+    }
+  }
+</script>
+
+</body>
+</html>

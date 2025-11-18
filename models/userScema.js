@@ -19,6 +19,12 @@ const userSchema=new Schema({
     sparse:true,//?
     default:null
   },
+   gender:{
+    type:String,
+    required:true,
+    unique:false,
+    default:'Female'
+  },
   googleId:{
     type:String,
     unique:true,

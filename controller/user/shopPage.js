@@ -1,4 +1,4 @@
-// controllers/shopController.js
+
 const Product = require("../../models/productSchema");
 const Variant = require("../../models/variantSchema");
 const Category = require("../../models/categprySchema");
@@ -11,6 +11,9 @@ const User=require('../../models/userScema')
     
 const shopPage = async (req, res) => {
   try {
+
+    
+    
 
      const userId = req.session.user;
     let user = null;
@@ -49,7 +52,7 @@ const shopPage = async (req, res) => {
     const colorArr = parseMulti(color);
 
     const page = parseInt(req.query.page) || 1;
-    const limit = 2;
+    const limit = 8;
     const skip = (page - 1) * limit;
 
 
