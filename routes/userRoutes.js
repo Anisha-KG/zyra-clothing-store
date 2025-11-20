@@ -9,6 +9,8 @@ const forgotPasswordController=require('../controller/user/forgotPasswordManagem
 const profileController=require('../controller/user/userProfile')
 const addressController=require('../controller/user/userAddress')
 const cartController=require('../controller/user/cartController')
+const checkoutController=require('../controller/user/checkoutController')
+const checkCart=require('../middleware/validateCart')
 
 router.get('/pagenotfound',userController.pageNotFound)
 router.get('/home',auth.checkSession,userController.loadHomepage)
@@ -63,6 +65,14 @@ router.post('/cart/addProduct',auth.checkSession,cartController.addToCart)
 router.post('/cart/incrementQuantity',auth.checkSession,cartController.increment)
 router.post('/cart/decrementQuantity',auth.checkSession,cartController.decrement)
 router.delete('/cart/removeItem',auth.checkSession,cartController.removeItem)
+
+
+router.get('/checkOut',auth.checkSession,checkCart.validateCart,checkoutController.viewCheckoutPage)
+router.post('/checkout/selectAddress',auth.checkSession,checkCart.validateCart,checkoutController.selectedAddress)
+router.get('/checkout/paymentmethod',auth.checkSession,checkCart.validateCart,checkoutController.selectPayment)
+router.post('/checkout/paymentmethod',auth.checkSession,checkCart.validateCart,checkoutController.selectPaymentmethod)
+router.get('/checkout/confirmationPage',auth.checkSession,checkCart.validateCart,checkoutController.getconfirmationPage)
+
 
 
 

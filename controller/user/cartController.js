@@ -47,12 +47,16 @@ const viewCart = async (req, res, next) => {
                 continue
             }
 
-            if (item.quantity > variant.quantity) {
-                if (variant.quantity <= 0) {
-                    cart.items.pull(item._id)
-                    modified = true
-                    continue
+            if (variant.quantity == 0) {
+                   // cart.items.pull(item._id)
+                item.quantity = 0
+
+                modified = true
+                quantityModified = true
                 }
+
+            if (item.quantity > variant.quantity) {
+                
 
                 item.quantity = variant.quantity
                 modified = true
@@ -72,7 +76,8 @@ const viewCart = async (req, res, next) => {
                 variant,
                 price,
                 itemsTotal,
-                quantity:item.quantity
+                quantity:item.quantity,
+                isOutOfStock: variant.quantity === 0   
             })
         }
 

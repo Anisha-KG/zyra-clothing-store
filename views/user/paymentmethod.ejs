@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zyra - Checkout</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+body {
+  background: #f8f5f4 !important;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px; /* slightly smaller base font */
+  min-height: 100vh;
+}
+
+.checkout-container {
+  padding: 25px 0; /* slightly reduced padding */
+}
+
+.section-box, .payment-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px; /* slightly reduced padding */
+  box-shadow: 0 0 10px rgba(0,0,0,0.08);
+  font-size: 0.95rem; /* slightly smaller text inside boxes */
+}
+
+.product-img {
+  width: 90px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.btn-black {
+  background: black;
+  color: white;
+  border-radius: 8px;
+  padding: 8px 18px; /* slightly smaller button */
+  font-size: 0.9rem;
+}
+
+.btn-black:hover {
+  background: #333;
+}
+
+/* Cart Item Styling */
+.d-flex.mb-3 {
+  gap: 10px; /* slightly reduced spacing between image and details */
+}
+
+.ms-3 p, .ms-auto {
+  margin-bottom: 2px; /* tighter spacing for product info */
+  font-size: 0.9rem; /* slightly smaller product text */
+}
+
+/* Payment Methods */
+.payment-card h5 {
+  font-size: 1.1rem;
+}
+
+.payment-card p {
+  font-size: 0.9rem;
+}
+
+.payment-card .form-check-label {
+  font-size: 0.9rem;
+}
+
+.payment-card img {
+  margin-right: 8px;
+}
+</style>
+
+</head>
+<body>
+
+  <!-- HEADER -->
+  <%- include("../../views/partials/user/header") %>
+
+  <div class="container checkout-container">
+    <div class="row g-4">
+
+      <!-- LEFT SIDE: CART ITEMS -->
+      <div class="col-lg-6">
+        <div class="section-box">
+          
+          <% if(cart.items && cart.items.length > 0) { %>
+            <% cart.items.forEach(item => { %>
+              <div class="d-flex mb-3">
+                <img src="/uploads/variants/<%= item.variantId.images?.length ? item.variantId.images[0] : 'placeholder.png' %>" class="product-img" alt="Product Image">
+                <div class="ms-3">
+                  <p class="fw-bold mb-1"><%= item.productId.name %></p>
+                  <p class="mb-0">Qty: <%= item.quantity %></p>
+                  <p class="text-muted mb-0">Size: <%= item.variantId.size %> | Color: <%= item.variantId.color %></p>
+                </div>
+                <div class="ms-auto fw-bold">₹<%= item.productId.finalPrice * item.quantity %></div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <p class="text-muted">Your cart is empty.</p>
+          <% } %>
+
+          <hr>
+
+          <div class="d-flex justify-content-between">
+            <p class="mb-1">Subtotal:</p>
+            <p class="fw-bold">₹<%= subTotal %></p>
+          </div>
+          <div class="d-flex justify-content-between">
+            <p class="mb-1">Tax (2%):</p>
+            <p class="fw-bold">₹<%= tax %></p>
+          </div>
+          <div class="d-flex justify-content-between">
+            <p class="mb-1">Delivery Fee:</p>
+            <p class="fw-bold text-success">Free</p>
+          </div>
+
+          <hr>
+
+          <div class="d-flex justify-content-between">
+            <h5>Total:</h5>
+            <h5>₹<%= total %></h5>
+          </div>
+
+          <div class="mt-4">
+            <form id="placeOrderForm" action="/checkout/paymentmethod" method="POST">
+    <!-- Hidden input to hold selected payment method -->
+    <input type="hidden" name="paymentMethod" id="hiddenPaymentMethod">
+
+    <div class="d-grid gap-2">
+      <button type="submit" class="btn-black w-100">Place Order</button>
+    </div>
+
+    
+  </form>
+          </div>
+
+          <div class="mt-3 text-center">
+            <a href="/cart" class="btn btn-outline-dark px-4">Back to Cart</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- RIGHT SIDE: PAYMENT METHODS -->
+      <div class="col-lg-6">
+        <div class="payment-card">
+          <h5 class="fw-bold mb-3">Payment Methods</h5>
+          <p class="small text-muted">Select any payment method</p>
+          <div id="paymentmethod-error" class="text-danger mt-2"></div>
+
+          <div id="paymentmethod-error" class="text-danger"></div>
+
+          <form action="/checkout/paymentmethod/confirm" method="POST">
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="payment_method" value="card" id="cardMethod" required>
+              <label class="form-check-label" for="cardMethod">Debit / Credit Card</label>
+            </div>
+            <div class="ms-3 mb-3">
+              <img src="https://img.icons8.com/color/48/visa.png" width="40">
+              <img src="https://img.icons8.com/color/48/mastercard.png" width="40">
+              <img src="https://img.icons8.com/color/48/rupay.png" width="40">
+            </div>
+
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="payment_method" value="bank" id="bankMethod">
+              <label class="form-check-label" for="bankMethod">Bank</label>
+            </div>
+
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="payment_method" value="upi" id="upiMethod">
+              <label class="form-check-label" for="upiMethod">UPI Method</label>
+            </div>
+
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="payment_method" value="cod" id="codMethod">
+              <label class="form-check-label" for="codMethod">Cash on Delivery</label>
+            </div>
+
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="payment_method" value="wallet" id="walletMethod">
+              <label class="form-check-label" for="walletMethod">Wallet</label>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <%- include("../../views/partials/user/footer") %>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+ 
+
+  <script>
+document.getElementById('placeOrderForm').addEventListener('submit', function(e){
+    e.preventDefault(); // prevent default submission
+
+    // Get selected payment method
+    const selectedMethod = document.querySelector('input[name="payment_method"]:checked');
+    const errorDiv = document.getElementById('paymentmethod-error');
+
+    if(!selectedMethod){
+        // Show error if none selected
+        errorDiv.innerText = 'Please select a payment method';
+        return;
+    } else {
+        errorDiv.innerText = '';
+    }
+
+    // Set the hidden input value
+    document.getElementById('hiddenPaymentMethod').value = selectedMethod.value;
+
+    // Submit the form
+    e.target.submit();
+});
+</script>
+
+
+</body>
+</html>

@@ -13,16 +13,37 @@
       font-family: Arial, sans-serif;
     }
 
-    .cart-container {
-      padding: 40px 0;
-    }
+    .cart-container { padding: 40px 0; }
 
     .product-card {
       background: white;
       border-radius: 12px;
       padding: 15px;
       margin-bottom: 20px;
+      position: relative;
     }
+
+    /* BLUR EFFECT */
+    .blur-img {
+      filter: blur(3px);
+      opacity: 0.6;
+    }
+
+    /* OUT OF STOCK LABEL */
+/* OUT OF STOCK LABEL */
+.out-of-stock-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(199, 154, 141, 0.9); /* Zyra color */
+  color: white;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 15px;
+  white-space: nowrap; /* FORCE single line */
+}
 
     .order-summary {
       background: white;
@@ -49,10 +70,13 @@
       padding: 0;
     }
 
-    .qty-number {
-      min-width: 22px;
-      text-align: center;
+    .qty-btn:disabled {
+      background: #ddd;
+      cursor: not-allowed;
+      opacity: 0.6;
     }
+
+    .qty-number { min-width: 22px; text-align: center; }
 
     .continue-btn {
       width: 100%;
@@ -89,16 +113,23 @@
 
     <!-- CART ITEMS -->
     <div class="col-lg-8">
-
       <% if (!cartItems || cartItems.length === 0) { %>
         <h4 class="text-center mt-5">Your cart is empty</h4>
       <% } else { %>
+
         <% cartItems.forEach(item => { %>
           <div class="product-card d-flex gap-3">
 
-            <!-- Image -->
-            <img src="/uploads/variants/<%= item.variant.images?.length ? item.variant.images[0] : '' %>"
-                 width="120" height="120" class="rounded" />
+            <!-- IMAGE -->
+            <div style="position: relative;">
+              <img src="/uploads/variants/<%= item.variant.images?.length ? item.variant.images[0] : '' %>"
+                width="120" height="120"
+                class="rounded <%= item.isOutOfStock ? 'blur-img' : '' %>" />
+
+              <% if(item.isOutOfStock) { %>
+                <div class="out-of-stock-label">OUT OF STOCK</div>
+              <% } %>
+            </div>
 
             <div class="flex-grow-1">
 
@@ -110,27 +141,31 @@
 
               <!-- Quantity Buttons -->
               <div class="qty-box">
-
                 <button class="qty-btn"
-                        onclick="decrement('<%= item._id%>')">−</button>
+                        onclick="decrement('<%= item._id %>')"
+                        <%= item.isOutOfStock ? 'disabled' : '' %> >
+                  −
+                </button>
 
                 <span class="qty-number" id="qty-<%= item._id %>"><%= item.quantity %></span>
 
-                <button class="qty-btn" 
-                        onclick="increment('<%= item._id%>')">+</button>
+                <button class="qty-btn"
+                        onclick="increment('<%= item._id %>')"
+                        <%= item.isOutOfStock ? 'disabled' : '' %> >
+                  +
+                </button>
               </div>
+
               <button class="btn btn-sm text-danger border-0"
-        onclick="deleteItem('<%= item._id %>')">
-  <i class="bi bi-trash" style="font-size:18px;"></i>
-</button>
+                      onclick="deleteItem('<%= item._id %>')">
+                <i class="bi bi-trash" style="font-size:18px;"></i>
+              </button>
 
             </div>
-            
           </div>
-          
         <% }) %>
-      <% } %>
 
+      <% } %>
     </div>
 
     <!-- ORDER SUMMARY -->
@@ -139,18 +174,19 @@
         <p class="summary-title">Order Summary</p>
 
         <% if (cartItems && cartItems.length > 0) { %>
-          <% cartItems.forEach(item => { %>
-  <div class="d-flex justify-content-between mb-1" id="summary-item-<%= item._id %>">
-<div class="d-flex gap-0">
-  <span id="summary-qty-price-<%= item._id %>"><%= item.quantity %> ×</span>
-  <span>₹<%= item.price %></span>
-</div>
 
-    <span id="summary-itemTotal-<%= item._id %>">
-      ₹<%= item.itemsTotal %>
-    </span>
-  </div>
-<% }) %>
+          <% cartItems.forEach(item => { %>
+            <div class="d-flex justify-content-between mb-1" id="summary-item-<%= item._id %>">
+              <div class="d-flex gap-0">
+                <span id="summary-qty-price-<%= item._id %>"><%= item.quantity %> ×</span>
+                <span>₹<%= item.price %></span>
+              </div>
+
+              <span id="summary-itemTotal-<%= item._id %>">
+                ₹<%= item.itemsTotal %>
+              </span>
+            </div>
+          <% }) %>
 
           <hr/>
 
@@ -174,13 +210,17 @@
             <strong id="total">₹<%= total || 0 %></strong>
           </div>
 
-          <button class="continue-btn mt-3">Continue</button>
+          <button class="continue-btn mt-3" onclick="window.location.href='/checkout';">
+            Continue
+          </button>
         <% } %>
+
       </div>
     </div>
 
   </div>
 </div>
+
 
 <footer>
   <%- include("../../views/partials/user/footer") %>

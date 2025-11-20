@@ -64,6 +64,7 @@ const addAddress=async(req,res,next)=>{
 }
 
 const editAddress=async(req,res,next)=>{
+    console.log('controller hit')
     try{
        
         const{name,phone,altphone,addressName,city,state,landmark,addressType,pincode,id}=req.body 

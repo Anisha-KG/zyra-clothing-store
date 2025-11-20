@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zyra - Checkout</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<style>
+body {
+  background: #f8f5f4 !important;   /* PAGE COLOR FIXED */
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px; /* slightly smaller base font */
+  min-height: 100vh;
+}
+
+.checkout-container {
+  padding: 25px 0; /* slightly reduced padding */
+}
+
+.section-box {
+  background: white;
+  border-radius: 12px;
+  padding: 20px; /* slightly reduced padding */
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.08);
+  font-size: 0.95rem; /* reduce font inside sections */
+}
+
+.product-img {
+  width: 90px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.btn-black {
+  background: black;
+  color: white;
+  border-radius: 8px;
+  padding: 8px 18px; /* slightly smaller padding */
+  font-size: 0.9rem;
+}
+
+.btn-black:hover {
+  background: #333;
+}
+
+/* Address Box Styling */
+.address-box {
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  padding: 12px; /* reduced padding */
+  cursor: pointer;
+  transition: 0.2s;
+  position: relative;
+  font-size: 0.9rem; /* slightly smaller */
+}
+
+.address-box:hover {
+  border-color: #000;
+}
+
+.address-box.selected {
+  border-color: #000;
+  background: #f1eceb;
+}
+
+.checkmark {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  border: 2px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px; /* smaller checkmark font */
+  background: white;
+  visibility: hidden;
+}
+
+.address-box.selected .checkmark {
+  visibility: visible;
+}
+
+.address-radio {
+  display: none;
+}
+
+/* Cart Item Styling */
+.d-flex.mb-3 {
+  gap: 10px; /* slightly reduced spacing between image and details */
+}
+
+.ms-3 p, .ms-auto {
+  margin-bottom: 2px; /* tighter spacing for product info */
+  font-size: 0.9rem; /* slightly smaller product text */
+}
+
+/* Modal adjustments */
+.modal-content {
+  font-size: 0.95rem; /* slightly smaller text in modals */
+  padding: 20px; /* compact padding */
+}
+
+.modal-content h4 {
+  font-size: 1.3rem; /* smaller heading */
+  margin-bottom: 20px;
+}
+
+.modal-content label {
+  font-size: 0.9rem;
+}
+
+.modal-content input.form-control,
+.modal-content textarea.form-control {
+  font-size: 0.9rem;
+  padding: 6px 10px; /* slightly smaller input padding */
+}
+
+.modal-content .btn {
+  font-size: 0.9rem;
+  padding: 6px 18px; /* slightly smaller buttons */
+}
+</style>
+
+</head>
+
+<body>
+
+<!-- HEADER INSIDE BODY ✔ -->
+<%- include("../../views/partials/user/header") %>
+
+<div class="container checkout-container">
+
+  <div class="row g-4">
+
+    <!-- LEFT SIDE: CART ITEMS -->
+    <div class="col-lg-6">
+      <div class="section-box">
+
+        <% cart.items.forEach(item => { %>
+
+          <div class="d-flex mb-3">
+            <img src="/uploads/variants/<%= item.variantId.images?.length ? item.variantId.images[0] : '' %>" class="product-img" />
+
+            <div class="ms-3">
+              <p class="fw-bold mb-1"><%= item.productId.name %></p>
+              <p class="mb-0">Qty: <%= item.quantity %></p>
+              <p class="text-muted mb-0"><%= item.variantId.size %> | <%= item.variantId.color %></p>
+            </div>
+
+            <div class="ms-auto fw-bold">
+              ₹<%= item.productId.finalPrice * item.quantity %>
+            </div>
+          </div>
+
+        <% }) %>
+
+        <hr>
+
+        <div class="d-flex justify-content-between">
+          <p class="mb-1">Subtotal:</p>
+          <p class="fw-bold">₹<%= subTotal %></p>
+        </div>
+
+        <div class="d-flex justify-content-between">
+          <p class="mb-1">Tax (2%):</p>
+          <p class="fw-bold">₹<%= tax %></p>
+        </div>
+
+        <div class="d-flex justify-content-between">
+          <p class="mb-1">Delivery Fee:</p>
+          <p class="fw-bold text-success">Free</p>
+        </div>
+
+        <hr>
+
+        <div class="d-flex justify-content-between">
+          <h5>Total:</h5>
+          <h5>₹<%= total %></h5>
+        </div>
+
+       <form action="/checkout/selectAddress" method="POST" id="placeOrderForm">
+  <input type="hidden" name="addressId" id="selectedAddressId">
+  <button type="submit" class="btn-black w-100">Place Order</button>
+</form>
+
+        <div class="mt-3 text-center">
+          <a href="/cart" class="btn btn-outline-dark px-4">Back to Cart</a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE: ADDRESS SECTION -->
+    <div class="col-lg-6">
+
+      <div class="section-box mb-4">
+        <h5 class="mb-3">Select Delivery Address</h5>
+        <div id="address-Error" class="text-danger"></div>
+
+        <% if (addresses && addresses.address && addresses.address.length > 0) { %>
+
+          <% addresses.address.forEach((addr) => { %>
+
+            <div class="address-box mb-3" onclick="selectAddress('<%= addr._id %>', event)">
+
+              <span class="checkmark">✔</span>
+
+              <input 
+                type="radio" 
+                name="address" 
+                value="<%= addr._id %>" 
+                id="addr-<%= addr._id %>"
+                class="address-radio"
+                <%= addr.isDefault ? "checked" : "" %>
+              >
+
+              <strong><%= addr.name %> (<%= addr.addressType %>)</strong><br>
+              <%= addr.addressName %><br>
+
+              <% if (addr.landmark) { %>
+                Landmark: <%= addr.landmark %><br>
+              <% } %>
+
+              <%= addr.city %>, <%= addr.state %> - <%= addr.pincode %><br>
+              Phone: <%= addr.phone %><br>
+
+              <% if (addr.altphone) { %>
+                Alt Phone: <%= addr.altphone %><br>
+              <% } %>
+
+              <% if (addr.isDefault) { %>
+                <span class="badge bg-dark mt-2">Default</span>
+              <% } %>
+              <!-- Edit Icon at Bottom Right -->
+  <button type="button" 
+        class="btn btn-sm btn-outline-primary position-absolute bottom-0 end-0 m-2"
+        onclick="openEditModal('<%= addr._id %>')">
+  <i class="bi bi-pencil"></i>
+</button>
+
+            </div>
+
+          <% }) %>
+
+        <% } else { %>
+          <p class="text-muted">No address found. Please add one.</p>
+        <% } %>
+
+        <button class="btn btn-outline-dark btn-sm mt-2" data-bs-toggle="modal" data-bs-target="#addAddressModal">
+          + Add New Address
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ===================== ADD ADDRESS MODAL ===================== -->
+<div class="modal fade" id="addAddressModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content p-4">
+
+      <h4 class="text-center fw-bold mb-4">Add New Address</h4>
+
+      <form id="addAddressForm">
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label>Full Name</label>
+            <input type="text" name="name" class="form-control" placeholder="Enter your name" />
+            <small id="nameError" class="text-danger"></small>
+          </div>
+
+          <div class="col-md-6">
+            <label>Phone Number</label>
+            <input type="text" name="phone" class="form-control" placeholder="Enter your phone number" />
+            <small id="phoneError" class="text-danger"></small>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label>Alternate Phone</label>
+            <input type="text" name="altphone" class="form-control" placeholder="Alternate phone number (optional)" />
+            <small id="altphoneError" class="text-danger"></small>
+          </div>
+
+          <div class="col-md-6">
+            <label>Pincode</label>
+            <input type="number" name="pincode" class="form-control" placeholder="Enter your pincode" />
+            <small id="pincodeError" class="text-danger"></small>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label>Address</label>
+          <textarea name="addressName" class="form-control" placeholder="House No, Street, Area" rows="2"></textarea>
+          <small id="addressError" class="text-danger"></small>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label>City</label>
+            <input type="text" name="city" class="form-control" placeholder="Enter your city" />
+            <small id="cityError" class="text-danger"></small>
+          </div>
+
+          <div class="col-md-6">
+            <label>State</label>
+            <input type="text" name="state" class="form-control" placeholder="Enter your state" />
+            <small id="stateError" class="text-danger"></small>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label>Landmark</label>
+          <input type="text" name="landmark" class="form-control" placeholder="Enter landmark (optional)" />
+        </div>
+
+        <div class="mb-3 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center">
+            <label class="d-flex align-items-center mb-0 me-3">
+              <input type="radio" name="addressType" value="Home" checked class="me-1" />
+              Home
+            </label>
+
+            <label class="d-flex align-items-center mb-0">
+              <input type="radio" name="addressType" value="Work" class="me-1" />
+              Work
+            </label>
+          </div>
+
+          <label class="d-flex align-items-center mb-0 ms-4">
+            <input type="checkbox" name="isDefault" id="isDefault" class="me-2" />
+            Set as default
+          </label>
+        </div>
+
+        <div class="text-center mt-4">
+          <button type="submit" class="btn btn-dark px-4">Save</button>
+          <button type="button" class="btn btn-secondary ms-2" data-bs-dismiss="modal">Cancel</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===================== EDIT ADDRESS MODAL ===================== -->
+<div class="modal fade" id="editAddressModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content p-4">
+
+      <h4 class="text-center fw-bold mb-4">Edit Address</h4>
+
+      <form id="editAddressForm">
+
+        <input type="hidden" name="id" id="editAddressId" />
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label>Full Name</label>
+            <input type="text" name="name" id="editName" class="form-control" placeholder="Enter your name" />
+            <small id="editNameError" class="text-danger"></small>
+          </div>
+
+          <div class="col-md-6">
+            <label>Phone Number</label>
+            <input type="text" name="phone" id="editPhone" class="form-control" placeholder="Enter your phone number" />
+            <small id="editPhoneError" class="text-danger"></small>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label>Alternate Phone</label>
+            <input type="text" name="altphone" id="editAltPhone" class="form-control" placeholder="Alternate phone number (optional)" />
+            <small id="editAltPhoneError" class="text-danger"></small>
+          </div>
+
+          <div class="col-md-6">
+            <label>Pincode</label>
+            <input type="number" name="pincode" id="editPincode" class="form-control" placeholder="Enter your pincode" />
+            <small id="editPincodeError" class="text-danger"></small>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label>Address</label>
+          <textarea name="addressName" id="editAddressName" class="form-control" placeholder="House No, Street, Area" rows="2"></textarea>
+          <small id="editAddressError" class="text-danger"></small>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label>City</label>
+            <input type="text" name="city" id="editCity" class="form-control" placeholder="Enter your city" />
+            <small id="editCityError" class="text-danger"></small>
+          </div>
+
+          <div class="col-md-6">
+            <label>State</label>
+            <input type="text" name="state" id="editState" class="form-control" placeholder="Enter your state" />
+            <small id="editStateError" class="text-danger"></small>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label>Landmark</label>
+          <input type="text" name="landmark" id="editLandmark" class="form-control" placeholder="Enter landmark (optional)" />
+        </div>
+
+        <div class="mb-3 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center">
+            <label class="d-flex align-items-center mb-0 me-3">
+              <input type="radio" name="addressType" value="Home" id="editHome" class="me-1" />
+              Home
+            </label>
+
+            <label class="d-flex align-items-center mb-0">
+              <input type="radio" name="addressType" value="Work" id="editWork" class="me-1" />
+              Work
+            </label>
+          </div>
+
+          <label class="d-flex align-items-center mb-0 ms-4">
+            <input type="checkbox" name="isDefault" id="editIsDefault" class="me-2" />
+            Set as default
+          </label>
+        </div>
+
+        <div class="text-center mt-4">
+          <button type="submit" class="btn btn-dark px-4">Update</button>
+          <button type="button" class="btn btn-secondary ms-2" data-bs-dismiss="modal">Cancel</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+ function selectAddress(id, event) {
+  document.getElementById("addr-" + id).checked = true;
+
+  document.querySelectorAll('.address-box').forEach(box => {
+    box.classList.remove('selected');
+  });
+
+  event.currentTarget.classList.add('selected');
+
+  // Set hidden input for form submission
+  document.getElementById('selectedAddressId').value = id;
+
+  // Clear error if any
+  document.getElementById('address-Error').innerText = '';
+}
+
+
+
+  function openEditModal(id) {
+  // Find the address object from your addresses array (you need to pass it from server-side)
+  const addr = <%- JSON.stringify(addresses.address) %>.find(a => a._id === id);
+
+  if (!addr) return;
+
+  // Populate modal fields
+  document.getElementById('editAddressId').value = addr._id;
+  document.getElementById('editName').value = addr.name || '';
+  document.getElementById('editPhone').value = addr.phone || '';
+  document.getElementById('editAltPhone').value = addr.altphone || '';
+  document.getElementById('editPincode').value = addr.pincode || '';
+  document.getElementById('editAddressName').value = addr.addressName || '';
+  document.getElementById('editCity').value = addr.city || '';
+  document.getElementById('editState').value = addr.state || '';
+  document.getElementById('editLandmark').value = addr.landmark || '';
+  document.getElementById('editHome').checked = addr.addressType === 'Home';
+  document.getElementById('editWork').checked = addr.addressType === 'Work';
+  document.getElementById('editIsDefault').checked = addr.isDefault || false;
+
+  // Show the modal
+  const editModal = new bootstrap.Modal(document.getElementById('editAddressModal'));
+  editModal.show();
+}
+
+          document.getElementById('addAddressForm').addEventListener('submit', async function (e) {
+          e.preventDefault();
+
+          // clear old errors
+          document.querySelectorAll('.text-danger').forEach(el => el.innerText = '');
+
+          const form = e.target;
+          const formData = new FormData(form);
+
+          const name = formData.get('name');
+          const phone = formData.get('phone');
+          const altphone = formData.get('altphone');
+          const addressName = formData.get('addressName');
+          const pincode = formData.get('pincode');
+          const city = formData.get('city');
+          const state = formData.get('state');
+          const addressType = formData.get('addressType');
+          const isDefault = document.getElementById("isDefault").checked;
+          formData.set("isDefault", isDefault);
+
+          let hasError = false;
+          const phonePattern = /^[0-9]{10}$/;
+          const pincodePattern = /^[1-9][0-9]{5}$/;
+
+          if (!name.trim()) {
+            document.getElementById('nameError').innerText = 'Please enter your name';
+            hasError = true;
+          }
+
+          if (!phone.trim()) {
+            document.getElementById('phoneError').innerText = 'Please enter your phone number';
+            hasError = true;
+          } else if (!phonePattern.test(phone)) {
+            document.getElementById('phoneError').innerText = 'Enter a valid 10-digit number';
+            hasError = true;
+          }
+
+
+
+          if (!addressName.trim()) {
+            document.getElementById('addressError').innerText = 'Please enter your address';
+            hasError = true;
+          }
+
+          if (!pincode.trim()) {
+            document.getElementById('pincodeError').innerText = 'Please enter pincode';
+            hasError = true;
+          } else if (!pincodePattern.test(pincode)) {
+            document.getElementById('pincodeError').innerText = 'Enter a valid 6-digit pincode';
+            hasError = true;
+          }
+
+          if (!city.trim()) {
+            document.getElementById('cityError').innerText = 'Please enter city';
+            hasError = true;
+          }
+
+          if (!state.trim()) {
+            document.getElementById('stateError').innerText = 'Please enter state';
+            hasError = true;
+          }
+
+          if (!addressType) {
+            document.getElementById('addressTypeError').innerText = 'Please select address type';
+            hasError = true;
+          }
+
+          if (hasError) return;
+
+          const data = Object.fromEntries(formData.entries());
+
+          try {
+            const response = await fetch('/addAddress', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: result.message,
+                confirmButtonColor: '#198754'
+              }).then(() => window.location.reload());
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: result.message,
+                confirmButtonColor: '#dc3545'
+              });
+            }
+          } catch (error) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Server Error',
+              text: 'Something went wrong',
+              confirmButtonColor: '#dc3545'
+            });
+          }
+        });
+
+
+       document.getElementById('editAddressForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  // Clear old errors (only for edit form)
+  document.querySelectorAll('#editAddressForm .text-danger').forEach(el => el.innerText = '');
+
+  const form = e.target;
+  const formData = new FormData(form);
+
+  const name = formData.get('name');
+  const phone = formData.get('phone');
+  const altphone = formData.get('altphone');
+  const addressName = formData.get('addressName');
+  const pincode = formData.get('pincode');
+  const city = formData.get('city');
+  const state = formData.get('state');
+  const addressType = formData.get('addressType');
+  const isDefault = document.getElementById("editIsDefault").checked;
+  const id = document.getElementById("editAddressId").value;
+
+  let hasError = false;
+  const phonePattern = /^[0-9]{10}$/;
+  const pincodePattern = /^[1-9][0-9]{5}$/;
+
+  // Validation
+  if (!name.trim()) {
+    document.getElementById('editNameError').innerText = 'Please enter your name';
+    hasError = true;
+  }
+
+  if (!phone.trim()) {
+    document.getElementById('editPhoneError').innerText = 'Please enter your phone number';
+    hasError = true;
+  } else if (!phonePattern.test(phone)) {
+    document.getElementById('editPhoneError').innerText = 'Enter a valid 10-digit number';
+    hasError = true;
+  }
+
+  if (!addressName.trim()) {
+    document.getElementById('editAddressError').innerText = 'Please enter your address';
+    hasError = true;
+  }
+
+  if (!pincode.trim()) {
+    document.getElementById('editPincodeError').innerText = 'Please enter pincode';
+    hasError = true;
+  } else if (!pincodePattern.test(pincode)) {
+    document.getElementById('editPincodeError').innerText = 'Enter a valid 6-digit pincode';
+    hasError = true;
+  }
+
+  if (!city.trim()) {
+    document.getElementById('editCityError').innerText = 'Please enter city';
+    hasError = true;
+  }
+
+  if (!state.trim()) {
+    document.getElementById('editStateError').innerText = 'Please enter state';
+    hasError = true;
+  }
+
+  if (!addressType) {
+    // Optional: you can add an error element for addressType if needed
+    hasError = true;
+  }
+
+  if (hasError) return;
+
+  const data = {
+    ...Object.fromEntries(formData.entries()),
+    isDefault: isDefault,
+    id: id
+  };
+
+  try {
+    const response = await fetch('/editAddress', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: result.message,
+        confirmButtonColor: '#198754'
+      }).then(() => window.location.reload());
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: result.message,
+        confirmButtonColor: '#dc3545'
+      });
+    }
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Server Error',
+      text: 'Something went wrong',
+      confirmButtonColor: '#dc3545'
+    });
+  }
+});
+
+document.getElementById('placeOrderForm').addEventListener('submit', function(e) {
+  const selectedAddress = document.getElementById('selectedAddressId').value;
+
+  if (!selectedAddress) {
+    e.preventDefault(); // Stop form submission
+    document.getElementById('address-Error').innerText = 'Please select an address';
+  }
+});
+
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- FOOTER INSIDE BODY ✔ -->
+<%- include("../../views/partials/user/footer") %>
+
+</body>
+</html>
+
+

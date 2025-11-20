@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: #f3eeea;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .checkout-container {
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .address-box {
+      border: 2px solid #ddd;
+      padding: 15px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .address-box:hover {
+      border-color: #000;
+    }
+
+    .address-selected {
+      border-color: #000 !important;
+      background: #f8f8f8;
+    }
+
+    .product-img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .btn-dark {
+      border-radius: 10px;
+      padding: 10px 20px;
+    }
+
+    .btn-add-address {
+      background: #000;
+      color: #fff;
+      border-radius: 8px;
+      padding: 8px 15px;
+    }
+
+    .price-box {
+      background: #fafafa;
+      border-radius: 10px;
+      padding: 15px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container my-4">
+
+    <div class="checkout-container">
+
+      <h3 class="mb-4 fw-bold">Checkout</h3>
+
+      <!-- ADDRESS SECTION -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold">Select Delivery Address</h5>
+        <button class="btn-add-address" data-bs-toggle="modal" data-bs-target="#addAddressModal">+ Add Address</button>
+      </div>
+
+      <!-- Address List -->
+      <div>
+        <% if (addresses.length === 0) { %>
+          <p class="text-muted">No address added yet.</p>
+        <% } %>
+
+        <% addresses.forEach(addr => { %>
+          <div class="address-box mb-3" onclick="selectAddress('<%= addr._id %>')" id="addr-<%= addr._id %>">
+            <p class="fw-bold"><%= addr.name %> - <%= addr.addressType %></p>
+            <p class="mb-0"><%= addr.addressName %>, <%= addr.city %>, <%= addr.state %> - <%= addr.pincode %></p>
+            <p class="text-muted mb-0">Phone: <%= addr.phone %></p>
+          </div>
+        <% }) %>
+      </div>
+
+      <hr class="my-4">
+
+      <!-- PRODUCT SUMMARY -->
+      <h5 class="fw-bold mb-3">Order Summary</h5>
+
+      <% cart.items.forEach(item => { %>
+        <div class="d-flex mb-3 align-items-center">
+          <img src="<%= item.productId.images[0] %>" class="product-img" />
+
+          <div class="ms-3">
+            <p class="fw-bold mb-1"><%= item.productId.productName %></p>
+            <p class="text-muted mb-1">Qty: <%= item.quantity %></p>
+            <p class="fw-bold">₹<%= item.productId.finalPrice * item.quantity %></p>
+          </div>
+        </div>
+      <% }) %>
+
+      <hr class="my-4">
+
+      <!-- PRICE SECTION -->
+      <div class="price-box mb-4">
+        <div class="d-flex justify-content-between">
+          <p>Subtotal:</p>
+          <p>₹<%= subTotal %></p>
+        </div>
+
+        <div class="d-flex justify-content-between">
+          <p>Tax (2%):</p>
+          <p>₹<%= tax %></p>
+        </div>
+
+        <div class="d-flex justify-content-between fw-bold">
+          <p>Total:</p>
+          <p>₹<%= total %></p>
+        </div>
+      </div>
+
+      <!-- CONTINUE BUTTON -->
+      <button class="btn btn-dark w-100" id="continueBtn">Continue</button>
+
+    </div> <!-- /checkout-container -->
+  </div>
+
+  <!-- ===================== ADD ADDRESS MODAL ===================== -->
+
+  <div class="modal fade" id="addAddressModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content p-4">
+
+        <h4 class="text-center fw-bold mb-3">Add New Address</h4>
+
+        <form id="addAddressForm">
+
+          <!-- Your full address form you pasted -->
+          <!-- (Kept *exactly* as you provided) -->
+
+          <!-- FULL NAME + PHONE -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label>Full Name</label>
+              <input type="text" name="name" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label>Phone Number</label>
+              <input type="text" name="phone" class="form-control">
+            </div>
+          </div>
+
+          <!-- REST OF YOUR FORM HERE (same as you gave) -->
+          
+          <!-- Submit -->
+          <div class="text-center mt-4">
+            <button type="submit" class="btn btn-dark px-4">Save</button>
+            <button type="button" class="btn btn-secondary ms-2" data-bs-dismiss="modal">Cancel</button>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    let selectedAddress = null;
+
+    function selectAddress(id) {
+      if (selectedAddress) {
+        document.getElementById("addr-" + selectedAddress).classList.remove("address-selected");
+      }
+
+      selectedAddress = id;
+      document.getElementById("addr-" + id).classList.add("address-selected");
+    }
+
+    document.getElementById("continueBtn").addEventListener("click", () => {
+      if (!selectedAddress) {
+        alert("Please select an address");
+        return;
+      }
+
+      window.location.href = "/payment?address=" + selectedAddress;
+    });
+  </script>
+</body>
+</html>
