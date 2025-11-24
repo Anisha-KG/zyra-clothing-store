@@ -120,7 +120,9 @@ const addToCart=async(req,res,next)=>{
             return res.status(httpStatus.UNAUTHORIZED).json({success:false,message:'You are not logged in '})
         }
 
-        const {productId,size,color,quantity}=req.body
+        const {productId,size,color}=req.body
+        const quantity=Number(req.body.quantity)
+        
  
         
 
@@ -147,7 +149,7 @@ const addToCart=async(req,res,next)=>{
         }
 
         const variant=await Variant.findOne({product:productId,size,color})
-        console.log(variant)
+        
         
         if(!variant||!variant.isListed){
             return res.status(httpStatus.NOT_FOUND).json({success:false,message:'Selected Color and size are not available'})
@@ -163,9 +165,12 @@ const addToCart=async(req,res,next)=>{
 
         const existingItem=cart.items.find((item)=>{
             return item.productId.toString()==productId&& item.size==size && item.color===color
+            
         })
+        console.log(existingItem)
         if(existingItem){
             const qty=existingItem.quantity+quantity
+            console.log(qty)
             if(qty>5){
                 return res.status(httpStatus.BAD_REQUEST).json({status:false,message:'Only 5 products of this size and color can be added'})
             }
@@ -180,7 +185,9 @@ const addToCart=async(req,res,next)=>{
                 variantId:variant._id,
                 size,
                 color,
+                MRPprice:product.price,
                 price:product.finalPrice,
+                //price:product.finalPrice,
                 quantity:Math.min(quantity,5),
                 totalPrice:product.finalPrice*Math.min(quantity,5)
             })

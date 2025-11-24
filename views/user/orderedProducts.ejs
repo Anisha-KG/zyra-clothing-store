@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zyra - Order Details</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: #f5eee9;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+    }
+
+    #productDetailsPage {
+      background: #fff;
+      min-height: 100vh;
+      padding: 40px;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .tracking-list {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .tracking-list li {
+      position: relative;
+      margin-bottom: 35px;
+      padding-left: 25px;
+      font-weight: 500;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+    }
+
+    .tracking-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: #ddd; /* default dot color */
+    }
+
+    .tracking-list li.text-success::before {
+      background-color: #28a745; /* completed */
+    }
+
+    .tracking-list li.text-primary::before {
+      background-color: #0d6efd; /* current */
+    }
+
+    .tracking-list li::after {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 22px;
+      width: 2px;
+      height: calc(100% - 22px);
+      background-color: #ddd;
+    }
+
+    .tracking-list li:last-child::after {
+      display: none;
+    }
+
+    .details-box {
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      border: 1px solid #e5e5e5;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .tracking-column {
+      border-right: 1px solid #ddd;
+      padding-right: 15px;
+      min-height: 900px;
+    }
+
+    .order-actions button {
+      min-width: 100px;
+      margin-bottom: 5px;
+    }
+
+    /* Right side modal */
+    .modal.right .modal-dialog {
+      position: fixed;
+      right: 0;
+      margin: 0;
+      height: 100%;
+      transform: translateX(100%);
+      transition: transform 0.3s ease-out;
+    }
+
+    .modal.right.show .modal-dialog {
+      transform: translateX(0);
+    }
+
+    .modal.right .modal-content {
+      height: 100%;
+      border: 0;
+      border-radius: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <%- include("../../views/partials/user/header") %>
+
+<div id="productDetailsPage">
+
+  <a href="/profile/orders" class="btn btn-dark mb-3">← Back to Orders</a>
+
+  <div class="details-box">
+    <div class="row">
+
+      <!-- LEFT SIDE - TRACKING -->
+      <div class="col-md-3 tracking-column">
+        <h6 class="fw-bold mb-3">Tracking</h6>
+
+        <% 
+          const timeline = ['Processing','Packed', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled','Cancellation Requested', 'Return Requested', 'Returning','Return Rejected', 'Returned','Failed']; 
+        %>
+
+        <ul class="tracking-list">
+          <% timeline.forEach(stage => { %>
+            <% 
+              let stageClass = '';
+              if (stage === orderedItem.status) {
+                stageClass = 'text-primary fw-bold'; // current stage
+              } else if (timeline.indexOf(stage) < timeline.indexOf(orderedItem.status)) {
+                stageClass = 'text-success'; // completed stage
+              } else {
+                stageClass = 'text-muted'; // future stage
+              }
+            %>
+            <li class="<%= stageClass %>"><%= stage %></li>
+          <% }) %>
+        </ul>
+      </div>
+
+      <!-- RIGHT SIDE -->
+      <div class="col-md-9">
+
+        <!-- PRODUCT HEADER -->
+        <div class="d-flex align-items-start gap-3">
+
+          <img 
+            src="/uploads/variants/<%= orderedItem.variant?.images?.[0] || 'default.jpg' %>" 
+            width="130" height="130"
+            style="object-fit:contain; border:1px solid #ddd; border-radius:10px;"
+          >
+
+          <div>
+            <h5 class="fw-bold"><%= orderedItem.productName %></h5>
+
+            <p><b>Payment Method:</b> <%= order.paymentMethod %></p>
+            <p><b>Order No:</b> <%= order.orderId %></p>
+
+            <p class=" <%= orderedItem.status === 'Cancelled' || orderedItem.status === 'Returned' ? 'text-danger' : 'text-success' %>">
+             Order Status: <%= orderedItem.status %>
+            </p>
+<% let st = orderedItem.status.toUpperCase(); %>
+<% const disableCancel = orderedItem.cancellationRequest.status !== 'NONE'; %>
+<% const disableReturn = orderedItem.returnRequest.status !== 'NONE'; %>
+
+<div class="order-actions d-flex flex-wrap gap-2">
+  <% if (st === "PROCESSING" || st === "PACKED" || st === "CONFIRMED" || st === "CANCELLED" || st === "CANCELLATION REQUESTED") { %>
+    <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelModal" 
+      <%= disableCancel ? 'disabled' : '' %>>
+      Cancel Item
+    </button>
+  <% } else { %>
+    <button class="btn btn-outline-primary btn-sm">Invoice</button>
+    <button class="btn btn-outline-primary btn-sm">Review</button>
+    <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#returnModal"
+      <%= disableReturn ? 'disabled' : '' %>>
+      Return
+    </button>
+  <% } %>
+            </div>
+
+            
+
+          </div>
+        </div>
+
+        <hr>
+
+        <!-- DELIVERY ADDRESS -->
+        <h6 class="fw-bold">Delivery Address</h6>
+
+        <div class="p-3 bg-light border rounded">
+          <p class="mb-1"><%= order.address %></p>
+        </div>
+
+        <hr>
+
+        <!-- ORDER ITEMS -->
+        <h6 class="fw-bold mb-2">Order Items • 1 product</h6>
+
+        <div class="d-flex gap-3 p-3 bg-light border rounded">
+
+          <img 
+            src="/uploads/variants/<%= orderedItem.variant?.images?.[0] || 'default.jpg' %>" 
+            width="60" height="60"
+            style="object-fit:contain;"
+          >
+
+          <div>
+            <p class="fw-bold mb-0"><%= orderedItem.productName %></p>
+
+            <small>
+              Size: <%= orderedItem.size %> |
+              Color: <%= orderedItem.color %>
+            </small><br>
+
+            <small>Qty: <%= orderedItem.quantity %></small>
+          </div>
+
+          <div class="ms-auto fw-bold">
+            ₹<%= orderedItem.finalPrice %>
+          </div>
+
+        </div>
+
+        <hr>
+
+        <!-- PRICE SUMMARY -->
+        <h6 class="fw-bold mb-3">Price Summary</h6>
+
+        <div class="row mb-1">
+          <div class="col">Total MRP</div>
+          <div class="col text-end">₹<%= orderedItem.totalMrp %></div>
+        </div>
+
+        <div class="row text-success fw-bold mb-1">
+          <div class="col">Discount</div>
+          <div class="col text-end">- ₹<%= order.discount %></div>
+        </div>
+
+        <div class="row mb-1">
+          <div class="col">Subtotal</div>
+          <div class="col text-end">₹<%= order.subtotal %></div>
+        </div>
+
+        <hr>
+
+        <div class="row fw-bold fs-5">
+          <div class="col">Total Payable</div>
+          <div class="col text-end">₹<%= order.totalPayable %></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Cancel Modal -->
+<div class="modal right fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content p-3">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cancelModalLabel">Cancel Item</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label for="cancelReason" class="form-label">Reason for cancellation:</label>
+        <textarea id="cancelReason" class="form-control" rows="4"></textarea>
+        <button class="btn btn-danger mt-3 w-100" onclick="CancelItem('<%= order.orderId%>','<%= orderedItem._id%>')">Submit Cancellation</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Return Modal -->
+<div class="modal right fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content p-3">
+      <div class="modal-header">
+        <h5 class="modal-title" id="returnModalLabel">Return Item</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label for="returnReason" class="form-label">Reason for return:</label>
+        <textarea id="returnReason" class="form-control" rows="4"></textarea>
+        <button class="btn btn-warning mt-3 w-100" onclick="returnItem('<%= order.orderId%>','<%= orderedItem._id%>')">Submit Return</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    async function CancelItem(orderId,itemId) {
+        cancelReason=document.getElementById('cancelReason').value
+        try{
+            const response=await fetch("/order/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            itemId,
+            orderId,
+            cancelReason
+        })
+    })
+    const result=await response.json() 
+    
+                    if (result.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'cancel requested!',
+                            text: result.message,
+                            confirmButtonColor: '#198754'
+                        }).then(() => window.location.reload());
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Failed',
+                            text: result.message,
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+    
+    
+    }catch(error){
+        Swal.fire({
+                        icon: 'error',
+                        title: 'Server Error',
+                        text: 'Something went wrong',
+                        confirmButtonColor: '#dc3545'
+                    });
+    }
+        
+        
+    }
+
+
+    async function returnItem(orderId,itemId) {
+ returnReason=document.getElementById('returnReason').value
+        try{
+            const response=await fetch("/order/returnItem", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            itemId,
+            orderId,
+            returnReason
+        })
+    })
+    const result=await response.json() 
+    
+                    if (result.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'cancel requested!',
+                            text: result.message,
+                            confirmButtonColor: '#198754'
+                        }).then(() => window.location.reload());
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Failed',
+                            text: result.message,
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+    
+    
+    }catch(error){
+        Swal.fire({
+                        icon: 'error',
+                        title: 'Server Error',
+                        text: 'Something went wrong',
+                        confirmButtonColor: '#dc3545'
+                    });
+    }
+
+      
+    }
+</script>
+</body>
+</html>
+

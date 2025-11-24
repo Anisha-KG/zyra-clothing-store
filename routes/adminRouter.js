@@ -13,6 +13,7 @@ const subcategoryUpload=require('../middleware/subcategoryUpload')
 const product_editController=require('../controller/admin/product-editController')
 const variantController=require('../controller/admin/variantController')
 const categoryUpload=require('../middleware/categoryMulter')
+const orderController=require('../controller/admin/ordersController')
 
 router.get('/pageerror',adminController.pageerror)
 router.get('/login',isAdminLogin,adminController.loadLogin)
@@ -77,5 +78,9 @@ router.patch('/editVariant',adminAuth,upload.fields([
 ]),variantController.editVariant)
 router.patch('/listVariant',adminAuth,variantController.listVariant)
 router.patch('/unlistVariant',adminAuth,variantController.unlistVariant)
+router.get('/orders',adminAuth,orderController.listOrders)
+router.get('/orders/:orderId',adminAuth,orderController.orderDetails)
+router.patch('/updateOrderStatus',adminAuth,orderController.updateItemstatus)
+router.patch('/orders/handleReturnRequest',adminAuth,orderController.handleReturnRequest)
 
 module.exports=router

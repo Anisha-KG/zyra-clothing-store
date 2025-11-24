@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Orders</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        .pagination .page-item.active .page-link {
+            background-color: #a3654b;
+            border-color: #a3654b;
+            color: white;
+        }
+        .pagination .page-link:hover {
+            background-color: #a3654b;
+            color: white;
+        }
+        .table-head th {
+            background-color: #a3654b !important;
+            color: #0e0d0d !important;
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+
+    <%- include("../../views/partials/admin/header") %>
+
+    <main class="col-12 col-md-10 px-3 pt-3">
+
+        <div class="d-flex justify-content-between align-items-center my-3">
+            <h4><strong>Orders</strong></h4>
+
+            <form class="d-flex gap-2">
+                <input type="text" name="search" value="<%= search || '' %>" 
+                       placeholder="Search order..." class="form-control" style="width: 250px;" autocomplete="off">
+                <button class="btn btn-dark btn-sm" type="submit">Search</button>
+            </form>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-responsive bg-white p-3 rounded shadow-sm">
+            <table class="table align-middle table-hover">
+                <thead class="table-head">
+                    <tr>
+                        <th>Sl No</th>
+                        <th>Order ID</th>
+                        <th>Order Date</th>
+                        <th>User Email</th>
+                        <th>Total Amount</th>
+                        <th>Payment Method</th>
+                        <th>Payment Status</th>
+                        <th>Order concern</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <% if (orders && orders.length > 0) { %>
+
+                        <% orders.forEach((order, index) => { %>
+                        <tr>
+                            <td><%= ((currentPage - 1) * limit) + index + 1 %></td>
+                            <td><%= order._id %></td>
+                            <td><%= order.createdAt.toISOString().split('T')[0] %></td>
+                            <td><%= order.userId.email %></td>
+                            <td>₹<%= order.totalPayable %></td>
+                            <td><%= order.paymentMethod %></td>
+
+                            <td>
+                                <% if (order.paymentStatus === "completed") { %>
+                                    <span class="badge bg-success">completed</span>
+                                <% } else { %>
+                                    <span class="badge bg-warning">Pending</span>
+                                <% } %>
+                            </td>
+                            <td>
+  <% order.orderedItems.forEach((item, idx) => { %>
+    <%= item.cancellationRequest?.reason || '-' %><%= idx < order.orderedItems.length - 1 ? ', ' : '' %>
+  <% }) %>
+</td>
+
+                            <td>
+                                <button class="btn btn-sm btn-primary"
+                                    onclick="window.location.href='/admin/orders/<%= order.orderId%>'">View</button>
+                            </td>
+                        </tr>
+                        <% }) %>
+
+                    <% } else { %>
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">No orders found</td>
+                        </tr>
+                    <% } %>
+
+                </tbody>
+            </table>
+
+            <!-- PAGINATION -->
+            <div class="d-flex justify-content-center mt-4">
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+
+                        <% for(let i = 1; i <= totalPages; i++){ %>
+                            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                <a class="page-link"
+                                   href="/admin/orders?page=<%= i %><%= search ? '&search=' + search : '' %>">
+                                   <%= i %>
+                                </a>
+                            </li>
+                        <% } %>
+
+                    </ul>
+                </nav>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

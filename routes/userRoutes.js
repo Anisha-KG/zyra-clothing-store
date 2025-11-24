@@ -11,6 +11,9 @@ const addressController=require('../controller/user/userAddress')
 const cartController=require('../controller/user/cartController')
 const checkoutController=require('../controller/user/checkoutController')
 const checkCart=require('../middleware/validateCart')
+const orderController=require('../controller/user/orderController')
+const orderManagement=require('../controller/user/orderManagementController')
+const downloadInvoice=require('../controller/user/downloadInvoice')
 
 router.get('/pagenotfound',userController.pageNotFound)
 router.get('/home',auth.checkSession,userController.loadHomepage)
@@ -72,6 +75,18 @@ router.post('/checkout/selectAddress',auth.checkSession,checkCart.validateCart,c
 router.get('/checkout/paymentmethod',auth.checkSession,checkCart.validateCart,checkoutController.selectPayment)
 router.post('/checkout/paymentmethod',auth.checkSession,checkCart.validateCart,checkoutController.selectPaymentmethod)
 router.get('/checkout/confirmationPage',auth.checkSession,checkCart.validateCart,checkoutController.getconfirmationPage)
+router.post('/checkout/placeOrder',auth.checkSession,checkCart.validateCart,orderController.placeOrder)
+router.get('/orderSuccessfull',auth.checkSession,orderController.orderSuccessfull)
+
+router.get('/profile/orders',auth.checkSession,orderController.listOrder)
+router.get('/profile/orders/:itemId',auth.checkSession,orderController.orderedProducts)
+router.get('/profile/orders/details',auth.checkSession,orderController.productDetails)
+router.post('/order/cancel',auth.checkSession,orderController.requestCancelOrder)
+router.patch('/order/returnItem',auth.checkSession,orderManagement.requestReturn)
+router.patch('/order/cancelOrder',auth.checkSession,orderManagement.cancelOrder)
+router.patch('/order/returnOrder',auth.checkSession,orderManagement.returnOrder)
+router.get("/download-invoice/:orderId",auth.checkSession, downloadInvoice.downloadInvoice);
+
 
 
 

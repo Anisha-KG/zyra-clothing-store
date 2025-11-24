@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Orders</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        .pagination .page-item.active .page-link {
+            background-color: #a3654b;
+            border-color: #a3654b;
+            color: white;
+        }
+        .pagination .page-link:hover {
+            background-color: #a3654b;
+            color: white;
+        }
+        .table-head th {
+            background-color: #a3654b !important;
+            color: #0e0d0d !important;
+        }
+        .card-custom {
+            padding: 18px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: #fff;
+        }
+        .product-img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .return-box {
+            background-color: #fff3cd;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+
+    <%- include("../../views/partials/admin/header") %>
+
+    <main class="col-12 col-md-10 px-3 pt-3">
+
+       <div class="col-md-10 px-4 py-4">
+
+            <!-- Back Button -->
+            <a href="/admin/orders" class="text-primary text-decoration-none mb-3 d-inline-block">
+                ← Back to All Orders
+            </a>
+
+            <!-- Order ID -->
+            <h2 class="order-title">Order #<%= order.orderId %></h2>
+
+            <!-- THREE CARDS -->
+            <div class="row g-4">
+
+                <!-- CUSTOMER -->
+                <div class="col-md-4">
+                    <div class="card-custom">
+                        <h6 class="fw-bold mb-3">Customer Details</h6>
+                        <p class="mb-1"><%= order.userId?.name %></p>
+                        <p class="text-muted mb-0"><%= order.userId?.email %></p>
+                    </div>
+                </div>
+
+                <!-- SHIPPING -->
+                <div class="col-md-4">
+                    <div class="card-custom">
+                        <h6 class="fw-bold mb-3">Shipping Address</h6>
+
+                        <% let addressParts = order.address.split(","); %>
+                        <% addressParts.forEach(line => { %>
+                            <p class="mb-1"><%= line.trim() %></p>
+                        <% }) %>
+                    </div>
+                </div>
+
+                <!-- SUMMARY -->
+                <div class="col-md-4">
+                    <div class="card-custom">
+                        <h6 class="fw-bold mb-3">Order Summary</h6>
+
+                        <p class="mb-1">
+                            Payment Status:
+                            <span class="fw-bold text-danger"><%= order.paymentStatus.toUpperCase() %></span>
+                        </p>
+
+                        <p class="mb-1">
+                            Payment Method:
+                            <span class="fw-bold"><%= order.paymentMethod.toUpperCase() %></span>
+                        </p>
+
+                        <p class="mb-1">
+                            Coupon Applied:
+                            <span class="fw-bold text-success">₹<%= order.discount %></span>
+                        </p>
+
+                        <hr>
+
+                        <h6 class="fw-bold">Total Amount: ₹<%= order.totalPayable %></h6>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ORDER ITEMS -->
+            <h4 class="section-title mt-5">
+                <i class="bi bi-list text-primary"></i> Order Details
+            </h4>
+
+            <% order.orderedItems.forEach(item => { %>
+                <div class="card-custom mt-3">
+
+                    <div class="row align-items-center g-4">
+
+                        <div class="col-md-2 text-center">
+                            <img src="/uploads/variants/<%= item.variant?.images?.[0] || '/images/no-img.png' %>"
+                                class="product-img">
+                        </div>
+
+                        <div class="col-md-7">
+                            <h5 class="fw-bold"><%= item.productName %></h5>
+
+                            <p class="mb-1">Qty: <%= item.quantity %> • Price: ₹<%= item.finalPrice %></p>
+                            <p class="mb-1">Color: <%= item.color %> • Size: <%= item.size %></p>
+
+                            <div class="mt-3">
+                                <span class="fw-bold">Status</span>
+                                <select class="form-select mt-1" id="status-<%= item._id%>" onchange="updateStatus('<%= item._id%>','<%= order.orderId%>')">
+                                    <option selected><%= item.status.toUpperCase() %></option>
+                                    <option>PROCESSING</option>
+                                    <option>PACKED</option>
+                                    <option>SHIPPED</option>
+                                    <option>DELIVERED</option>
+                                    <option>CANCELLED</option>
+                                    <option>RETURNED</option>
+                                </select>
+                            </div>
+
+                            <!-- RETURN REQUEST BOX -->
+                            <% if(item.status === 'Return Requested') { %>
+                                <div class="return-box">
+                                    <p class="mb-2"><strong>Return Reason:</strong> <%= item.returnRequest.reason %></p>
+                                    <button class="btn btn-success btn-sm me-2" onclick="handleReturn('<%= item._id %>', '<%= order.orderId %>', 'accept')">Accept</button>
+                                    <button class="btn btn-danger btn-sm" onclick="handleReturn('<%= item._id %>', '<%= order.orderId %>', 'reject')">Reject</button>
+                                </div>
+                            <% } %>
+
+                            
+
+                        </div>
+
+                        <div class="col-md-3">
+                            <span class="fw-bold">Expected Delivery</span>
+                            <input type="date" class="form-control mt-2">
+                        </div>
+
+                    </div>
+
+                </div>
+            <% }) %>
+
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+<script>
+async function updateStatus(itemId, orderId) {
+    try{
+        const selectedStatus = document.getElementById(`status-${itemId}`).value.toLowerCase();
+
+        const response = await fetch("/admin/updateOrderStatus", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                itemId: itemId,
+                status: selectedStatus,
+                orderId
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Updated!',
+                text: result.message,
+                confirmButtonColor: '#198754'
+            }).then(() => window.location.reload());
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed',
+                text: result.message,
+                confirmButtonColor: '#dc3545'
+            });
+        }
+    } catch(error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Server Error',
+            text: 'Something went wrong',
+            confirmButtonColor: '#dc3545'
+        });
+    }
+}
+
+async function handleReturn(itemId, orderId, action) {
+    try {
+        const response = await fetch('/admin/orders/handleReturnRequest', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ itemId, orderId, action })
+        });
+        const result = await response.json();
+
+        if(result.success) {
+            Swal.fire({
+                icon: 'success',
+                title: action === 'accept' ? 'Return Accepted' : 'Return Rejected',
+                text: result.message,
+                confirmButtonColor: '#198754'
+            }).then(() => window.location.reload());
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed',
+                text: result.message,
+                confirmButtonColor: '#dc3545'
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Server Error',
+            text: 'Something went wrong',
+            confirmButtonColor: '#dc3545'
+        });
+    }
+}
+</script>
+</html>

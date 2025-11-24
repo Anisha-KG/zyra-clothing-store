@@ -1,412 +1,253 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zyra - Profile Page</title>
-
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zyra - My Orders</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <style>
     body {
-      background-color: #f9ebe3;
-      font-family: "Poppins", sans-serif;
+      background: #f5eee9 !important;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
     }
 
-    .navbar {
-      background-color: #f9ebe3;
-    }
-
-    .navbar-brand {
-      font-weight: 700;
-      color: #7a1f1f;
-      font-size: 1.5rem;
-    }
-
-    .sidebar {
+    .order-box {
       background: #fff;
-      border-radius: 15px;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-      padding: 20px 0;
-      height: 100%;
+      padding: 25px;
+      border-radius: 12px;
+      border: 1px solid #e5e5e5;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      margin-bottom: 35px;
     }
 
-    .sidebar a {
-      color: #000;
-      text-decoration: none;
+    .order-header {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      padding: 10px 25px;
-      border-left: 4px solid transparent;
-      transition: all 0.3s ease;
-      font-size: 15px;
-    }
-
-    .sidebar a:hover,
-    .sidebar a.active {
-      background-color: #f9ebe3;
-      border-left: 4px solid #7a1f1f;
-      color: #7a1f1f;
-      font-weight: 500;
-    }
-
-    .sidebar i {
-      margin-right: 10px;
-    }
-
-    .profile-card {
-      background: #fff;
-      border-radius: 15px;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-      padding: 40px;
-    }
-
-    .profile-header {
-      text-align: center;
-      font-size: 22px;
-      font-weight: 600;
-      border-bottom: 1px solid #000;
-      margin-bottom: 25px;
+      margin-bottom: 18px;
       padding-bottom: 10px;
+      border-bottom: 1px solid #f0f0f0;
     }
 
-    .profile-img {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background-color: #f1f1f1;
+    .order-item {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      color: #6c757d;
-      margin: 0 auto 15px;
+      gap: 20px;
+      padding: 18px 0;
+      border-bottom: 1px solid #f0f0f0;
     }
 
-    .info-label {
-      font-weight: 500;
-      color: #7a1f1f;
-    }
-
-    .info-value {
-      color: #000;
-    }
-
-    .btn-edit {
-      background-color: #a05a3b;
-      color: #fff;
-      border-radius: 30px;
-      font-weight: 500;
-      padding: 8px 20px;
-    }
-
-    /* Address Section Styles */
-    .address-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .btn-add-address {
-      background-color: #d9534f;
-      color: #fff;
-      border: none;
-      padding: 8px 18px;
-      border-radius: 6px;
-      font-size: 14px;
-      transition: 0.3s;
-    }
-
-    .btn-add-address:hover {
-      background-color: #b94440;
-    }
-
-    .address-card {
-      background: #f8f8f8;
-      border-radius: 8px;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
+    .product-img {
+      width: 110px;
+      height: 110px;
+      object-fit: contain;
+      border-radius: 10px;
       border: 1px solid #ddd;
-    }
-
-    .address-details {
-      flex: 1;
-    }
-
-    .address-name {
-      font-weight: 600;
-      font-size: 15px;
-      margin-bottom: 4px;
-    }
-
-    .address-text {
-      font-size: 14px;
-      color: #333;
-    }
-
-    .address-actions {
-      text-align: right;
-    }
-
-    .address-actions button {
-      display: block;
-      width: 70px;
-      margin-bottom: 5px;
-      font-size: 13px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
       background: #fff;
-      color: #333;
-      transition: 0.3s;
     }
 
-    .address-actions button:hover {
-      background-color: #f1f1f1;
+    #productDetailsPage {
+      background: #fff;
+      min-height: 100vh;
+      padding: 40px;
+      width: 100% !important;
+      max-width: 100% !important;
     }
 
-    .address-type {
-      background-color: #e9e9e9;
-      border: none;
-      color: #555;
+    .tracking-list li {
+      margin-bottom: 12px;
+      padding-left: 12px;
+      border-left: 3px solid #0d6efd;
       font-weight: 500;
     }
 
-    footer {
-      background-color: #f9ebe3;
-      padding: 40px 0;
-      text-align: center;
-      font-size: 14px;
+    .details-box {
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      border: 1px solid #e5e5e5;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
     }
 
-    @media (max-width: 768px) {
-      .sidebar {
-        margin-bottom: 20px;
-      }
+    /* Orders Page Layout With Sidebar */
+    #ordersPage .container .row {
+      display: flex;
+    }
+
+    #ordersSidebar {
+      width: 260px;
+      margin-right: 20px;
+    }
+
+    #ordersContent {
+      flex-grow: 1;
+    }
+
+    .tracking-column {
+      border-right: 1px solid #ddd;
+      min-height: 100%;
+      height: 100%;
+      padding-right: 15px;
     }
   </style>
 </head>
-
 <body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg shadow-sm">
-    <div class="container">
-      <a class="navbar-brand" href="#">ZYRA</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-        <ul class="navbar-nav">
-          <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">All Products</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Brands</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
 
-  <!-- Main content -->
+<div id="ordersPage">
   <div class="container py-5">
     <div class="row">
-      <!-- Sidebar -->
-      <div class="col-md-3">
-        <div class="sidebar">
-          <div class="text-center mb-4">
-            <div class="rounded-circle bg-dark text-white mx-auto d-flex align-items-center justify-content-center"
-              style="width: 60px; height: 60px; font-weight: 600;">
-              AG
-            </div>
-            <p class="mt-2 mb-0 fw-semibold">Anisha K G</p>
-          </div>
-          <a href="#" class="active" onclick="showSection('profile', event)"><i class="bi bi-person"></i> My Profile</a>
-          <a href="#" onclick="showSection('viewAddress', event)"><i class="bi bi-geo-alt"></i> My Address</a>
-          <a href="#" onclick="showSection('order', event)"><i class="bi bi-bag"></i> My Order</a>
-          <a href="#" onclick="showSection('wishlist', event)"><i class="bi bi-heart"></i> My Wishlist</a>
-          <a href="#" onclick="showSection('wallet', event)"><i class="bi bi-wallet2"></i> My Wallet</a>
-          <a href="#" onclick="showSection('coupon', event)"><i class="bi bi-ticket-perforated"></i> My Coupon</a>
-          <a href="#" onclick="showSection('password', event)"><i class="bi bi-lock"></i> Change Password</a>
-          <a href="#" onclick="showSection('referral', event)"><i class="bi bi-gift"></i> Referral Code</a>
-          <a href="#"><i class="bi bi-box-arrow-right"></i> Log Out</a>
-        </div>
+
+      <div class="col-md-3 mb-4" id="ordersSidebar">
+        <!-- Sidebar Include -->
+        <%- include("../../views/partials/user/userProfile-sidebar") %>
       </div>
 
-      <!-- Profile Section -->
-      <div class="col-md-9">
-        <div id="profile" class="profile-card section">
-          <div class="text-center profile-header">PROFILE</div>
-          <div class="text-center">
-            <div class="profile-img"><i class="bi bi-person-circle"></i></div>
-            <h5 class="fw-semibold mb-1">Anisha K G</h5>
-            <p class="text-muted">Customer since 2023</p>
-          </div>
-          <hr class="my-4">
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <p class="info-label mb-1">Email</p>
-              <p class="info-value">anisha@example.com</p>
-            </div>
-            <div class="col-md-6 mb-3">
-              <p class="info-label mb-1">Phone</p>
-              <p class="info-value">+91 98765 43210</p>
-            </div>
-            <div class="col-md-6 mb-3">
-              <p class="info-label mb-1">Gender</p>
-              <p class="info-value">Female</p>
-            </div>
-          </div>
-          <hr class="my-4">
-          <div class="row">
-            <h6 class="fw-semibold mb-3">Address Details</h6>
-            <div class="col-md-6 mb-3">
-              <p class="info-label mb-1">Home Address</p>
-              <p class="info-value mb-1">Rose Villa, MG Road</p>
-              <p class="info-value mb-1">Thrissur, Kerala</p>
-              <p class="info-value mb-3">Pincode: 680001</p>
-            </div>
-          </div>
-          <div class="text-center mt-4"> <a href="edit-profile.html" class="btn btn-edit"><i
-                class="bi bi-pencil me-2"></i>Edit Profile</a> </div>
-        </div>
+      <div class="col-lg-9" id="ordersContent">
+        <h3 class="fw-bold mb-4">My Orders</h3>
 
-        <!-- View Address Section -->
-        <div id="viewAddress" class="profile-card section d-none">
-          <div class="address-header">
-            <h4 class="fw-semibold">My Address</h4>
-            <button class="btn-add-address">Add new Address</button>
+        <div class="order-box">
+          <div class="order-header">
+            <div>Order ID: <span class="text-muted">#SportsHub-2025-0251</span></div>
+            <a href="#">View Order Details</a>
           </div>
 
-          <div class="address-card">
-            <div class="address-details">
-              <div class="address-name">ASWATHI</div>
-              <div class="address-text">Pandari (h) Varandarappilli p.o Pulinchodu, Thrissur, Kerala - 680303</div>
-            </div>
-            <div class="address-actions">
-              <button
-                onclick="editAddress('ASWATHI','Pandari (h) Varandarappilli p.o Pulinchodu','Thrissur','Kerala','680303','Home')">Edit</button>
-              <button>Delete</button>
-              <button class="address-type">Home</button>
-            </div>
-          </div>
+          <div class="order-item">
+            <img src="/mnt/data/9ac10292-6634-46a0-bfa6-0369d28084e4.jpg" class="product-img">
 
-          <div class="address-card">
-            <div class="address-details">
-              <div class="address-name">Anamika</div>
-              <div class="address-text">123 Rose Villa, MG Road, Thrissur, Kerala - 680001</div>
+            <div class="flex-grow-1">
+              <div class="item-title fw-bold">Li Ning G Force Sk Superlite Badminton Racket</div>
+              <small class="d-block">Quantity: 3</small>
+              <small class="d-block">Brand: Li-Ning</small>
+              <small class="d-block">Color: <b>Red</b></small>
+              <small class="d-block">Size: 20 Inch</small>
             </div>
-            <div class="address-actions">
-              <button
-                onclick="editAddress('Anamika','123 Rose Villa, MG Road','Thrissur','Kerala','680001','Work')">Edit</button>
-              <button>Delete</button>
-              <button class="address-type">Work</button>
+
+            <div class="text-end">
+              <div class="price mb-1">₹ 2500.00</div>
+              <div class="order-date mb-1">Item Ordered By Thu 21 August 2025</div>
+              <div class="status-text mb-2 text-success fw-bold">Your Order Has Been Placed</div>
+
+              <button class="btn btn-outline-danger btn-sm">Cancel Item</button>
+              <button class="btn btn-primary btn-sm mt-2"
+                onclick="showDetails('Li Ning G Force Sk Superlite Badminton Racket','/mnt/data/9ac10292-6634-46a0-bfa6-0369d28084e4.jpg')">
+                Track Order
+              </button>
             </div>
           </div>
         </div>
-        <!-- Edit Address -->
-        <div id="editAddress" class="profile-card d-none">
-          <h4 class="fw-semibold text-center mb-4">EDIT ADDRESS</h4>
-          <form class="row g-3">
-            <div class="col-md-6"> <label class="form-label">Name</label> <input type="text" class="form-control"
-                placeholder="Enter your name"> </div>
-            <div class="col-md-6"> <label class="form-label">Mobile Number</label> <input type="text"
-                class="form-control" placeholder="Enter your Mobile number"> </div>
-            <div class="col-md-6"> <label class="form-label">Pincode</label> <input type="text" class="form-control"
-                placeholder="Enter your pincode"> </div>
-            <div class="col-md-6"> <label class="form-label">Locality</label> <input type="text" class="form-control"
-                placeholder="Enter your locality"> </div>
-            <div class="col-12"> <label class="form-label">Address</label> <textarea class="form-control" rows="2"
-                placeholder="Address (area, city)"></textarea> </div>
-            <div class="col-md-6"> <label class="form-label">City/Dist/Town</label> <input type="text"
-                class="form-control" placeholder="Enter city/dist/town"> </div>
-            <div class="col-md-6"> <label class="form-label">State</label> <select class="form-select">
-                <option selected>--- select state ---</option>
-                <option>Kerala</option>
-                <option>Tamil Nadu</option>
-                <option>Karnataka</option>
-                <option>Maharashtra</option>
-                <option>Delhi</option>
-              </select> </div>
-            <div class="col-md-6"> <label class="form-label">Landmark</label> <input type="text" class="form-control"
-                placeholder="Enter landmark (optional)"> </div>
-            <div class="col-md-6"> <label class="form-label">Alternate Mobile Number</label> <input type="text"
-                class="form-control" placeholder="Alternate Mobile number (optional)"> </div>
-            <div class="col-12">
-              <div class="form-check form-check-inline"> <input class="form-check-input" type="radio" name="addressType"
-                  id="home" checked> <label class="form-check-label" for="home">Home</label> </div>
-              <div class="form-check form-check-inline"> <input class="form-check-input" type="radio" name="addressType"
-                  id="work"> <label class="form-check-label" for="work">Work</label> </div>
-            </div>
-            <div class="col-12 text-end mt-3"> <button type="submit" class="btn btn-dark px-4 me-2">Save</button>
-              <button type="button" class="btn btn-outline-dark px-4" onclick="toggleEdit(false)">Cancel</button>
-            </div>
-          </form>
-        </div>
 
-        <!-- Placeholder Sections -->
-        <div id="order" class="profile-card section d-none">
-          <h4>MY ORDER</h4>
-        </div>
-        <div id="wishlist" class="profile-card section d-none">
-          <h4>MY WISHLIST</h4>
-        </div>
-        <div id="wallet" class="profile-card section d-none">
-          <h4>MY WALLET</h4>
-        </div>
-        <div id="coupon" class="profile-card section d-none">
-          <h4>MY COUPON</h4>
-        </div>
-        <div id="password" class="profile-card section d-none">
-          <h4>CHANGE PASSWORD</h4>
-        </div>
-        <div id="referral" class="profile-card section d-none">
-          <h4>REFERRAL CODE</h4>
-        </div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Footer -->
-  <footer>
-    <div class="container">
-      <p class="mb-1">© 2025 | Zyra | All Rights Reserved. | We Give You Style.</p>
-      <div>
-        <i class="bi bi-instagram mx-2"></i>
-        <i class="bi bi-facebook mx-2"></i>
-        <i class="bi bi-twitter mx-2"></i>
+<!-- PRODUCT DETAILS FULL PAGE -->
+<div id="productDetailsPage" style="display:none;">
+  <button class="btn btn-dark mb-3" onclick="goBack()">← Back to Orders</button>
+
+  <div class="details-box">
+    <div class="row">
+
+      <div class="col-md-3 tracking-column">
+        <h6 class="fw-bold mb-3">Tracking</h6>
+        <ul class="tracking-list" style="list-style:none; padding-left:0;">
+          <li>Processing</li>
+          <li>Packed</li>
+          <li>Shipped</li>
+          <li>Delivered</li>
+          <li>Return Requested</li>
+          <li>Returned</li>
+          <li>Cancellation Requested</li>
+          <li>Cancelled</li>
+        </ul>
       </div>
+
+      <div class="col-md-9">
+        <div class="d-flex align-items-start gap-3">
+          <img id="detailImage" src="" width="130" height="130" style="object-fit:contain; border:1px solid #ddd; border-radius:10px;">
+
+          <div>
+            <h5 id="detailTitle" class="fw-bold"></h5>
+            <p><b>Payment Method:</b> COD</p>
+            <p><b>Order No:</b> #Sample-Order-9981</p>
+            <p class="text-danger fw-bold">REFUNDED</p>
+          </div>
+        </div>
+
+        <hr>
+
+        <h6 class="fw-bold">Delivery Address</h6>
+        <div class="p-3 bg-light border rounded">
+          <p class="mb-1">Anisha K</p>
+          <p class="mb-1">Thrissur, Kerala - 680302</p>
+          <p class="mb-0">Phone: 7736839194</p>
+        </div>
+
+        <hr>
+
+        <h6 class="fw-bold">Order Items • 1 product</h6>
+        <div class="d-flex gap-3 p-3 bg-light border rounded">
+          <img id="detailImage2" src="" width="60" height="60" style="object-fit:contain;">
+          <div>
+            <p id="detailTitle2" class="fw-bold mb-0"></p>
+            <small>Size: XL | Color: Black</small><br>
+            <small>Qty: 1</small>
+          </div>
+          <div class="ms-auto fw-bold">₹1199</div>
+        </div>
+
+        <hr>
+
+        <h6 class="fw-bold mb-3">Price Summary</h6>
+        <div class="row mb-1">
+          <div class="col">Total MRP</div>
+          <div class="col text-end">₹2999</div>
+        </div>
+
+        <div class="row mb-1 text-success fw-bold">
+          <div class="col">Applicable Discount</div>
+          <div class="col text-end">- ₹1800</div>
+        </div>
+
+        <div class="row mb-1">
+          <div class="col">Subtotal</div>
+          <div class="col text-end">₹1199</div>
+        </div>
+
+        <div class="row mb-1">
+          <div class="col">Total Tax</div>
+          <div class="col text-end">₹216</div>
+        </div>
+
+        <hr>
+
+        <div class="row fw-bold fs-5">
+          <div class="col">Total Payable</div>
+          <div class="col text-end">₹1415</div>
+        </div>
+      </div>
+
     </div>
-  </footer>
+  </div>
+</div>
 
-  <!-- JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    function showSection(sectionId, event) {
-      document.querySelectorAll(".section").forEach(sec => sec.classList.add("d-none"));
-      document.querySelectorAll(".sidebar a").forEach(link => link.classList.remove("active"));
-      document.getElementById(sectionId).classList.remove("d-none");
-      if (event) event.target.closest("a").classList.add("active");
-    }
+<script>
+  function showDetails(title, img) {
+    document.getElementById("ordersPage").style.display = "none";
+    document.getElementById("productDetailsPage").style.display = "block";
 
-    function toggleEdit(isEdit) {
-      document.getElementById('viewAddress').classList.toggle('d-none', isEdit);
-      document.getElementById('editAddress').classList.toggle('d-none', !isEdit);
-    }
+    document.getElementById("detailTitle").innerText = title;
+    document.getElementById("detailTitle2").innerText = title;
+    document.getElementById("detailImage").src = img;
+    document.getElementById("detailImage2").src = img;
+  }
 
-    function editAddress(name, address, city, state, pincode, type) {
-      toggleEdit(true);
-      document.getElementById('editName').value = name;
-      document.getElementById('editAddressText').value = address;
-      document.getElementById('editCity').value = city;
-      document.getElementById('editState').value = state;
-      document.getElementById('editPincode').value = pincode;
-      document.getElementById('editLocality').value = city;
-    }
-  </script>
+  function goBack() {
+    document.getElementById("productDetailsPage").style.display = "none";
+    document.getElementById("ordersPage").style.display = "block";
+  }
+</script>
+
 </body>
-
 </html>

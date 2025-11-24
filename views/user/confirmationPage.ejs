@@ -120,7 +120,7 @@
   <!-- ACTION BUTTONS -->
   <div class="row mt-3 g-3">
     <div class="col-lg-6">
-      <form action="/checkout/placeorder" method="POST">
+      <form action="/checkout/placeOrder" id="confirmOrder" method="POST">
         <button class="place-btn" type="submit">Confirm Order</button>
       </form>
     </div>
@@ -136,4 +136,43 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
+<script>
+  document.getElementById('confirmOrder').addEventListener('submit',async function(e) {
+        e.preventDefault();
+    try{
+      const response=await fetch('/checkout/placeOrder',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        
+      })
+
+      const result=await response.json()
+      
+    if (result.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: result.message,
+        confirmButtonColor: '#198754'
+      }).then(() => window.location.href='/orderSuccessfull');
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: result.message,
+        confirmButtonColor: '#dc3545'
+      });
+    }
+
+    }catch(error){
+      Swal.fire({
+      icon: 'error',
+      title: 'Server Error',
+      text: 'Something went wrong',
+      confirmButtonColor: '#dc3545'
+    });
+    }
+  })
+</script>
 </html>

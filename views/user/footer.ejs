@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Invoice</title>
+
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .header { display: flex; justify-content: space-between; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    table, th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    .total { text-align: right; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>Zyra Invoice</h2>
+    <p>Order ID: <%= order.orderId %></p>
+  </div>
+
+  <h3>Customer Details</h3>
+  <p><b>Name:</b> <%= order.user.name %></p>
+  <p><b>Email:</b> <%= order.user.email %></p>
+
+  <h3>Items</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Size</th>
+        <th>Color</th>
+        <th>Qty</th>
+        <th>Price</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% order.orderedItems.forEach(item => { %>
+        <tr>
+          <td><%= item.name %></td>
+          <td><%= item.size %></td>
+          <td><%= item.color %></td>
+          <td><%= item.quantity %></td>
+          <td>₹<%= item.price %></td>
+          <td>₹<%= item.totalPrice %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <h2 class="total">Grand Total: ₹<%= order.grandTotal %></h2>
+</body>
+</html>
