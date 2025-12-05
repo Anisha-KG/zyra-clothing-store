@@ -8,6 +8,9 @@ const Subcategory=require('../../models/subcategorySchema')
 
 const viewCart = async (req, res, next) => {
     try {
+
+        const cartError = req.session.cartError;
+        req.session.cartError = null;
         const userId = req.session.user || null
         if (!userId) {
             return res.status(httpStatus.UNAUTHORIZED).json({ success: false, message: 'User not logged in ' })
@@ -23,7 +26,8 @@ const viewCart = async (req, res, next) => {
                 subTotal:0,
                 total: 0,
                 tax: 0,
-                cartCount:0
+                cartCount:0,
+                cartError
 
             })
         }
@@ -85,7 +89,7 @@ const viewCart = async (req, res, next) => {
             await cart.save()
         }
 
-        const tax = Math.round(subTotal * 0.02)
+        const tax = Math.round(subTotal * 0.09)
         const total = subTotal + tax
         const cartCount = cart.items.reduce((acc, item) => {
             return acc += item.quantity
@@ -103,6 +107,7 @@ const viewCart = async (req, res, next) => {
             tax,
             subTotal,
             cartCount,
+            cartError
 
 
         })
@@ -167,10 +172,10 @@ const addToCart=async(req,res,next)=>{
             return item.productId.toString()==productId&& item.size==size && item.color===color
             
         })
-        console.log(existingItem)
+        
         if(existingItem){
             const qty=existingItem.quantity+quantity
-            console.log(qty)
+            
             if(qty>5){
                 return res.status(httpStatus.BAD_REQUEST).json({status:false,message:'Only 5 products of this size and color can be added'})
             }
@@ -189,7 +194,7 @@ const addToCart=async(req,res,next)=>{
                 price:product.finalPrice,
                 //price:product.finalPrice,
                 quantity:Math.min(quantity,5),
-                totalPrice:product.finalPrice*Math.min(quantity,5)
+                itemsTotal:product.finalPrice*Math.min(quantity,5)
             })
         }
 

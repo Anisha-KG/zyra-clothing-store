@@ -108,6 +108,18 @@
 
 <h2 class="text-center mt-4">YOUR CART</h2>
 
+<% if (cartError) { %>
+  <div class="alert alert-danger text-center w-50 mx-auto mt-3" id="cartErrorBox">
+    <%= cartError %>
+  </div>
+  <script>
+    setTimeout(() => {
+      const box = document.getElementById("cartErrorBox");
+      if (box) box.style.display = "none";
+    }, 3000);
+  </script>
+<% } %>
+
 <div class="container cart-container">
   <div class="row g-4">
 

@@ -3,7 +3,9 @@ const Cart=require('../../models/cartSchema')
 const Product=require('../../models/productSchema')
 const Variant=require('../../models/variantSchema')
 const Address=require('../../models/addressSchema')
+const Coupons=require('../../models/couponSchema')
 const httpStatus=require('../../Constants/httpStatuscode')
+require('dotenv').config()
 
 
 const viewCheckoutPage = async (req, res, next) => {
@@ -105,41 +107,114 @@ const selectPayment=async(req,res,next)=>{
   }
 }
 
-const getconfirmationPage=async(req,res,next)=>{
-  try{
-    const userId=req.session.user 
-    const user=await User.findById(userId)
-    const addressId=req.session.addressId 
-    const paymentMethod=req.session.paymentMethod 
+const getconfirmationPage = async (req, res, next) => {
+  try {
+    const userId = req.session.user
+    const user = await User.findById(userId)
+    const addressId = req.session.addressId
+    const paymentMethod = req.session.paymentMethod
+    const couponId = req.query.couponId || null
 
-    const cart=await Cart.findOne({userId}).populate('items.productId').populate('items.variantId')
-    const addresses=await Address.findOne({userId})
-    const address=addresses.address.id(addressId)
+    const cart = await Cart.findOne({ userId }).populate('items.productId').populate('items.variantId')
+    const addresses = await Address.findOne({ userId })
+    const address = addresses.address.id(addressId)
 
-    let subTotal=0
-    let totalMRP=0
-    let applicableDiscount=0
+    let subTotal = 0
+    let totalMRP = 0
+    let applicableDiscount = 0
 
-    for(let item of cart.items){
-      const price=item.productId.finalPrice 
-      const mrp=item.productId.price
-      const quantity=item.quantity 
-      const itemTotal=quantity*price 
-      const priceDifference=mrp-price
-      subTotal+=itemTotal 
-      totalMRP+=mrp *quantity
-      applicableDiscount+=priceDifference 
+    for (let item of cart.items) {
+      const price = item.productId.finalPrice
+      const mrp = item.productId.price
+      const quantity = item.quantity
+      const itemTotal = quantity * price
+      const priceDifference = mrp - price
+      subTotal += itemTotal
+      totalMRP += mrp * quantity
+      applicableDiscount += priceDifference
 
     }
 
-      
-       
-       const CGST=Math.round(subTotal*0.09)
-       const SGST=Math.round(subTotal*0.09)
-       const totalTax = CGST+SGST
-       const TotalPayable=subTotal+totalTax
-       let shippingCharge = subTotal < 1000 ? 60 : 0;
-    res.render('confirmationPage',{
+    const coupons = await Coupons.find({
+      minimumOrderAmount: { $lte: subTotal }, status: true
+    });
+
+    let appliedCoupon = null
+    let discount = 0
+
+    if (couponId) {
+      const coupon = await Coupons.findById(couponId)
+
+      const userExist = coupon.usedUsers.find((u) => u.userId.toString() == userId.toString())
+      if (userExist) {
+        if (userExist.count >= coupon.usagePerUser) {
+
+          const CGST = Math.round(subTotal * process.env.TAX_RATE)
+          const SGST = Math.round(subTotal * process.env.TAX_RATE)
+          const totalTax = CGST + SGST
+          let shippingCharge = subTotal < 1000 ? 60 : 0;
+          const TotalPayable = subTotal + totalTax+shippingCharge
+          
+
+          return res.render("confirmationPage", {
+            user,
+            address,
+            paymentMethod,
+            cart,
+            subTotal,
+            totalMRP,
+            CGST,
+            SGST,
+            totalTax,
+            shippingCharge,
+            applicableDiscount,
+            TotalPayable,
+            coupons,
+            couponError: "You already used this coupon maximum times.",
+            appliedCoupon: null
+          });
+        }
+        
+      }
+
+
+
+      if (coupon.type == 'fixed') {
+        discount = coupon.discountValue
+      } else {
+        discount = subTotal * (coupon.discountValue / 100)
+      }
+
+      if (discount > coupon.maximumDiscount) {
+        discount = coupon.maximumDiscount
+      }
+
+      subTotal = subTotal - discount
+
+      appliedCoupon = {
+        code: coupon.code,
+        discountValue: coupon.discountValue,
+        discount: discount
+      }
+      req.session.couponCode=coupon.code 
+      req.session.couponDiscount=discount
+
+    }
+
+
+
+
+
+    const CGST = Math.round(subTotal * 0.09)
+    const SGST = Math.round(subTotal * 0.09)
+    const totalTax = CGST + SGST
+    const TotalPayable = subTotal + totalTax
+    let shippingCharge = subTotal < 1000 ? 60 : 0;
+
+    
+
+
+    res.render('confirmationPage', {
       user,
       address,
       paymentMethod,
@@ -151,10 +226,13 @@ const getconfirmationPage=async(req,res,next)=>{
       totalTax,
       shippingCharge,
       applicableDiscount,
-      TotalPayable
+      TotalPayable,
+      coupons,
+      appliedCoupon
+
     }
     )
-  }catch(error){
+  } catch (error) {
     next(error)
   }
 }
@@ -198,3 +276,6 @@ getconfirmationPage,
 selectedAddress,
 selectPaymentmethod
 }
+
+
+

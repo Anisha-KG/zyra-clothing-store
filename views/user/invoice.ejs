@@ -87,15 +87,15 @@
     </thead>
     <tbody>
       <% order.orderedItems.forEach((item, index) => { 
-          const gstAmount = Math.round(item.totalPrice * 0.18);
-          const totalWithGST = item.totalPrice + gstAmount;
+          const gstAmount = Math.round(item.itemsTotal * 0.18);
+          const totalWithGST = item.itemsTotal + gstAmount;
       %>
         <tr>
           <td><%= index + 1 %></td>
           <td><%= item.productName %></td>
           <td><%= item.quantity %></td>
           <td><%= item.finalPrice %></td>
-          <td><%= item.totalPrice %></td>
+          <td><%= item.itemsTotal %></td>
           <td>18%</td>
           <td><%= gstAmount %></td>
           <td><%= totalWithGST %></td>
@@ -107,9 +107,7 @@
   <!-- SUMMARY -->
   <p class="section-title">Total Summary</p>
 
-  <% 
-    const calculatedGST = Math.round(order.subTotal * 0.18);
-  %>
+  
 
   <table class="table table-bordered summary-table">
     <tr>
@@ -117,8 +115,8 @@
       <td class="text-end">₹<%= order.subTotal %></td>
     </tr>
     <tr>
-      <td><strong>Total GST (18%)</strong></td>
-      <td class="text-end">₹<%= calculatedGST %></td>
+      <td><strong>Total GST (<%= order.taxRate%>)</strong></td>
+      <td class="text-end">₹<%= order.taxAmount %></td>
     </tr>
     <tr>
       <td><strong>Grand Total</strong></td>

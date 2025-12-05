@@ -7,6 +7,11 @@ const userSchema=new Schema({
     required: true,
 
   },
+  profileImage: {
+  type: String,
+  default: null
+},
+
   email:{
     type:String,
     required:true,

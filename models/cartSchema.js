@@ -26,7 +26,7 @@
                 type: Number,
                 required: true
             },
-            totalPrice:{
+            itemsTotal:{
                 type: Number,
                 required: true
             },  

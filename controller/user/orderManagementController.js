@@ -1,5 +1,6 @@
 const HttpStatus = require('../../Constants/httpStatuscode')
 const Order=require('../../models/orderSchema')
+const Variant=require('../../models/variantSchema')
 
 const requestReturn=async(req,res,next)=>{
     
@@ -31,15 +32,25 @@ const cancelOrder=async(req,res,next)=>{
     try{
 
         const {orderId,reason}=req.body 
-         console.log("Received orderId:", orderId);
+        
         const orders=await Order.findOne({orderId})
-        console.log(orders)
+        
         const orderedItems=orders.orderedItems 
         
         for(let item of orderedItems){
             item.status='Cancelled'
             item.cancellationRequest.reason=reason
             item.cancellationRequest.status=true
+        }
+
+        for(let item of orderedItems){
+            await Variant.findOneAndUpdate({
+                _id:item.variant,
+                size:item.size,
+                color:item.color
+            },
+            {$inc:{quantity:item.quantity}}
+        )
         }
         const updated=await orders.save()
         if(!updated){

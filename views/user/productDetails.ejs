@@ -9,56 +9,102 @@
     font-family: 'Poppins', sans-serif;
     background-color: #fdf6f0;
     color: #1f1f1f;
+    font-size: 0.9rem;
   }
-  h1, h2, h3 {
-    font-family: 'Playfair Display', serif;
+
+  h1, h2, h3 { font-family: 'Playfair Display', serif; }
+  h2 { font-size: 1.5rem; }
+  h4 { font-size: 1.2rem; }
+  h5 { font-size: 1rem; }
+
+  .breadcrumb a, .breadcrumb-item.active { color: #6c757d; }
+
+  /* --- Gallery Styles --- */
+  .main-image-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 450px;
   }
-  .product-images img {
-    width: 100%;
-    height: auto;
+  .main-image {
+    width: 80%;
+    height: 450px;
     object-fit: cover;
-    border-radius: 8px;
+    border-radius: 6px;
   }
+
+  /* --- Zoom Effect --- */
+  .zoom-container {
+    position: relative;
+    overflow: hidden;
+    height: 450px;
+    border-radius: 6px;
+  }
+  .zoom-image {
+    width: 80%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.2s ease;
+    transform-origin: center center;
+    will-change: transform;
+  }
+  .zoom-container:hover .zoom-image { transform: scale(2); }
+
+  .thumbnail img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 5px;
+    cursor: pointer;
+    border: 2px solid transparent;
+  }
+  .thumbnail img.selected-thumb { border: 2px solid #000; }
+
+  .arrow-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 10px 15px;
+    background: rgba(150, 141, 141, 0.5);
+    color: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.5rem;
+    user-select: none;
+    z-index: 10;
+  }
+  .arrow-left { left: 0.5px; }
+  .arrow-right { right: 5px; }
+
   .color-swatch {
-    width: 30px;
-    height: 30px;
+    width: 25px;
+    height: 25px;
     border-radius: 50%;
     display: inline-block;
     margin-right: 5px;
     cursor: pointer;
     border: 1px solid #ccc;
   }
-  .color-swatch.selected {
-    border: 2px solid #000;
+  .color-swatch.selected { border: 2px solid #000; }
+
+  .btn-zyra { border-radius: 25px; padding: 8px 20px; font-weight: 600; font-size: 0.85rem; }
+  .btn-wishlist, .btn-cart { background-color: #912f2f; color: #fff; }
+
+  .product-description { line-height: 1.5; font-size: 0.9rem; }
+
+  .also-like .product-card-like {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
   }
-  .btn-zyra {
-    border-radius: 30px;
-    padding: 10px 25px;
-    font-weight: 600;
-  }
-  .btn-wishlist {
-    background-color: #c77c59;
-    color: #fff;
-  }
-  .btn-cart {
-    background-color: #000;
-    color: #fff;
-  }
-  .product-description {
-    line-height: 1.6;
-    font-size: 0.95rem;
-  }
-  .also-like img {
-    border-radius: 5px;
-  }
-  @media (max-width: 768px) {
-    .color-swatch {
-      width: 25px;
-      height: 25px;
-    }
-  }
+  .also-like .product-card-like:hover { transform: translateY(-5px); }
+  .also-like img { border-radius: 8px; max-height: 180px; object-fit: cover; }
+
+  .size-btn, #qtyMinus, #qtyPlus { font-size: 0.8rem; padding: 5px 12px; }
 </style>
-</head>
 
 <body>
   <div class="container my-5">
@@ -71,32 +117,42 @@
       </ol>
     </nav>
 
-    <!-- Product Section -->
     <div class="row align-items-start">
-      <!-- LEFT SIDE: Product Images -->
-      <div class="col-lg-6 col-md-12 product-images mb-4">
-        <div class="row g-3">
-          <% if (defaultVariant && defaultVariant.images && defaultVariant.images.length > 0) { %>
-            <% defaultVariant.images.forEach((img) => { %>
-              <div class="col-6">
-                <img src="/uploads/variants/<%= img %>" alt="Product Image" class="img-fluid shadow-sm">
+      <!-- LEFT SIDE: PRODUCT GALLERY -->
+      <div class="col-lg-6 col-md-12 mb-4">
+        <% let images = (defaultVariant && defaultVariant.images && defaultVariant.images.length > 0)
+              ? defaultVariant.images
+              : []; %>
+
+        <% if (images.length > 0) { %>
+        <div class="d-flex">
+          <!-- Thumbnails -->
+          <div class="me-3" id="thumbnailContainer">
+            <% images.forEach((img, index) => { %>
+              <div class="thumbnail mb-2">
+                <img src="/uploads/variants/<%= img %>" data-index="<%= index %>"
+                     class="<%= index === 0 ? 'selected-thumb' : '' %>">
               </div>
             <% }) %>
-          <% } else { %>
-            <p>No images available</p>
-          <% } %>
+          </div>
+
+          <!-- Main Image + Arrows -->
+          <div class="flex-grow-1 main-image-container zoom-container">
+  <img src="/uploads/variants/<%= images[0] %>" id="mainImage" class="main-image zoom-image shadow">
+  <span class="arrow-btn arrow-left" id="prevImg">‹</span>
+  <span class="arrow-btn arrow-right" id="nextImg">›</span>
+</div>
         </div>
+        <% } else { %>
+          <p>No images available</p>
+        <% } %>
       </div>
 
       <!-- RIGHT SIDE: Product Details -->
       <div class="col-lg-6 col-md-12">
         <h2 class="mb-2"><%= product.name %></h2>
-        <p class="text-muted">HSN: <%= product.hsn || "N/A" %></p>
-
         <h5 class="text-decoration-line-through text-muted">₹<%= product.price %></h5>
-        <h4 class="text-danger fw-bold" id="offerPrice">
-          Offer Price: ₹<%= product.finalPrice || product.price %>
-        </h4>
+        <h4 class="text-dark fw-bold" id="offerPrice">₹<%= product.finalPrice || product.price %></h4>
 
         <!-- Size Selection -->
         <div class="my-3">
@@ -114,120 +170,117 @@
           <label class="form-label fw-bold">Color:</label>
           <div id="colorOptions">
             <% availableColors.forEach(color => { %>
-              <span class="color-swatch" 
-                    style="background-color:<%= color %>;" 
-                    data-color="<%= color %>" 
-                    title="<%= color %>"></span>
+              <span class="color-swatch" style="background-color:<%= color %>;" data-color="<%= color %>"></span>
             <% }) %>
           </div>
           <p id="ColorError" class="text-danger small"></p>
         </div>
 
-        <!-- Quantity Selection -->
-<div class="my-3">
-  <label class="form-label fw-bold">Quantity:</label>
-  <div class="d-flex align-items-center" style="max-width: 140px;">
-    <button class="btn btn-outline-dark btn-sm" id="qtyMinus">−</button>
-    <input type="number" id="quantity" class="form-control mx-2 text-center" value="1" min="1" max="5" style="width: 60px;">
-    <button class="btn btn-outline-dark btn-sm" id="qtyPlus">+</button>
-  </div>
-</div>
+        <!-- Quantity -->
+        <div class="my-3">
+          <label class="form-label fw-bold">Quantity:</label>
+          <div class="d-flex align-items-center" style="max-width: 140px;">
+            <button class="btn btn-outline-dark btn-sm" id="qtyMinus">−</button>
+            <input type="number" id="quantity" class="form-control mx-2 text-center" value="1" min="1" max="5" style="width: 60px;">
+            <button class="btn btn-outline-dark btn-sm" id="qtyPlus">+</button>
+          </div>
+        </div>
 
         <!-- Buttons -->
         <div class="my-4">
-          <button class="btn btn-zyra btn-wishlist me-3">Add to Wishlist</button>
-          <button class="btn btn-zyra btn-cart" onclick="addToCart('<%= product._id%>')">Add to Cart</button>
+          <button class="btn btn-zyra btn-wishlist me-3" onclick="addToWishlist('<%= product._id%>')">Add to Wishlist </button>
+          <button class="btn btn-zyra btn-cart" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
         </div>
+      </div>
+    </div>
 
-        <!-- Tabs -->
+    <!-- Description & Review -->
+    <div class="row mt-4">
+      <div class="col-12">
         <ul class="nav nav-tabs" id="productTab" role="tablist">
           <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="desc-tab" data-bs-toggle="tab" data-bs-target="#desc" type="button" role="tab">Description</button>
+            <button class="nav-link active" id="desc-tab" data-bs-toggle="tab" data-bs-target="#desc" type="button">Description</button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review" type="button" role="tab">Review</button>
+            <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review" type="button">Review</button>
           </li>
         </ul>
-
         <div class="tab-content mt-3">
-          <div class="tab-pane fade show active product-description" id="desc" role="tabpanel">
+          <div class="tab-pane fade show active product-description" id="desc">
             <%= product.description || "No description available." %>
           </div>
-          <div class="tab-pane fade" id="review" role="tabpanel">
+          <div class="tab-pane fade" id="review">
             <p>No reviews yet.</p>
           </div>
         </div>
       </div>
     </div>
-<!-- You May Also Like -->
-<div class="mt-5">
-  <h4>You May Also Like</h4>
-  <div class="row g-3 also-like">
-    <% if (likeProducts && likeProducts.length > 0) { %>
-      <% likeProducts.forEach(product => { %>
-        <div class="col-6 col-md-3 text-center">
-          <!-- Product Image -->
-          <% if (product.variantImage) { %>
-            <img src="/uploads/variants/<%= product.variantImage %>" 
-                 alt="<%= product.name %>" 
-                 class="img-fluid rounded">
-          <% } else { %>
-            <img src="https://via.placeholder.com/200x250" alt="No Image" class="img-fluid rounded">
-          <% } %>
 
-          <!-- Product Info -->
-          <p class="mt-2">
-            <%= product.name %><br>
-            <%= product.variantColor || '' %><br>
-            ₹<%= product.price %>
-          </p>
-
-          <!-- View Product Button -->
-          <a href="/product/<%= product._id %>" class="btn btn-sm btn-outline-dark">View</a>
-        </div>
-      <% }) %>
-    <% } else { %>
-      <p class="text-muted">No similar products found.</p>
-    <% } %>
+    <!-- You May Also Like -->
+    <div class="mt-5">
+      <h4>You May Also Like</h4>
+      <div class="row g-3 also-like">
+        <% if (likeProducts && likeProducts.length > 0) { %>
+          <% likeProducts.forEach(product => { %>
+            <div class="col-6 col-md-3">
+              <div class="product-card-like text-center p-3">
+                <% if (product.variantImage) { %>
+                  <img src="/uploads/variants/<%= product.variantImage %>" class="img-fluid rounded mb-2">
+                <% } else { %>
+                  <img src="https://via.placeholder.com/200x250" class="img-fluid rounded mb-2">
+                <% } %>
+                <p class="mt-2" style="font-size:0.85rem;">
+                  <%= product.name %><br>₹<%= product.price %>
+                </p>
+                <a href="/product/<%= product._id %>" class="btn btn-sm btn-outline-dark">View</a>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <p class="text-muted">No similar products found.</p>
+        <% } %>
+      </div>
+    </div>
   </div>
-</div>
+
+  <%- include("../../views/partials/user/footer") %>
+
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script>
+
+    const zoomContainer = document.querySelector('.zoom-container');
+const zoomImage = document.querySelector('.zoom-image');
+
+zoomContainer.addEventListener('mousemove', (e) => {
+  const rect = zoomContainer.getBoundingClientRect();
+  const x = ((e.clientX - rect.left) / rect.width) * 100;
+  const y = ((e.clientY - rect.top) / rect.height) * 100;
+  zoomImage.style.transformOrigin = `${x}% ${y}%`;
+});
+    let currentIndex = 0;
+    const images = <%- JSON.stringify(defaultVariant?.images || []) %>;
+    const mainImage = document.getElementById("mainImage");
+
+    // Image navigation
+    function updateImage() {
+      mainImage.src = `/uploads/variants/${images[currentIndex]}`;
+      document.querySelectorAll(".thumbnail img").forEach((img, i) => {
+        img.classList.toggle("selected-thumb", i === currentIndex);
+      });
+    }
+    document.getElementById("nextImg").onclick = () => { currentIndex = (currentIndex + 1) % images.length; updateImage(); };
+    document.getElementById("prevImg").onclick = () => { currentIndex = (currentIndex - 1 + images.length) % images.length; updateImage(); };
+    document.querySelectorAll(".thumbnail img").forEach(img => {
+      img.addEventListener("click", function () { currentIndex = Number(this.dataset.index); updateImage(); });
+    });
+
     const variants = <%- JSON.stringify(variants) %>;
     const basePrice = <%= product.finalPrice || product.price %>;
-    
     let selectedSize = null;
     let selectedColor = null;
-
-    const updateProductView = (variant) => {
-      const imageContainer = document.querySelector('.product-images .row');
-      imageContainer.innerHTML = variant.images.map(img =>
-        `<div class="col-6"><img src="/uploads/variants/${img}" class="img-fluid shadow-sm"></div>`
-      ).join('');
-
-      // Always use base product price (since variants don’t have prices)
-      document.getElementById('offerPrice').textContent = "Offer Price: ₹" + basePrice;
-    };
-
-    const findVariant = () => {
-      let variant = null;
-
-      if (selectedSize && selectedColor) {
-        variant = variants.find(v => v.size === selectedSize && v.color === selectedColor);
-      }
-      if (!variant && selectedSize) {
-        variant = variants.find(v => v.size === selectedSize);
-      }
-      if (!variant && selectedColor) {
-        variant = variants.find(v => v.color === selectedColor);
-      }
-
-      if (variant) {
-        updateProductView(variant);
-      }
-    };
 
     // Size selection
     document.querySelectorAll('.size-btn').forEach(btn => {
@@ -235,7 +288,9 @@
         selectedSize = btn.getAttribute('data-size');
         document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        findVariant();
+
+        // Update variant based on size + color
+        updateVariant();
       });
     });
 
@@ -245,87 +300,131 @@
         selectedColor = colorEl.getAttribute('data-color');
         document.querySelectorAll('.color-swatch').forEach(c => c.classList.remove('selected'));
         colorEl.classList.add('selected');
-        findVariant();
+
+        // Update variant based on color + size
+        updateVariant();
       });
     });
-     const qtyInput = document.getElementById("quantity");
-  const qtyMinus = document.getElementById("qtyMinus");
-  const qtyPlus = document.getElementById("qtyPlus");
 
-  qtyMinus.addEventListener("click", () => {
-    let value = parseInt(qtyInput.value);
-    if (value > 1) qtyInput.value = value - 1;
-  });
+    function updateVariant() {
+      let variant = null;
+      if (selectedSize && selectedColor) variant = variants.find(v => v.size === selectedSize && v.color === selectedColor);
+      if (!variant && selectedSize) variant = variants.find(v => v.size === selectedSize);
+      if (!variant && selectedColor) variant = variants.find(v => v.color === selectedColor);
 
-  qtyPlus.addEventListener("click", () => {
-    let value = parseInt(qtyInput.value);
-    if (value < 5) qtyInput.value = value + 1;
-  });
+      if (variant) {
+        // Update main image
+        if (variant.images && variant.images.length > 0) {
+          mainImage.src = `/uploads/variants/${variant.images[0]}`;
+          currentIndex = 0;
 
-async function addToCart(id) {
-  let hasError = false;
+          // Update thumbnails
+          const thumbContainer = document.getElementById('thumbnailContainer');
+          thumbContainer.innerHTML = '';
+          variant.images.forEach((img, index) => {
+            const thumbDiv = document.createElement('div');
+            thumbDiv.className = 'thumbnail mb-2';
+            const thumbImg = document.createElement('img');
+            thumbImg.src = `/uploads/variants/${img}`;
+            thumbImg.dataset.index = index;
+            if (index === 0) thumbImg.classList.add('selected-thumb');
+            thumbImg.addEventListener('click', () => {
+              currentIndex = index;
+              mainImage.src = `/uploads/variants/${variant.images[index]}`;
+              document.querySelectorAll('.thumbnail img').forEach(t => t.classList.remove('selected-thumb'));
+              thumbImg.classList.add('selected-thumb');
+            });
+            thumbDiv.appendChild(thumbImg);
+            thumbContainer.appendChild(thumbDiv);
+          });
+        }
 
-  if (!selectedSize) {
-    document.getElementById('sizeError').innerText = 'Select size';
-    hasError = true;
-  }
-
-  if (!selectedColor) {
-    document.getElementById('ColorError').innerText = 'Select color';
-    hasError = true;
-  }
-
-  const productId = id;
-
-  
-
-  const quantity = document.getElementById('quantity').value; // FIXED
-
-  if (hasError) return;
-
-  try {
-    const response = await fetch('/cart/addProduct', {
-      method: "POST",
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        productId,
-         
-        size: selectedSize,              
-        color: selectedColor,             
-        quantity
-      })
-    });
-
-    const result = await response.json();
-
-    if (result.success) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: result.message,
-      }).then(() => {
-        window.location.reload();
-      });
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: result.message,
-      });
+        // Update price
+        document.getElementById('offerPrice').textContent = "₹" + (variant.price || basePrice);
+      }
     }
 
-  } catch (error) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Something went wrong'
+    // Quantity buttons
+    const qtyInput = document.getElementById("quantity");
+    const qtyMinus = document.getElementById("qtyMinus");
+    const qtyPlus = document.getElementById("qtyPlus");
+
+    qtyMinus.addEventListener("click", () => {
+      let value = parseInt(qtyInput.value);
+      if (value > 1) qtyInput.value = value - 1;
     });
-  }
-}
 
-    
+    qtyPlus.addEventListener("click", () => {
+      let value = parseInt(qtyInput.value);
+      if (value < 5) qtyInput.value = value + 1;
+    });
+
+    // Add to cart
+    async function addToCart(id) {
+      let hasError = false;
+      if (!selectedSize) { document.getElementById('sizeError').innerText = 'Select size'; hasError = true; }
+      if (!selectedColor) { document.getElementById('ColorError').innerText = 'Select color'; hasError = true; }
+      const quantity = document.getElementById('quantity').value;
+      if (hasError) return;
+
+      try {
+        const response = await fetch('/cart/addProduct', {
+          method: "POST",
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: id, size: selectedSize, color: selectedColor, quantity })
+        });
+        const result = await response.json();
+        if (result.success) {
+          Swal.fire({ icon: 'success', title: 'Success!', text: result.message }).then(() => { window.location.reload(); });
+        } else {
+          Swal.fire({ icon: 'error', title: 'Error', text: result.message });
+        }
+      } catch (error) {
+        Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong' });
+      }
+    }
+
+
+    async function addToWishlist(productId){
+      let hasError=false
+      if (!selectedSize) { document.getElementById('sizeError').innerText = 'Select size'; hasError = true; }
+      if (!selectedColor) { document.getElementById('ColorError').innerText = 'Select color'; hasError = true; }
+      if (hasError) return;
+      try{
+        const response=await fetch(`/wishlist/toggle?size=${selectedSize}&color=${selectedColor}`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({productId})
+      })
+
+      const result=await response.json()
+
+      if (result.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: result.message,
+                confirmButtonColor: '#198754'
+            })
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: result.message,
+                confirmButtonColor: '#dc3545'
+            });
+        }
+      }catch(error){
+        Swal.fire({
+            icon: 'error',
+            title: 'Server Error',
+            text: 'Something went wrong',
+            confirmButtonColor: '#dc3545'
+        });
+      }
+
+
+    }
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 </body>
 </html>

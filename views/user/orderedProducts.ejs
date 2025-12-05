@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,15 +46,18 @@
       width: 12px;
       height: 12px;
       border-radius: 50%;
-      background-color: #ddd; /* default dot color */
+      background-color: #ddd;
+      /* default dot color */
     }
 
     .tracking-list li.text-success::before {
-      background-color: #28a745; /* completed */
+      background-color: #28a745;
+      /* completed */
     }
 
     .tracking-list li.text-primary::before {
-      background-color: #0d6efd; /* current */
+      background-color: #0d6efd;
+      /* current */
     }
 
     .tracking-list li::after {
@@ -75,7 +79,7 @@
       padding: 25px;
       border-radius: 12px;
       border: 1px solid #e5e5e5;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     }
 
     .tracking-column {
@@ -114,279 +118,327 @@
 <body>
   <%- include("../../views/partials/user/header") %>
 
-<div id="productDetailsPage">
+    <div id="productDetailsPage">
 
-  <a href="/profile/orders" class="btn btn-dark mb-3">← Back to Orders</a>
+      <a href="/profile/orders" class="btn btn-dark mb-3">← Back to Orders</a>
 
-  <div class="details-box">
-    <div class="row">
+      <div class="details-box">
+        <div class="row">
 
-      <!-- LEFT SIDE - TRACKING -->
-      <div class="col-md-3 tracking-column">
-        <h6 class="fw-bold mb-3">Tracking</h6>
+          <!-- LEFT SIDE - TRACKING -->
+          <div class="col-md-3 tracking-column">
+            <h6 class="fw-bold mb-3">Tracking</h6>
 
-        <% 
-          const timeline = ['Processing','Packed', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled','Cancellation Requested', 'Return Requested', 'Returning','Return Rejected', 'Returned','Failed']; 
-        %>
+            <% const timeline=[ 'Confirmed' , 'Processing' , 'Packed' , 'Shipped' , 'Delivered' , 'Cancelled'
+              , 'Cancellation Requested' , 'Return Requested' , 'Returning' , 'Return Rejected' , 'Returned' , 'Failed'
+              ]; %>
 
-        <ul class="tracking-list">
-          <% timeline.forEach(stage => { %>
-            <% 
-              let stageClass = '';
-              if (stage === orderedItem.status) {
-                stageClass = 'text-primary fw-bold'; // current stage
-              } else if (timeline.indexOf(stage) < timeline.indexOf(orderedItem.status)) {
-                stageClass = 'text-success'; // completed stage
-              } else {
-                stageClass = 'text-muted'; // future stage
-              }
-            %>
-            <li class="<%= stageClass %>"><%= stage %></li>
-          <% }) %>
-        </ul>
-      </div>
+              <ul class="tracking-list">
+                <% timeline.forEach(stage=> {
+                  let stageClass = '';
 
-      <!-- RIGHT SIDE -->
-      <div class="col-md-9">
+                  // Current stage
+                  if (stage === orderedItem.status) {
+                  stageClass = 'text-primary fw-bold';
+                  }
+                  // Completed stage
+                  else if (timeline.indexOf(stage) < timeline.indexOf(orderedItem.status)) { stageClass='text-success' ;
+                    } // Future stage else { stageClass='text-muted' ; } %>
 
-        <!-- PRODUCT HEADER -->
-        <div class="d-flex align-items-start gap-3">
+                    <li class="<%= stageClass %>">
+                      <%= stage %>
+                    </li>
 
-          <img 
-            src="/uploads/variants/<%= orderedItem.variant?.images?.[0] || 'default.jpg' %>" 
-            width="130" height="130"
-            style="object-fit:contain; border:1px solid #ddd; border-radius:10px;"
-          >
+                    <% }) %>
+              </ul>
+          </div>
+          <!-- RIGHT SIDE -->
+          <div class="col-md-9">
 
-          <div>
-            <h5 class="fw-bold"><%= orderedItem.productName %></h5>
+            <!-- PRODUCT HEADER -->
+            <div class="d-flex align-items-start gap-3" onclick='window.location.href="/product/<%= orderedItem.product._id %>"'>
 
-            <p><b>Payment Method:</b> <%= order.paymentMethod %></p>
-            <p><b>Order No:</b> <%= order.orderId %></p>
 
-            <p class=" <%= orderedItem.status === 'Cancelled' || orderedItem.status === 'Returned' ? 'text-danger' : 'text-success' %>">
-             Order Status: <%= orderedItem.status %>
-            </p>
-<% let st = orderedItem.status.toUpperCase(); %>
-<% const disableCancel = orderedItem.cancellationRequest.status !== 'NONE'; %>
-<% const disableReturn = orderedItem.returnRequest.status !== 'NONE'; %>
+              <img src="/uploads/variants/<%= orderedItem.variant?.images?.[0] || 'default.jpg' %>" width="130"
+                height="130" style="object-fit:contain; border:1px solid #ddd; border-radius:10px;">
+
+              <div>
+                <h5 class="fw-bold">
+                  <%= orderedItem.productName %>
+                </h5>
+
+                <p><b>Payment Method:</b>
+                  <%= order.paymentMethod %>
+                </p>
+                <p><b>Order No:</b>
+                  <%= order.orderId %>
+                </p>
+
+                <p
+                  class=" <%= orderedItem.status === 'Cancelled' || orderedItem.status === 'Returned' ? 'text-danger' : 'text-success' %>">
+                  Order Status: <%= orderedItem.status %>
+                </p>
+  <% 
+  let st = order.orderedItems[0].status.toUpperCase(); 
+  
+  const disableCancel = order.orderedItems.every(i => i.cancellationRequest?.status === true);
+  const disableReturn = order.orderedItems.every(i => i.returnRequest?.status === true);
+
+  const cancelBlocked = (st === "CANCELLED" || st === "CANCELLATION REQUESTED");
+
+  // UPDATED: Now CANCELLED also blocks RETURN button
+  const returnBlocked = (
+    st === "CANCELLED" ||
+    st === "RETURN REQUESTED" ||
+    st === "RETURNED" ||
+    st === "RETURN REJECTED" ||
+    st === "RETURNING"
+  );
+%>
+
+<% if (st==="PROCESSING" || st==="PACKED" || st==="CONFIRMED" || st==="SHIPPED") { %>
+  <div class="text-primary">
+    Expected Delivery: <%= new Date(orderedItem.expectedDelivery).toLocaleDateString("en-IN") %>
+  </div>
+<% } %>
 
 <div class="order-actions d-flex flex-wrap gap-2">
-  <% if (st === "PROCESSING" || st === "PACKED" || st === "CONFIRMED" || st === "CANCELLED" || st === "CANCELLATION REQUESTED") { %>
-    <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelModal" 
-      <%= disableCancel ? 'disabled' : '' %>>
-      Cancel Item
-    </button>
+
+  <% if (st === "PROCESSING" || st === "PACKED" || st === "CONFIRMED") { %>
+
+      <% if (!cancelBlocked && !disableCancel) { %>
+        <button class="btn btn-outline-danger btn-sm" 
+          data-bs-toggle="modal" data-bs-target="#cancelModal">
+          Cancel Item
+        </button>
+      <% } %>
+
   <% } else { %>
-    <button class="btn btn-outline-primary btn-sm">Invoice</button>
-    <button class="btn btn-outline-primary btn-sm">Review</button>
-    <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#returnModal"
-      <%= disableReturn ? 'disabled' : '' %>>
-      Return
-    </button>
+
+      <% if (!cancelBlocked) { %>
+        <button class="btn btn-outline-primary btn-sm">Review</button>
+      <% } %>
+
+      <% if (!returnBlocked && !disableReturn) { %>
+        <button class="btn btn-outline-warning btn-sm"
+          data-bs-toggle="modal" data-bs-target="#returnModal">
+          Return
+        </button>
+      <% } %>
+
   <% } %>
+
+</div>
+
+
+
+              </div>
             </div>
 
-            
+            <hr>
+
+            <!-- DELIVERY ADDRESS -->
+            <h6 class="fw-bold">Delivery Address</h6>
+
+            <div class="p-3 bg-light border rounded">
+              <p class="mb-1">
+                <%= order.address %>
+              </p>
+            </div>
+
+            <hr>
+
+            <!-- ORDER ITEMS -->
+            <h6 class="fw-bold mb-2">Order Items • 1 product</h6>
+
+            <div class="d-flex gap-3 p-3 bg-light border rounded">
+
+              <img src="/uploads/variants/<%= orderedItem.variant?.images?.[0] || 'default.jpg' %>" width="60"
+                height="60" style="object-fit:contain;">
+
+              <div>
+                <p class="fw-bold mb-0">
+                  <%= orderedItem.productName %>
+                </p>
+
+                <small>
+                  Size: <%= orderedItem.size %> |
+                    Color: <%= orderedItem.color %>
+                </small><br>
+
+                <small>Qty: <%= orderedItem.quantity %></small>
+              </div>
+
+              <div class="ms-auto fw-bold">
+                ₹<%= orderedItem.finalPrice %>
+              </div>
+
+            </div>
+
+            <hr>
+
+
+
+            <!-- PRICE SUMMARY -->
+            <h6 class="fw-bold mb-3">Price Summary</h6>
+
+            <div class="row mb-1">
+              <div class="col">Total MRP</div>
+              <div class="col text-end">₹<%= orderedItem.MRPprice %>
+              </div>
+            </div>
+
+            <div class="row text-success fw-bold mb-1">
+              <div class="col">Discount</div>
+              <div class="col text-end">- ₹<%= orderedItem.MRPprice-orderedItem.finalPrice %>
+              </div>
+            </div>
+
+            <div class="row mb-1">
+              <div class="col">Subtotal</div>
+              <div class="col text-end">₹<%= orderedItem.itemsTotal %>
+              </div>
+            </div>
+
+            <hr>
+
+            <div class="row fw-bold fs-5">
+              <div class="col">Total Payable</div>
+              <div class="col text-end">₹<%= order.subTotal %>
+              </div>
+            </div>
 
           </div>
         </div>
+      </div>
 
-        <hr>
+    </div>
 
-        <!-- DELIVERY ADDRESS -->
-        <h6 class="fw-bold">Delivery Address</h6>
-
-        <div class="p-3 bg-light border rounded">
-          <p class="mb-1"><%= order.address %></p>
-        </div>
-
-        <hr>
-
-        <!-- ORDER ITEMS -->
-        <h6 class="fw-bold mb-2">Order Items • 1 product</h6>
-
-        <div class="d-flex gap-3 p-3 bg-light border rounded">
-
-          <img 
-            src="/uploads/variants/<%= orderedItem.variant?.images?.[0] || 'default.jpg' %>" 
-            width="60" height="60"
-            style="object-fit:contain;"
-          >
-
-          <div>
-            <p class="fw-bold mb-0"><%= orderedItem.productName %></p>
-
-            <small>
-              Size: <%= orderedItem.size %> |
-              Color: <%= orderedItem.color %>
-            </small><br>
-
-            <small>Qty: <%= orderedItem.quantity %></small>
+    <!-- Cancel Modal -->
+    <div class="modal right fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content p-3">
+          <div class="modal-header">
+            <h5 class="modal-title" id="cancelModalLabel">Cancel Item</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-
-          <div class="ms-auto fw-bold">
-            ₹<%= orderedItem.finalPrice %>
+          <div class="modal-body">
+            <label for="cancelReason" class="form-label">Reason for cancellation:</label>
+            <textarea id="cancelReason" class="form-control" rows="4"></textarea>
+            <button class="btn btn-danger mt-3 w-100"
+              onclick="CancelItem('<%= order.orderId%>','<%= orderedItem._id%>')">Submit Cancellation</button>
           </div>
-
         </div>
-
-        <hr>
-
-        <!-- PRICE SUMMARY -->
-        <h6 class="fw-bold mb-3">Price Summary</h6>
-
-        <div class="row mb-1">
-          <div class="col">Total MRP</div>
-          <div class="col text-end">₹<%= orderedItem.totalMrp %></div>
-        </div>
-
-        <div class="row text-success fw-bold mb-1">
-          <div class="col">Discount</div>
-          <div class="col text-end">- ₹<%= order.discount %></div>
-        </div>
-
-        <div class="row mb-1">
-          <div class="col">Subtotal</div>
-          <div class="col text-end">₹<%= order.subtotal %></div>
-        </div>
-
-        <hr>
-
-        <div class="row fw-bold fs-5">
-          <div class="col">Total Payable</div>
-          <div class="col text-end">₹<%= order.totalPayable %></div>
-        </div>
-
       </div>
     </div>
-  </div>
 
-</div>
-
-<!-- Cancel Modal -->
-<div class="modal right fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content p-3">
-      <div class="modal-header">
-        <h5 class="modal-title" id="cancelModalLabel">Cancel Item</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <label for="cancelReason" class="form-label">Reason for cancellation:</label>
-        <textarea id="cancelReason" class="form-control" rows="4"></textarea>
-        <button class="btn btn-danger mt-3 w-100" onclick="CancelItem('<%= order.orderId%>','<%= orderedItem._id%>')">Submit Cancellation</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Return Modal -->
-<div class="modal right fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content p-3">
-      <div class="modal-header">
-        <h5 class="modal-title" id="returnModalLabel">Return Item</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <label for="returnReason" class="form-label">Reason for return:</label>
-        <textarea id="returnReason" class="form-control" rows="4"></textarea>
-        <button class="btn btn-warning mt-3 w-100" onclick="returnItem('<%= order.orderId%>','<%= orderedItem._id%>')">Submit Return</button>
+    <!-- Return Modal -->
+    <div class="modal right fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content p-3">
+          <div class="modal-header">
+            <h5 class="modal-title" id="returnModalLabel">Return Item</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <label for="returnReason" class="form-label">Reason for return:</label>
+            <textarea id="returnReason" class="form-control" rows="4"></textarea>
+            <button class="btn btn-warning mt-3 w-100"
+              onclick="returnItem('<%= order.orderId%>','<%= orderedItem._id%>')">Submit Return</button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    async function CancelItem(orderId,itemId) {
-        cancelReason=document.getElementById('cancelReason').value
-        try{
-            const response=await fetch("/order/cancel", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            itemId,
-            orderId,
-            cancelReason
-        })
-    })
-    const result=await response.json() 
-    
-                    if (result.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'cancel requested!',
-                            text: result.message,
-                            confirmButtonColor: '#198754'
-                        }).then(() => window.location.reload());
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Failed',
-                            text: result.message,
-                            confirmButtonColor: '#dc3545'
-                        });
-                    }
-    
-    
-    }catch(error){
-        Swal.fire({
-                        icon: 'error',
-                        title: 'Server Error',
-                        text: 'Something went wrong',
-                        confirmButtonColor: '#dc3545'
-                    });
-    }
-        
-        
-    }
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      async function CancelItem(orderId, itemId) {
+        cancelReason = document.getElementById('cancelReason').value
+        try {
+          const response = await fetch("/order/cancel", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              itemId,
+              orderId,
+              cancelReason
+            })
+          })
+          const result = await response.json()
+
+          if (result.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'cancel requested!',
+              text: result.message,
+              confirmButtonColor: '#198754'
+            }).then(() => window.location.reload());
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Failed',
+              text: result.message,
+              confirmButtonColor: '#dc3545'
+            });
+          }
 
 
-    async function returnItem(orderId,itemId) {
- returnReason=document.getElementById('returnReason').value
-        try{
-            const response=await fetch("/order/returnItem", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            itemId,
-            orderId,
-            returnReason
-        })
-    })
-    const result=await response.json() 
-    
-                    if (result.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'cancel requested!',
-                            text: result.message,
-                            confirmButtonColor: '#198754'
-                        }).then(() => window.location.reload());
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Failed',
-                            text: result.message,
-                            confirmButtonColor: '#dc3545'
-                        });
-                    }
-    
-    
-    }catch(error){
-        Swal.fire({
-                        icon: 'error',
-                        title: 'Server Error',
-                        text: 'Something went wrong',
-                        confirmButtonColor: '#dc3545'
-                    });
-    }
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Server Error',
+            text: 'Something went wrong',
+            confirmButtonColor: '#dc3545'
+          });
+        }
 
-      
-    }
-</script>
+
+      }
+
+
+      async function returnItem(orderId, itemId) {
+        returnReason = document.getElementById('returnReason').value
+        try {
+          const response = await fetch("/order/returnItem", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              itemId,
+              orderId,
+              returnReason
+            })
+          })
+          const result = await response.json()
+
+          if (result.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'cancel requested!',
+              text: result.message,
+              confirmButtonColor: '#198754'
+            }).then(() => window.location.reload());
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Failed',
+              text: result.message,
+              confirmButtonColor: '#dc3545'
+            });
+          }
+
+
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Server Error',
+            text: 'Something went wrong',
+            confirmButtonColor: '#dc3545'
+          });
+        }
+
+
+      }
+    </script>
 </body>
-</html>
 
+</html>

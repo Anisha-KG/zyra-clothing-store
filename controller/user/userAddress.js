@@ -1,28 +1,39 @@
 const Address=require('../../models/addressSchema')
 const User=require('../../models/userScema')
 const httpStatus=require('../../Constants/httpStatuscode')
+const viewAddresses = async (req, res, next) => {
+  try {
+    const userId = req.session.user;
 
-const viewAddresses=async(req,res,next)=>{
-    try{
-        const userId=req.session.user 
-    let user=null 
-    if(userId){
-        user=await User.findById(userId)
+    let user = null;
+    if (userId) {
+      user = await User.findById(userId);
     }
 
-    const userAddress=await Address.findOne({userId})
-    const addresses=userAddress?userAddress.address:[]
-    let limit=1
+    let page = parseInt(req.query.page) || 1;   // current page
+    let limit = 3;                              // addresses per page
+    let skip = (page - 1) * limit;
 
-    res.render('userAddress',{
-        user,
-        addresses,
-        limit
-    })
-    }catch(error){
-        next(error)
-    }
-}
+    const userAddress = await Address.findOne({ userId });
+    const addresses = userAddress ? userAddress.address : [];
+
+    const totalAddresses = addresses.length;
+    const totalPages = Math.ceil(totalAddresses / limit);
+
+    const paginatedAddresses = addresses.slice(skip, skip + limit);
+
+    res.render("userAddress", {
+      user,
+      addresses: paginatedAddresses,
+      page,
+      totalPages,
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 const addAddress=async(req,res,next)=>{
     try{

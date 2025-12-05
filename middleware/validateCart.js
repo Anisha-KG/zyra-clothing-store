@@ -134,6 +134,65 @@ const validateCart= async (req, res, next) => {
   }
 };
 
+
+const validateCartt = async (req, res, next) => {
+  try {
+    const isFetch = req.headers['x-requested-with'] === 'fetch';
+
+    const userId = req.session.user;
+    if (!userId) {
+      if (isFetch)
+        return res.status(400).json({ success: false, message: "Please login first" });
+
+      return res.redirect("/login");
+    }
+
+    const cart = await Cart.findOne({ userId });
+    if (!cart || cart.items.length === 0) {
+      if (isFetch)
+        return res.status(400).json({ success: false, message: "Cart is empty" });
+
+      return res.redirect("/getCart");
+    }
+
+    for (let item of cart.items) {
+      if (item.quantity === 0) {
+        if (isFetch)
+          return res.status(400).json({ success: false, message: "Item quantity cannot be zero" });
+
+        return res.redirect("/getCart");
+      }
+
+      const product = await Product.findById(item.productId)
+        .populate(['category', 'subcategory']);
+
+      if (!product || product.isBlocked ||
+          !product.category || product.category.isDeleted ||
+          !product.subcategory || !product.subcategory.isListed) {
+
+        if (isFetch)
+          return res.status(400).json({ success: false, message: "Some items are unavailable" });
+
+        return res.redirect("/getCart");
+      }
+
+      const variant = await Variant.findById(item.variantId);
+      if (!variant || !variant.isListed || item.quantity > variant.quantity) {
+
+        if (isFetch)
+          return res.status(400).json({ success: false, message: "Stock is not available" });
+
+        return res.redirect("/getCart");
+      }
+    }
+
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+
+
 const validateCart2 = async (req, res, next) => {
   try {
     const userId = req.session.user;
@@ -201,4 +260,4 @@ const validateCart2 = async (req, res, next) => {
 
 
 
-module.exports = {validateCart};
+module.exports = {validateCart,validateCartt};

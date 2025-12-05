@@ -6,21 +6,17 @@ const Subcategory = require("../../models/subcategorySchema");
 const Brand = require("../../models/brandsSchema");
 const mongoose=require('mongoose')
 const User=require('../../models/userScema')
+const Wishlist=require('../../models/wishlistSchema')
 
-
-    
 const shopPage = async (req, res) => {
   try {
-
-    
-    
-
-     const userId = req.session.user;
+    const userId = req.session.user;
     let user = null;
 
     if (userId) {
       user = await User.findById(userId).lean();
     }
+
     const [category, subcategory, allVariants, brand] = await Promise.all([
       Category.find({ isListed: true }).lean(),
       Subcategory.find({ isListed: true }).lean(),
@@ -55,7 +51,7 @@ const shopPage = async (req, res) => {
     const limit = 8;
     const skip = (page - 1) * limit;
 
-
+    // Filter variants for size & color
     let variantQuery = { isListed: true, quantity: { $gt: 0 } };
     if (sizeArr.length) variantQuery.size = { $in: sizeArr };
     if (colorArr.length) variantQuery.color = { $in: colorArr };
@@ -63,7 +59,7 @@ const shopPage = async (req, res) => {
     const filteredVariants = await Variant.find(variantQuery).lean();
     const productIdsFromVariants = filteredVariants.map(v => v.product);
 
-
+    // Product filters
     let productQuery = { isBlocked: false };
     if (categoryId) productQuery.category = categoryId;
     if (subcategoryId) productQuery.subcategory = subcategoryId;
@@ -75,19 +71,20 @@ const shopPage = async (req, res) => {
       ];
     }
 
-
+    // Price filter (stored in product collection)
     if (price === 'price1') productQuery.finalPrice = { $gte: 0, $lt: 500 };
     else if (price === 'price2') productQuery.finalPrice = { $gte: 500, $lt: 1000 };
     else if (price === 'price3') productQuery.finalPrice = { $gte: 1000, $lt: 2000 };
     else if (price === 'price4') productQuery.finalPrice = { $gte: 2000 };
 
-
+    // Variant filter
     if ((sizeArr.length || colorArr.length) && productIdsFromVariants.length > 0) {
       productQuery._id = { $in: productIdsFromVariants };
     } else if ((sizeArr.length || colorArr.length) && productIdsFromVariants.length === 0) {
-      productQuery._id = { $in: ['000000000000000000000000'] }; 
+      productQuery._id = { $in: ['000000000000000000000000'] }; // ensures no product matches
     }
 
+    // Sorting
     let sortQuery = {};
     if (sortBy === 'lowhigh') sortQuery.finalPrice = 1;
     else if (sortBy === 'highlow') sortQuery.finalPrice = -1;
@@ -95,24 +92,35 @@ const shopPage = async (req, res) => {
     else if (sortBy === 'za') sortQuery.name = -1;
     else if (sortBy === 'newest') sortQuery.createdAt = -1;
 
-
     const totalProducts = await Product.countDocuments(productQuery);
     const totalPages = Math.ceil(totalProducts / limit);
 
-
     const products = await Product.find(productQuery)
       .sort(sortQuery)
+      .collation({ locale: 'en', strength: 2 }) // ensures proper alphabetical sorting
       .skip(skip)
       .limit(limit)
       .lean();
 
     const productIds = products.map(p => p._id.toString());
 
-
     const variants = filteredVariants.filter(v => productIds.includes(v.product.toString()));
+
+    // Wishlist
+    let wishlistProducts = [];
+    if (user) {
+      const wishlist = await Wishlist.findOne({ userId }).lean();
+      wishlistProducts = wishlist?.products
+        ?.filter(p => p && p.productId && p.variantId)
+        ?.map(p => ({
+          productId: p.productId.toString(),
+          variantId: p.variantId.toString()
+        })) || [];
+    }
 
     res.render('shopPage', {
       user,
+      wishlistProducts,
       totalPages,
       products,
       variants,
@@ -121,6 +129,7 @@ const shopPage = async (req, res) => {
       category,
       subcategory,
       brand,
+      search,
       currentPage: page,
       selectedSort: sortBy,
       selectedSizes: sizeArr,

@@ -17,10 +17,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Nanum+Myeongjo&family=Roboto:wght@100..900&display=swap" rel="stylesheet">
 
   <style>
-    .custom-navbar {
-      padding-left: 50px;
-      padding-right: 50px;
-    }
+   .custom-navbar {
+  padding-left: 50px;
+  padding-right: 50px;
+  background-color: #dbcfc5;
+}
 
     .logo-text {
       font-size: 2.5rem;
@@ -116,9 +117,30 @@
 
             <!-- Account Dropdown -->
             <li class="nav-item dropdown me-3">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                <i class="bi bi-person-circle"></i> <%= user.name || 'Account' %>
-              </a>
+             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+
+  <% if (user.profileImage) { %>
+    <!-- Show uploaded image -->
+    <img src="<%= user.profileImage %>" 
+         class="rounded-circle me-2"
+         style="width: 30px; height: 30px; object-fit: cover;">
+  <% } else { %>
+    <!-- Show initials -->
+    <% 
+      const name = user.name || "";
+      const first = name.charAt(0).toUpperCase();
+      const last = name.charAt(name.length - 1).toUpperCase();
+      const initials = first + last;
+    %>
+    <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center me-2"
+         style="width: 30px; height: 30px; font-size: 12px; font-weight: 600;">
+      <%= initials %>
+    </div>
+  <% } %>
+
+  <span><%= user.name || 'Account' %></span>
+</a>
+
               <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item" href="/profile">Account</a></li>
                 <li><a class="dropdown-item" href="/orders">Orders</a></li>

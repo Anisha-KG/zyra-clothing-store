@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zyra - My Orders</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-
   <style>
     body {
       background: #f5eee9 !important;
@@ -14,17 +14,50 @@
       font-size: 14px;
     }
 
-    .order-actions .order-btn {
-      min-width: 100px;
-      text-align: center;
-      margin-bottom: 5px;
+    .order-actions .order-btn,
+    .order-actions .btn-outline-danger,
+    .order-actions .btn-outline-warning,
+    .order-actions .btn-outline-primary {
+      min-width: 130px !important;
+      height: 38px !important;
+      border: 1.5px solid #912f2f !important;
+      color: #912f2f !important;
+      border-radius: 6px !important;
+      font-size: 13px;
+      font-weight: 500;
     }
 
-    .order-header a, .order-header button {
+    .order-actions .btn-outline-danger:hover,
+    .order-actions .btn-outline-warning:hover,
+    .order-actions .btn-outline-primary:hover {
+      background: #912f2f !important;
+      color: #fff !important;
+    }
+
+    .order-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      min-width: 150px;
+    }
+
+    .actions-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .order-header a,
+    .order-header button {
       text-decoration: none;
       color: #0d6efd;
     }
-    .order-header a:hover, .order-header button:hover {
+
+    .order-header a:hover,
+    .order-header button:hover {
       text-decoration: underline;
     }
 
@@ -33,7 +66,7 @@
       padding: 25px;
       border-radius: 12px;
       border: 1px solid #e5e5e5;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
       margin-bottom: 35px;
     }
 
@@ -49,10 +82,11 @@
     .order-item {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
       gap: 20px;
       padding: 18px 0;
       border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
     }
 
     .product-img {
@@ -64,15 +98,6 @@
       background: #fff;
     }
 
-    .order-actions {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 8px;
-      min-width: 150px;
-    }
-
-    /* Footer actions */
     .order-footer {
       display: flex;
       justify-content: space-between;
@@ -99,7 +124,6 @@
       justify-content: center;
     }
 
-    /* Shrink modal & reduce font */
     .modal-content {
       font-size: 0.9rem;
     }
@@ -109,199 +133,192 @@
     }
   </style>
 </head>
+
 <body>
+  <%- include("../../views/partials/user/header") %>
 
-<%- include("../../views/partials/user/header") %>
+  <div id="ordersPage">
+    <div class="container py-5">
+      <div class="row">
+        <div class="col-md-3 mb-4" id="ordersSidebar">
+          <%- include("../../views/partials/user/userProfile-sidebar") %>
+        </div>
 
-<div id="ordersPage">
-  <div class="container py-5">
-    <div class="row">
-      <div class="col-md-3 mb-4" id="ordersSidebar">
-        <%- include("../../views/partials/user/userProfile-sidebar") %>
-      </div>
+        <div class="col-lg-9" id="ordersContent">
+          <h3 class="fw-bold mb-4">My Orders</h3>
 
-      <div class="col-lg-9" id="ordersContent">
-        <h3 class="fw-bold mb-4">My Orders</h3>
-
-        <% if (!orders || orders.length === 0) { %>
+          <% if (!orders || orders.length === 0) { %>
           <p>No orders found.</p>
-        <% } else { %>
+          <% } else { %>
           <% orders.forEach(order => { %>
-            <div class="order-box">
-              <div class="order-header">
-                <div>Order ID: <span class="text-muted"><%= order.orderId %></span></div>
-                <!-- Modal Trigger -->
-                <button type="button" class="btn btn-link p-0" data-bs-toggle="modal" data-bs-target="#orderModal-<%= order._id %>">
-                  View Order Details
-                </button>
+          <div class="order-box">
+            <div class="order-header">
+              <div>Order ID: <span class="text-muted"><%= order.orderId %></span></div>
+              <button type="button" class="btn btn-link p-0" data-bs-toggle="modal"
+                data-bs-target="#orderModal-<%= order._id %>">
+                View Order Details
+              </button>
+            </div>
+
+            <% order.orderedItems.forEach(item => { %>
+            <div class="order-item" onclick="window.location.href='/product/<%= item.product._id%>'">
+              <img src="/uploads/variants/<%= item.variant?.images?.[0] || 'default.jpg' %>" class="product-img">
+
+              <div class="flex-grow-1">
+                <div class="item-title fw-bold"><%= item.productName %></div>
+                <small class="d-block">Qty: <%= item.quantity %> | ₹ <%= item.finalPrice %></small>
+                <small class="d-block">Total: ₹ <%= item.itemsTotal %></small>
+                <small class="d-block">Color: <%= item.color %></small>
+                <small class="d-block">Size: <%= item.size %></small>
+                <% if (item.status === 'Delivered') { %>
+                <small class="order-date">Delivered on: <%= order.updatedAt.toDateString() %></small>
+                <% } else if (item.expectedDelivery && item.status !== 'Cancelled' &&
+                    item.status !== 'Returned' && item.status !== 'Returning' &&
+                    item.status !== 'Return Requested') { %>
+                <small class="order-date">Expected Delivery: <%= item.expectedDelivery.toDateString() %></small>
+                <% } else { %>
+                <small class="order-date">Ordered on: <%= order.createdAt.toDateString() %></small>
+                <% } %>
               </div>
 
-              <% order.orderedItems.forEach(item => { %>
-                <div class="order-item">
-                  <img src="/uploads/variants/<%= item.variant?.images?.[0] || 'default.jpg' %>" class="product-img">
+              <div class="order-actions">
+                <div class="actions-wrapper">
+                  <div class="status-text text-success"><%= item.status %></div>
 
-                  <div class="flex-grow-1">
-                    <div class="item-title fw-bold"><%= item.productName %></div>
-                    <small class="d-block">Quantity: <%= item.quantity %></small>
-                    <small class="d-block">Final Price: ₹ <%= item.finalPrice %></small>
-                    <% if(item.size) { %><small class="d-block">Size: <%= item.size %></small><% } %>
-                    <% if(item.color) { %><small class="d-block">Color: <%= item.color %></small><% } %>
-                    <small class="order-date">
-                      <%= item.status === 'delivered' ? 'Delivered on: ' + order.updatedAt.toDateString() : 'Ordered on: ' + order.createdAt.toDateString() %>
-                    </small>
-                  </div>
+                  <% let st = item.status.toUpperCase(); 
+                     const disableCancel = item.cancellationRequest.status === true;
+                     const disableReturn = item.returnRequest.status === true;
+                     const cancelBlocked = (st === "CANCELLED" || st === "CANCELLATION REQUESTED");
+                     const returnBlocked = (st === "RETURNED" || st === "RETURN REQUESTED" || st === "RETURN REJECTED" || st === "RETURNING");
+                  %>
 
-                  <div class="order-actions">
-                    <div class="status-text text-success fw-bold"><%= item.status %></div>
+                  <% if (st === "PROCESSING" || st === "PACKED" || st === "CONFIRMED") { %>
+                  <% if (!cancelBlocked && !disableCancel) { %>
+                  <button class="btn btn-outline-danger btn-sm cancel-btn"
+                    onclick="event.stopPropagation(); openCancelModal('<%= order.orderId %>','<%= item._id %>')"
+                    data-bs-toggle="offcanvas" data-bs-target="#cancelModal">Cancel Item</button>
+                  <% } %>
+                  <% } else { %>
+                  <% if (!cancelBlocked) { %>
+                  <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation();">Review</button>
+                  <% } %>
+                  <% if (!returnBlocked && !disableReturn) { %>
+                  <button class="btn btn-outline-warning btn-sm return-btn"
+                    onclick="event.stopPropagation(); openReturnModal('<%= order.orderId %>','<%= item._id %>')"
+                    data-bs-toggle="offcanvas" data-bs-target="#returnModal">Return</button>
+                  <% } %>
+                  <% } %>
 
-                    <% let st = item.status.toUpperCase(); %>
-                    <% const disableCancel = item.cancellationRequest.status == true; %>
-                    <% const disableReturn = item.returnRequest.status == true; %>
-
-                    <% if (st === "PROCESSING" || st === "PACKED" || st === "CONFIRMED" || st === "CANCELLED" || st === "CANCELLATION REQUESTED") { %>
-                      <button class="btn btn-outline-danger btn-sm cancel-btn" 
-                              onclick="openCancelModal('<%= order.orderId %>','<%= item._id %>')"
-                              data-bs-toggle="offcanvas" 
-                              data-bs-target="#cancelModal"
-                              <%= disableCancel ? 'disabled' : '' %>>
-                        Cancel Item
-                      </button>
-                    <% } else { %>
-                      <button class="btn btn-outline-primary btn-sm">Review</button>
-                      <button class="btn btn-outline-warning btn-sm return-btn" 
-                              onclick="openReturnModal('<%= order.orderId %>','<%= item._id %>')"
-                              data-bs-toggle="offcanvas" 
-                              data-bs-target="#returnModal"
-                              <%= disableReturn ? 'disabled' : '' %>>
-                        Return
-                      </button>
-                    <% } %>
-
-                    <button class="btn btn-primary btn-sm order-btn" onclick="window.location.href='/profile/orders/<%= item._id%>'">View Order</button>
-                  </div>
+                  <button class="btn order-btn btn-outline-primary btn-sm"
+                    onclick="event.stopPropagation(); window.location.href='/profile/orders/<%= item._id %>'">
+                    View Details
+                  </button>
                 </div>
-              <% }) %>
+              </div>
 
-              <% let st=order.orderedItems[0].status.toUpperCase(); const disableCancel=order.orderedItems.some(i=>
-                i.cancellationRequest?.status === true);
-                const disableReturn = order.orderedItems.some(i => i.returnRequest?.status === true);
-                %>
-              
-                <!-- Footer actions -->
-                <div class="order-footer">
-                  <span onclick="window.location.href='/download-invoice/<%= order.orderId %>'">
-                    <i class="bi bi-download"></i> Download Invoice
-                  </span>
-                  <div>
-              
-                    <% if (st==="PROCESSING" || st==="PACKED" || st==="CONFIRMED" || st==="CANCELLED" || st==="CANCELLATION REQUESTED"
-                      ) { %>
-                      <span onclick="<%= disableCancel ? '' : `cancelOrder('${order.orderId}')` %>" style="cursor: <%= disableCancel ? 'not-allowed' : 'pointer' %>; 
-                                     color: <%= disableCancel ? 'gray' : 'black' %>;">
-                        <i class="bi bi-x-circle"></i> Cancel Order
-                      </span>
-                      <% } else { %>
-              
-                        <span onclick="<%= disableReturn ? '' : `returnOrder('${order.orderId}')` %>" style="cursor: <%= disableReturn ? 'not-allowed' : 'pointer' %>;
-                                     color: <%= disableReturn ? 'gray' : 'black' %>;">
-                          <i class="bi bi-arrow-counterclockwise"></i> Return Order
-                        </span>
-                        <% } %>
-                  </div>
-                </div>
-              
-                </div>
+            </div>
+            <% }) %>
 
+            <!-- Footer actions -->
+            <% let stOrder = order.orderedItems[0].status.toUpperCase(); 
+               const disableCancelOrder = order.orderedItems.every(i => i.cancellationRequest?.status === true);
+               const disableReturnOrder = order.orderedItems.every(i => i.returnRequest?.status === true);
+            %>
 
-              <!--
-             
-              
-              
-              
-              -->
+            <div class="order-footer">
+              <span onclick="window.location.href='/download-invoice/<%= order.orderId %>'"><i
+                  class="bi bi-download"></i> Download Invoice</span>
+              <div>
+                <% if (order.paymentStatus === 'Failed') { %>
+                <span style="cursor:pointer; color:#912f2f; font-weight:600;"
+                  onclick="RetryPaymentRequest('<%= order.orderId %>')"><i class="bi bi-arrow-repeat"></i> Retry
+                  Payment</span>
+                <% } %>
+
+                <% if (stOrder === "PROCESSING" || stOrder === "PACKED" || stOrder === "CONFIRMED" || stOrder === "CANCELLED" ||
+                      stOrder === "CANCELLATION REQUESTED") { %>
+                <span onclick="<%= disableCancelOrder ? '' : `cancelOrder('${order.orderId}')` %>"
+                  style="cursor: <%= disableCancelOrder ? 'not-allowed' : 'pointer' %>; color: <%= disableCancelOrder ? 'gray' : 'black' %>;">
+                  <i class="bi bi-x-circle"></i> Cancel Order
+                </span>
+                <% } else { %>
+                <span onclick="<%= disableReturnOrder ? '' : `returnOrder('${order.orderId}')` %>"
+                  style="cursor: <%= disableReturnOrder ? 'not-allowed' : 'pointer' %>; color: <%= disableReturnOrder ? 'gray' : 'black' %>;">
+                  <i class="bi bi-arrow-counterclockwise"></i> Return Order
+                </span>
+                <% } %>
+              </div>
+            </div>
 
             <!-- ORDER DETAILS MODAL -->
-            <div class="modal fade" id="orderModal-<%= order._id %>" tabindex="-1" aria-labelledby="orderModalLabel-<%= order._id %>" aria-hidden="true">
+            <div class="modal fade" id="orderModal-<%= order._id %>" tabindex="-1"
+              aria-labelledby="orderModalLabel-<%= order._id %>" aria-hidden="true">
               <div class="modal-dialog modal-xl modal-dialog-scrollable">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title" id="orderModalLabel-<%= order._id %>">Order Details - <%= order.orderId %></h5>
+                    <h5 class="modal-title" id="orderModalLabel-<%= order._id %>">Order Details - <%= order.orderId %>
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div class="modal-body">
                     <div class="row g-3">
-                      <!-- Delivery Address -->
                       <div class="col-md-6">
                         <div class="p-3 border rounded-3 bg-light">
                           <h6 class="fw-bold">Delivery Address</h6>
-                          <p class="mb-1"><strong><%= order.address?.name %></strong></p>
+                          <p class="mb-1"><strong><%= order.address %></strong></p>
                           <p class="mb-1"><%= order.address?.house %></p>
                           <p class="mb-1"><%= order.address?.city %> - <%= order.address?.pin %></p>
-                          <p class="mb-1">Phone: <%= order.address?.phone %></p>
                           <% if(order.address?.altPhone){ %>
-                            <p class="mb-1">Alt Phone: <%= order.address.altPhone %></p>
+                          <p class="mb-1">Alt Phone: <%= order.address.altPhone %></p>
                           <% } %>
                           <h6 class="mt-3 fw-bold">Payment Method</h6>
                           <p><%= order.paymentMethod %></p>
                         </div>
                       </div>
 
-                      <!-- Order Items -->
                       <div class="col-md-6">
                         <div class="p-3 border rounded-3 bg-light">
                           <h6 class="fw-bold">Order Items • <%= order.orderedItems.length %> products</h6>
-                          <% order.orderedItems.forEach(item => { %>
-                            <div class="d-flex align-items-center mb-2">
-                              <img src="/uploads/variants/<%= item.variant?.images?.[0] || 'default.jpg' %>" width="60" class="me-3">
-                              <div>
-                                <div><strong><%= item.productName %></strong></div>
-                                <% if(item.size){ %><div>Size: <%= item.size %></div><% } %>
-                                <% if(item.color){ %><div>Color: <%= item.color %></div><% } %>
-                                <div>Qty: <%= item.quantity %></div>
-                                <div>Price: ₹ <%= item.finalPrice %></div>
-                              </div>
+                          <% order.orderedItems.forEach(item=> { %>
+                          <div class="d-flex align-items-center mb-2">
+                            <img src="/uploads/variants/<%= item.variant?.images?.[0] || 'default.jpg' %>" width="60"
+                              class="me-3">
+                            <div>
+                              <div><strong><%= item.productName %></strong></div>
+                              <% if(item.size){ %>
+                              <div>Size: <%= item.size %></div>
+                              <% } %>
+                              <% if(item.color){ %>
+                              <div>Color: <%= item.color %></div>
+                              <% } %>
+                              <div>Qty: <%= item.quantity %></div>
+                              <div>Price: ₹ <%= item.itemsTotal %></div>
                             </div>
+                          </div>
                           <% }) %>
                         </div>
                       </div>
                     </div>
 
-                    <!-- Payment Details -->
+                    <% const totalMRP = order.orderedItems.reduce((MRP,item)=> MRP+=item.MRPprice,0) %>
+
                     <div class="mt-4 p-3 border rounded-3 bg-light">
                       <h6 class="fw-bold">Payment Details</h6>
-                      <div class="d-flex justify-content-between">
-                        <span>Total MRP</span>
-                        <span>₹ <%= order.totalMRP %></span>
+                      <div class="d-flex justify-content-between"><span>Total MRP</span><span>₹ <%= totalMRP %></span>
                       </div>
-                      <div class="d-flex justify-content-between text-success">
-                        <span>Applicable Discount</span>
-                        <span>- ₹ <%= order.discount %></span>
+                      <div class="d-flex justify-content-between text-success"><span>Applicable Discount</span><span>- ₹
+                          <%= totalMRP-order.subTotal %></span></div>
+                      <div class="d-flex justify-content-between"><span>Subtotal</span><span>₹ <%= order.subTotal %></span>
                       </div>
-                      <div class="d-flex justify-content-between">
-                        <span>Subtotal</span>
-                        <span>₹ <%= order.subTotal %></span>
+                      <div class="d-flex justify-content-between"><span>Total Tax</span><span>₹ <%= order.taxAmount %></span>
                       </div>
-                      <div class="d-flex justify-content-between">
-                        <span>Total Tax</span>
-                        <span>₹ <%= order.totalTax %></span>
-                      </div>
-                      <div class="d-flex justify-content-between">
-                        <span>CGST (9%)</span>
-                        <span>₹ <%= order.cgst %></span>
-                      </div>
-                      <div class="d-flex justify-content-between">
-                        <span>SGST (9%)</span>
-                        <span>₹ <%= order.sgst %></span>
-                      </div>
-                      <div class="d-flex justify-content-between">
-                        <span>Shipping Charge</span>
-                        <span><%= order.shippingCharge || 'Free' %></span>
-                      </div>
+                      <div class="d-flex justify-content-between"><span>CGST (9%)</span><span>₹
+                          <%= Math.round(order.subTotal * 0.09) %></span></div>
+                      <div class="d-flex justify-content-between"><span>SGST (9%)</span><span>₹
+                          <%= Math.round(order.subTotal * 0.09) %></span></div>
+                      <div class="d-flex justify-content-between"><span>Shipping Charge</span><span><%= order.shippingCharge || 'Free' %></span></div>
                       <hr>
-                      <div class="d-flex justify-content-between fw-bold fs-5">
-                        <span>Total Payable</span>
-                        <span>₹ <%= order.totalPayable %></span>
-                      </div>
+                      <div class="d-flex justify-content-between fw-bold fs-5"><span>Total Payable</span><span>₹ <%= order.totalPayable %></span></div>
                     </div>
                   </div>
                   <div class="modal-footer">
@@ -311,212 +328,248 @@
               </div>
             </div>
 
+          </div>
           <% }) %>
 
           <!-- Pagination -->
           <nav>
             <ul class="pagination mt-3">
               <% for(let i=1; i<=totalPages; i++) { %>
-                <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                  <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-                </li>
+              <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+              </li>
               <% } %>
             </ul>
           </nav>
 
-        <% } %>
+          <% } %>
 
+        </div>
       </div>
     </div>
   </div>
-</div>
+</body>
 
-<!-- CANCEL ITEM OFFCANVAS -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="cancelModal" aria-labelledby="cancelModalLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="cancelModalLabel">Cancel Item</h5>
-    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
-  </div>
-  <div class="offcanvas-body">
-    <div class="mb-3">
-      <label for="cancelReason" class="form-label">Reason</label>
-      <input type="text" class="form-control" id="cancelReason" placeholder="Type your reason">
-      <input type="text" class="form-control" id="orderId_cancel" hidden>
-      <input type="text" class="form-control" id="itemId_cancel" hidden>
+</html>
+
+
+    <!-- CANCEL ITEM OFFCANVAS -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="cancelModal" aria-labelledby="cancelModalLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="cancelModalLabel">Cancel Item</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+      </div>
+      <div class="offcanvas-body">
+        <div class="mb-3">
+          <label for="cancelReason" class="form-label">Reason</label>
+          <input type="text" class="form-control" id="cancelReason" placeholder="Type your reason">
+          <input type="text" class="form-control" id="orderId_cancel" hidden>
+          <input type="text" class="form-control" id="itemId_cancel" hidden>
+        </div>
+        <button class="btn btn-danger w-100" id="submitCancel" onclick="CancelItem()">Submit Cancel</button>
+      </div>
     </div>
-    <button class="btn btn-danger w-100" id="submitCancel" onclick="CancelItem()">Submit Cancel</button>
-  </div>
-</div>
 
-<!-- RETURN ITEM OFFCANVAS -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="returnModal" aria-labelledby="returnModalLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="returnModalLabel">Return Item</h5>
-    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
-  </div>
-  <div class="offcanvas-body">
-    <div class="mb-3">
-      <label for="returnReason" class="form-label">Reason</label>
-      <input type="text" class="form-control" id="returnReason" placeholder="Type your reason">
-      <input type="text" class="form-control" id="orderId_return" hidden>
-      <input type="text" class="form-control" id="itemId_return" hidden>
+    <!-- RETURN ITEM OFFCANVAS -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="returnModal" aria-labelledby="returnModalLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="returnModalLabel">Return Item</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+      </div>
+      <div class="offcanvas-body">
+        <div class="mb-3">
+          <label for="returnReason" class="form-label">Reason</label>
+          <input type="text" class="form-control" id="returnReason" placeholder="Type your reason">
+          <input type="text" class="form-control" id="orderId_return" hidden>
+          <input type="text" class="form-control" id="itemId_return" hidden>
+        </div>
+        <button class="btn btn-warning w-100" id="submitReturn" onclick="ReturnItem()">Submit Return</button>
+      </div>
     </div>
-    <button class="btn btn-warning w-100" id="submitReturn" onclick="ReturnItem()">Submit Return</button>
-  </div>
-</div>
 
-<!-- CANCEL ORDER OFFCANVAS -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="cancelOrderModal" aria-labelledby="cancelOrderModalLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="cancelOrderModalLabel">Cancel Order</h5>
-    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
-  </div>
-  <div class="offcanvas-body">
-    <div class="mb-3">
-      <label for="cancelOrderReason" class="form-label">Reason</label>
-      <input type="text" class="form-control" id="cancelOrderReason" placeholder="Type your reason">
-      <input type="text" class="form-control" id="orderId_cancelOrder" hidden>
+    <!-- CANCEL ORDER OFFCANVAS -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="cancelOrderModal" aria-labelledby="cancelOrderModalLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="cancelOrderModalLabel">Cancel Order</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+      </div>
+      <div class="offcanvas-body">
+        <div class="mb-3">
+          <label for="cancelOrderReason" class="form-label">Reason</label>
+          <input type="text" class="form-control" id="cancelOrderReason" placeholder="Type your reason">
+          <input type="text" class="form-control" id="orderId_cancelOrder" hidden>
+        </div>
+        <button class="btn btn-danger w-100" onclick="submitCancelOrder()">Submit Cancel</button>
+      </div>
     </div>
-    <button class="btn btn-danger w-100" onclick="submitCancelOrder()">Submit Cancel</button>
-  </div>
-</div>
 
-<!-- RETURN ORDER OFFCANVAS -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="returnOrderModal" aria-labelledby="returnOrderModalLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="returnOrderModalLabel">Return Order</h5>
-    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
-  </div>
-  <div class="offcanvas-body">
-    <div class="mb-3">
-      <label for="returnOrderReason" class="form-label">Reason</label>
-      <input type="text" class="form-control" id="returnOrderReason" placeholder="Type your reason">
-      <input type="text" class="form-control" id="orderId_returnOrder" hidden>
+    <!-- RETURN ORDER OFFCANVAS -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="returnOrderModal" aria-labelledby="returnOrderModalLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="returnOrderModalLabel">Return Order</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+      </div>
+      <div class="offcanvas-body">
+        <div class="mb-3">
+          <label for="returnOrderReason" class="form-label">Reason</label>
+          <input type="text" class="form-control" id="returnOrderReason" placeholder="Type your reason">
+          <input type="text" class="form-control" id="orderId_returnOrder" hidden>
+        </div>
+        <button class="btn btn-warning w-100" onclick="submitReturnOrder()">Submit Return</button>
+      </div>
     </div>
-    <button class="btn btn-warning w-100" onclick="submitReturnOrder()">Submit Return</button>
-  </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  // Item modals
-  function openCancelModal(orderId,itemId){
-    document.getElementById('orderId_cancel').value=orderId;
-    document.getElementById('itemId_cancel').value=itemId;
-  }
-
-  function openReturnModal(orderId,itemId){
-    document.getElementById('orderId_return').value=orderId;
-    document.getElementById('itemId_return').value=itemId;
-  }
-
-  async function CancelItem() {
-    const cancelReason=document.getElementById('cancelReason').value;
-    const orderId=document.getElementById('orderId_cancel').value;
-    const itemId=document.getElementById('itemId_cancel').value;
-    try {
-      const response=await fetch("/order/cancel", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ itemId, orderId, cancelReason })
-      });
-      const result=await response.json();
-      if (result.success) {
-        Swal.fire({ icon: 'success', title: 'Cancel requested!', text: result.message, confirmButtonColor: '#198754' })
-          .then(() => window.location.reload());
-      } else {
-        Swal.fire({ icon: 'error', title: 'Failed', text: result.message, confirmButtonColor: '#dc3545' });
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Item modals
+      function openCancelModal(orderId, itemId) {
+        document.getElementById('orderId_cancel').value = orderId;
+        document.getElementById('itemId_cancel').value = itemId;
       }
-    } catch(error) {
-      Swal.fire({ icon: 'error', title: 'Server Error', text: 'Something went wrong', confirmButtonColor: '#dc3545' });
-    }
-  }
 
-  async function ReturnItem() {
-    const returnReason=document.getElementById('returnReason').value;
-    const orderId=document.getElementById('orderId_return').value;
-    const itemId=document.getElementById('itemId_return').value;
-    try {
-      const response=await fetch("/order/returnItem", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ itemId, orderId, returnReason })
-      });
-      const result=await response.json();
-      if (result.success) {
-        Swal.fire({ icon: 'success', title: 'Return requested!', text: result.message, confirmButtonColor: '#198754' })
-          .then(() => window.location.reload());
-      } else {
-        Swal.fire({ icon: 'error', title: 'Failed', text: result.message, confirmButtonColor: '#dc3545' });
+      function openReturnModal(orderId, itemId) {
+        document.getElementById('orderId_return').value = orderId;
+        document.getElementById('itemId_return').value = itemId;
       }
-    } catch(error) {
-      Swal.fire({ icon: 'error', title: 'Server Error', text: 'Something went wrong', confirmButtonColor: '#dc3545' });
-    }
-  }
 
-  // Order modals
-  function cancelOrder(orderId){
-    document.getElementById('orderId_cancelOrder').value = orderId;
-    const cancelModal = new bootstrap.Offcanvas(document.getElementById('cancelOrderModal'));
-    cancelModal.show();
-  }
-
-  function returnOrder(orderId){
-    document.getElementById('orderId_returnOrder').value = orderId;
-    const returnModal = new bootstrap.Offcanvas(document.getElementById('returnOrderModal'));
-    returnModal.show();
-  }
-
-  async function submitCancelOrder(){
-    const orderId = document.getElementById('orderId_cancelOrder').value;
-    const reason = document.getElementById('cancelOrderReason').value;
-
-    try{
-      const response = await fetch('/order/cancelOrder', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId, reason })
-      });
-      const result = await response.json();
-      if(result.success){
-        Swal.fire({ icon: 'success', title: 'Order Cancelled!', text: result.message, confirmButtonColor:'#198754' })
-          .then(()=> window.location.reload());
-      } else{
-        Swal.fire({ icon: 'error', title: 'Failed', text: result.message, confirmButtonColor:'#dc3545' });
+      async function CancelItem() {
+        const cancelReason = document.getElementById('cancelReason').value;
+        const orderId = document.getElementById('orderId_cancel').value;
+        const itemId = document.getElementById('itemId_cancel').value;
+        try {
+          const response = await fetch("/order/cancel", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ itemId, orderId, cancelReason })
+          });
+          const result = await response.json();
+          if (result.success) {
+            Swal.fire({ icon: 'success', title: 'Cancel requested!', text: result.message, confirmButtonColor: '#198754' })
+              .then(() => window.location.reload());
+          } else {
+            Swal.fire({ icon: 'error', title: 'Failed', text: result.message, confirmButtonColor: '#dc3545' });
+          }
+        } catch (error) {
+          Swal.fire({ icon: 'error', title: 'Server Error', text: 'Something went wrong', confirmButtonColor: '#dc3545' });
+        }
       }
-    } catch(err){
-      Swal.fire({ icon: 'error', title: 'Server Error', text: 'Something went wrong', confirmButtonColor:'#dc3545' });
-    }
-  }
 
-  async function submitReturnOrder(){
-    const orderId = document.getElementById('orderId_returnOrder').value;
-    const reason = document.getElementById('returnOrderReason').value;
-
-    try{
-      const response = await fetch('/order/returnOrder', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId, reason })
-      });
-      const result = await response.json();
-      if(result.success){
-        Swal.fire({ icon: 'success', title: 'Return Requested!', text: result.message, confirmButtonColor:'#198754' })
-          .then(()=> window.location.reload());
-      } else{
-        Swal.fire({ icon: 'error', title: 'Failed', text: result.message, confirmButtonColor:'#dc3545' });
+      async function ReturnItem() {
+        const returnReason = document.getElementById('returnReason').value;
+        const orderId = document.getElementById('orderId_return').value;
+        const itemId = document.getElementById('itemId_return').value;
+        try {
+          const response = await fetch("/order/returnItem", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ itemId, orderId, returnReason })
+          });
+          const result = await response.json();
+          if (result.success) {
+            Swal.fire({ icon: 'success', title: 'Return requested!', text: result.message, confirmButtonColor: '#198754' })
+              .then(() => window.location.reload());
+          } else {
+            Swal.fire({ icon: 'error', title: 'Failed', text: result.message, confirmButtonColor: '#dc3545' });
+          }
+        } catch (error) {
+          Swal.fire({ icon: 'error', title: 'Server Error', text: 'Something went wrong', confirmButtonColor: '#dc3545' });
+        }
       }
-    } catch(err){
-      Swal.fire({ icon: 'error', title: 'Server Error', text: 'Something went wrong', confirmButtonColor:'#dc3545' });
+
+      // Order modals
+      function cancelOrder(orderId) {
+        document.getElementById('orderId_cancelOrder').value = orderId;
+        const cancelModal = new bootstrap.Offcanvas(document.getElementById('cancelOrderModal'));
+        cancelModal.show();
+      }
+
+      function returnOrder(orderId) {
+        document.getElementById('orderId_returnOrder').value = orderId;
+        const returnModal = new bootstrap.Offcanvas(document.getElementById('returnOrderModal'));
+        returnModal.show();
+      }
+
+      async function submitCancelOrder() {
+        const orderId = document.getElementById('orderId_cancelOrder').value;
+        const reason = document.getElementById('cancelOrderReason').value;
+
+        try {
+          const response = await fetch('/order/cancelOrder', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId, reason })
+          });
+          const result = await response.json();
+          if (result.success) {
+            Swal.fire({ icon: 'success', title: 'Order Cancelled!', text: result.message, confirmButtonColor: '#198754' })
+              .then(() => window.location.reload());
+          } else {
+            Swal.fire({ icon: 'error', title: 'Failed', text: result.message, confirmButtonColor: '#dc3545' });
+          }
+        } catch (err) {
+          Swal.fire({ icon: 'error', title: 'Server Error', text: 'Something went wrong', confirmButtonColor: '#dc3545' });
+        }
+      }
+
+      async function submitReturnOrder() {
+        const orderId = document.getElementById('orderId_returnOrder').value;
+        const reason = document.getElementById('returnOrderReason').value;
+
+        try {
+          const response = await fetch('/order/returnOrder', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId, reason })
+          });
+          const result = await response.json();
+          if (result.success) {
+            Swal.fire({ icon: 'success', title: 'Return Requested!', text: result.message, confirmButtonColor: '#198754' })
+              .then(() => window.location.reload());
+          } else {
+            Swal.fire({ icon: 'error', title: 'Failed', text: result.message, confirmButtonColor: '#dc3545' });
+          }
+        } catch (err) {
+          Swal.fire({ icon: 'error', title: 'Server Error', text: 'Something went wrong', confirmButtonColor: '#dc3545' });
+        }
+      }
+
+      function downloadInvoice(orderId) {
+        window.open(`/order/invoice/${orderId}`, '_blank');
+      }
+
+
+      async function RetryPaymentRequest(orderId) {
+  try {
+    const response = await fetch('/retryPayment/',{
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:JSON.stringify({orderId})
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      window.location.href = result.redirectUrl;
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed',
+        text: result.message,
+        confirmButtonColor: '#dc3545'
+      });
     }
+  } catch (err) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Server Error',
+      text: 'Something went wrong',
+      confirmButtonColor: '#dc3545'
+    });
   }
-
-  function downloadInvoice(orderId){
-    window.open(`/order/invoice/${orderId}`, '_blank');
-  }
-
-</script>
+}
+    </script>
 
 </body>
+
 </html>

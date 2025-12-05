@@ -49,7 +49,40 @@
         <h5 class="fw-bold mb-2">Payment Method</h5>
         <p class="mb-0 fw-semibold"><%= paymentMethod.toUpperCase() %></p>
       </div>
+
+       <!-- ========================= -->
+<!-- COUPON SECTION -->
+<!-- ========================= -->
+<div class="section-box mt-3">
+
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h5 class="fw-bold">Have a Coupon?</h5>
+    <a href="#" data-bs-toggle="modal" data-bs-target="#couponModal">view coupons</a>
+  </div>
+
+  <div class="input-group">
+    
+    <% if (appliedCoupon) { %>
+  <input type="text" id="couponInput" class="form-control" value="<%= appliedCoupon.code %>">
+<% } else { %>
+  <input type="text" id="couponInput" class="form-control" placeholder="Enter Code" value="">
+<% } %>
+    <input type="hidden" id="couponIdInput">   <!-- HIDDEN INPUT ADDED -->
+
+    <button class="btn btn-dark" id="applyCouponBtn" onclick="applyCoupon()">
+      Apply
+    </button>
+  </div>
+
+</div>
+<% if (typeof couponError !== 'undefined') { %>
+  <div class="alert alert-danger"><%= couponError %></div>
+<% } %>
     </div>
+
+   
+
+
 
     <!-- RIGHT SIDE: Order Items -->
     <div class="col-lg-6 mb-3">
@@ -88,6 +121,25 @@
           <span>Applicable Discount</span>
           <span>- ₹<%= applicableDiscount %></span>
         </div>
+        <% if (appliedCoupon) { %>
+  <div class="d-flex justify-content-between text-success fw-bold mb-2">
+    <span>
+  Coupon Discount 
+  <button 
+    class="btn btn-outline-danger btn-sm ms-2"
+    onclick="window.location.href='/checkout/confirmationPage'">
+    Remove
+  </button>
+</span>
+    <span>
+     -<%= appliedCoupon.discount %>
+  </span>
+  </div>
+  <div class="d-flex justify-content-between text-primary mb-2">
+    <span>Coupon Applied  </span>
+    <span><%= appliedCoupon.code %></span>
+  </div>
+<% } %>
         <div class="d-flex justify-content-between mb-2">
           <span>Subtotal</span>
           <span>₹<%= subTotal %></span>
@@ -130,49 +182,139 @@
   </div>
 </div>
 
-<!-- FOOTER -->
+
+
+<!-- ========================= -->
+<!-- COUPON LIST MODAL -->
+<!-- ========================= -->
+<div class="modal fade" id="couponModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Available Coupons</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <% if (coupons.length === 0) { %>
+          <p class="text-muted">No coupons available for this order.</p>
+        <% } %>
+
+        <div class="row g-3">
+          <% coupons.forEach(coupon => { %>
+            <div class="col-md-6">
+              <div class="p-3 border rounded coupon-card" 
+     style="cursor:pointer;" 
+     onclick="selectCoupon('<%= coupon.code %>', '<%= coupon._id %>')">
+
+  <h4 class="fw-bold mb-2"><%= coupon.code %></h4>
+
+  <p class="mb-1"><strong>Discount:</strong> 
+    <%= coupon.couponType === 'percentage' 
+        ? coupon.discountValue + '%' 
+        : '₹' + coupon.discountValue %>
+  </p>
+
+  <p class="mb-1"><strong>Expires:</strong> 
+    <%= coupon.expiryDate.toDateString() %>
+  </p>
+
+  <p class="small text-muted mb-0">
+    Min Order: ₹<%= coupon.minimumOrderAmount %>
+  </p>
+
+</div>
+            </div>
+          <% }) %>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
 <%- include("../../views/partials/user/footer") %>
 
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
+ 
 <script>
-  document.getElementById('confirmOrder').addEventListener('submit',async function(e) {
-        e.preventDefault();
-    try{
-      const response=await fetch('/checkout/placeOrder',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        
-      })
+  document.getElementById('confirmOrder').addEventListener('submit', async function (e) {
+    e.preventDefault();
 
-      const result=await response.json()
-      
-    if (result.success) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: result.message,
-        confirmButtonColor: '#198754'
-      }).then(() => window.location.href='/orderSuccessfull');
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error!',
-        text: result.message,
-        confirmButtonColor: '#dc3545'
-      });
-    }
+    try {
+        const response = await fetch('/checkout/placeOrder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-requested-with': 'fetch'
+            }
+        });
 
-    }catch(error){
-      Swal.fire({
-      icon: 'error',
-      title: 'Server Error',
-      text: 'Something went wrong',
-      confirmButtonColor: '#dc3545'
-    });
+        const result = await response.json();
+
+        if (result.success) {
+
+           if (result.paymentType === "razorpay") {
+                // Razorpay → redirect to online payment page
+                window.location.href = result.redirectUrl;
+                return;
+            }
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: result.message,
+                confirmButtonColor: '#198754'
+            }).then(() => window.location.href = '/orderSuccessfull');
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: result.message,
+                confirmButtonColor: '#dc3545'
+            }).then(() => window.location.href = '/getCart');
+        }
+
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Server Error',
+            text: 'Something went wrong',
+            confirmButtonColor: '#dc3545'
+        });
     }
-  })
+});
+
+ function selectCoupon(code, id) {
+    // put values in inputs
+    document.getElementById("couponInput").value = code;
+    document.getElementById("couponIdInput").value = id;
+
+    // close modal
+    const modalElement = document.getElementById('couponModal');
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    modal.hide();
+
+    // FIX BACKDROP BUG
+    setTimeout(() => {
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+      document.body.classList.remove('modal-open');
+      document.body.style.removeProperty('overflow');
+      document.body.style.removeProperty('padding-right');
+    }, 200);
+  }
+
+
+function applyCoupon() {
+  const couponId = document.getElementById("couponIdInput").value;
+  
+
+  window.location.href = `/checkout/confirmationPage?couponId=${couponId}`;
+}
 </script>
 </html>

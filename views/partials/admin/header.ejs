@@ -15,6 +15,7 @@
   <style>
     body {
       background-color: #f7f7f7;
+      font-family: "Poppins", sans-serif;
     }
 
     /* Header */
@@ -32,7 +33,6 @@
     }
 
     .main-header h1 {
-      font-family: 'Nanum Myeongjo', serif;
       font-weight: bold;
       font-size: 2rem;
       color: #823d2b;
@@ -41,82 +41,53 @@
       flex-grow: 1;
     }
 
-    @media (max-width: 767px) {
-      .main-header h1 {
-        font-size: 1.5rem;
-      }
+    /* ---------- NEW ADMIN SIDEBAR STYLE ---------- */
+    .admin-sidebar {
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px 0;
+      height: 100%;
+      margin-top: 20px;
     }
 
-    .main-header .dropdown-toggle {
+    .admin-sidebar a {
       color: #000;
       text-decoration: none;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      height: calc(100vh - 80px); /* Full height minus header */
-      position: sticky;
-      top: 80px;                  /* Sit below header */
-      overflow-y: auto;           /* Enable vertical scroll */
-      background: #fff;
-      border-right: 1px solid #e6e6e6;
-      padding-top: 1rem;
-    }
-
-    .sidebar::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .sidebar::-webkit-scrollbar-thumb {
-      background-color: #888;
-      border-radius: 3px;
-    }
-
-    .sidebar::-webkit-scrollbar-thumb:hover {
-      background-color: #eba8a8;
-    }
-   .sidebar::-webkit-scrollbar-thumb {
-    background-color: #ffb6c1; /* light pink thumb */
-    border-radius: 10px;
-    border: 2px solid #ffe6f0; /* adds spacing around */
-  }
-
-    .sidebar .nav-link {
-      color: #333;
-      font-weight: 500;
-      padding: 12px 16px;
-      margin-bottom: 8px;
-      border-radius: 8px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      padding: 12px 25px;
+      border-left: 4px solid transparent;
+      transition: all 0.3s ease;
+      font-size: 15px;
+      margin-bottom: 4px;
     }
 
-    .sidebar .nav-link.active {
-      background-color: #f8d9d0;
+    .admin-sidebar a:hover,
+    .admin-sidebar a.active {
+      background-color: #f9ebe3;
+      border-left: 4px solid #7a1f1f;
+      color: #7a1f1f;
+      font-weight: 500;
     }
 
-    /* Cards */
-    .card {
-      border: none;
-      border-radius: 15px;
-      box-shadow: 0px 4px 8px rgba(0,0,0,0.05);
+    .admin-sidebar i {
+      margin-right: 10px;
+      font-size: 17px;
     }
   </style>
 </head>
+
 <body>
 
 <!-- Header -->
 <div class="main-header">
-  <!-- Mobile sidebar toggle -->
   <button class="btn btn-outline-secondary d-md-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar">
     <i class="bi bi-list"></i>
   </button>
 
-  <!-- Title -->
   <h1 class="text-center flex-grow-1">ZYRA</h1>
 
-  <!-- Profile dropdown -->
   <div class="dropdown ms-2">
     <a class="dropdown-toggle d-flex align-items-center" href="#" role="button" id="profileDropdown" data-bs-toggle="dropdown">
       <i class="fas fa-user-circle fa-lg me-2"></i> Admin
@@ -128,43 +99,61 @@
   </div>
 </div>
 
-<!-- Offcanvas Sidebar for Mobile -->
+<!-- Mobile Sidebar -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title">Menu</h5>
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
   </div>
   <div class="offcanvas-body">
-    <ul class="nav flex-column">
-      <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-grid"></i> Dashboard</a></li>
-      <li class="nav-item"><a class="nav-link" href="/admin/customers"><i class="bi bi-people"></i> Customer</a></li>
-      <li class="nav-item"><a class="nav-link" href="/admin/categories"><i class="bi bi-tags"></i> Category</a></li>
-      <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-image"></i> Brand</a></li>
-      <li class="nav-item"><a class="nav-link" href="/admin/orders"><i class="bi bi-bag"></i> Order</a></li>
-      <li class="nav-item"><a class="nav-link" href="/admin/products"><i class="bi bi-box-seam"></i> Products</a></li>
-      <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-graph-up"></i> Sales report</a></li>
-      <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-ticket-perforated"></i> Coupon</a></li>
-      <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-arrow-repeat"></i> Refund/Return</a></li>
-      <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-image"></i> Banners</a></li>
-    </ul>
+    <div class="admin-sidebar">
+      <a href="/admin/dashboard"><i class="bi bi-grid"></i> Dashboard</a>
+      <a href="/admin/customers"><i class="bi bi-people"></i> Customer</a>
+      <a href="/admin/categories"><i class="bi bi-tags"></i> Category</a>
+      <a href="/admin/brands"><i class="bi bi-image"></i> Brands</a>
+      <a href="/admin/orders"><i class="bi bi-bag"></i> Orders</a>
+      <a href="/admin/products"><i class="bi bi-box-seam"></i> Products</a>
+      <a href="/admin/sales-report"><i class="bi bi-graph-up"></i> Sales report</a>
+      <a href="/admin/coupons"><i class="bi bi-ticket-perforated"></i> Coupon</a>
+      <a href="/admin/refund"><i class="bi bi-arrow-repeat"></i> Refund/Return</a>
+      <a href="/admin/banners"><i class="bi bi-image"></i> Banners</a>
+    </div>
   </div>
 </div>
 
-<!-- Main layout -->
+<!-- Main Layout -->
 <div class="container-fluid">
   <div class="row">
     <!-- Desktop Sidebar -->
-    <nav class="col-md-2 d-none d-md-block sidebar">
-      <ul class="nav flex-column">
-        <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-grid"></i> Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link" href="/admin/customers"><i class="bi bi-people"></i> Customer</a></li>
-        <li class="nav-item"><a class="nav-link" href="/admin/categories"><i class="bi bi-tags"></i> Category</a></li>
-        <li class="nav-item"><a class="nav-link" href="/admin/brands"><i class="bi bi-image"></i> Brands</a></li>
-        <li class="nav-item"><a class="nav-link" href="/admin/orders"><i class="bi bi-bag"></i> Order</a></li>
-        <li class="nav-item"><a class="nav-link" href="/admin/products"><i class="bi bi-box-seam"></i> Products</a></li>
-        <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-graph-up"></i> Sales report</a></li>
-        <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-ticket-perforated"></i> Coupon</a></li>
-        <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-arrow-repeat"></i> Refund/Return</a></li>
-        <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-image"></i> Banners</a></li>
-      </ul>
+    <nav class="col-md-2 d-none d-md-block">
+      <div class="admin-sidebar">
+        <a href="/admin/dashboard"><i class="bi bi-grid"></i> Dashboard</a>
+        <a href="/admin/customers"><i class="bi bi-people"></i> Customer</a>
+        <a href="/admin/categories"><i class="bi bi-tags"></i> Category</a>
+        <a href="/admin/brands"><i class="bi bi-image"></i> Brands</a>
+        <a href="/admin/orders"><i class="bi bi-bag"></i> Orders</a>
+        <a href="/admin/products"><i class="bi bi-box-seam"></i> Products</a>
+        <a href="/admin/sales-report"><i class="bi bi-graph-up"></i> Sales report</a>
+        <a href="/admin/coupons"><i class="bi bi-ticket-perforated"></i> Coupon</a>
+        <a href="/admin/refund"><i class="bi bi-arrow-repeat"></i> Refund/Return</a>
+        <a href="/admin/banners"><i class="bi bi-image"></i> Banners</a>
+      </div>
     </nav>
+
+
+
+    <script>
+  const path = window.location.pathname;
+
+  document.querySelectorAll(".admin-sidebar a").forEach(link => {
+    if (link.getAttribute("href") === path) {
+      link.classList.add("active");
+    }
+  });
+</script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

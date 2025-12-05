@@ -119,14 +119,31 @@
           <div id="viewProfile" class="profile-card">
             <div class="text-center profile-header">PROFILE</div>
             <div class="text-center">
-              <div class="profile-img">
-                <i class="bi bi-person-circle"></i>
-              </div>
-              <h5 class="fw-semibold mb-1">
-                <%= user.name %>
-              </h5>
-              <p class="text-muted">Customer since 2023</p>
-            </div>
+  <div class="profile-img" style="cursor:pointer;">
+    
+    <!-- If user already has image show it -->
+  <% if (user.profileImage) { %>
+  <img id="profilePreview"
+       src="<%= user.profileImage %>"
+       class="rounded-circle"
+       style="width:100px; height:100px; object-fit:cover;">
+<% } else { %>
+  <i class="bi bi-person-circle"
+     id="profilePreview"
+     style="font-size:100px;">
+  </i>
+<% } %>
+
+
+    <form id="uploadForm" action="/upload-profile" method="POST" enctype="multipart/form-data">
+      <input type="file" id="uploadInput" name="profileImage" accept="image/*" hidden>
+    </form>
+
+  </div>
+
+  <h5 class="fw-semibold mb-1"><%= user.name %></h5>
+  <p class="text-muted">Customer since 2023</p>
+</div>
 
             <hr class="my-4" />
 
@@ -297,6 +314,20 @@
 
     <!-- Custom JS -->
     <script>
+
+      const profilePreview = document.getElementById("profilePreview");
+  const uploadInput = document.getElementById("uploadInput");
+  const uploadForm = document.getElementById("uploadForm");
+
+  // Click icon → open file picker
+  profilePreview.addEventListener("click", () => {
+    uploadInput.click();
+  });
+
+  // After selecting → auto upload
+  uploadInput.addEventListener("change", () => {
+    uploadForm.submit();
+  });
 
       history.scrollRestoration = "manual";
 

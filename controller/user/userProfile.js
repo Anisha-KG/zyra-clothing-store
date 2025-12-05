@@ -69,7 +69,8 @@ const getUserprofile=async(req,res,next)=>{
             
             user,
             defaultAddress,
-            addresses
+            addresses,
+            
         })
 
 

@@ -1,43 +1,53 @@
 const Order=require('../../models/orderSchema')
 const User=require('../../models/userScema')
+const Variant=require('../../models/variantSchema')
 const httpStatus=require('../../Constants/httpStatuscode')
+const listOrders = async (req, res, next) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
 
-const listOrders=async(req,res,next)=>{
-    try{
-        const page=parseInt(req.query.page)||1 
-        const limit=5 
-        const search=req.query.search||''
+        const search = req.query.search || '';
+        const paymentStatus = req.query.paymentStatus || 'All';
+        const sort = req.query.sort || 'newest';
 
-        
-        const user=await User.find({ email: { $regex: ".*" + search + ".*", $options: "i" } })
-        const userIds=user.map((u)=>u._id)
-        let query={$or:[{ orderId: { $regex: ".*" + search + ".*", $options: "i" } },{userId:{$in:userIds}}]}
-        const [orders,totalOrders]=await Promise.all([
-            Order.find(query)
-                .sort({createdAt:-1})
-                .skip((page-1)*limit) 
-                .limit(limit)
-                .populate('userId','email'),
-            Order.countDocuments(query)
-            
-            
-        ])
+        let sortQuery = sort === 'newest' ? { createdAt: -1 } : { createdAt: 1 };
 
-        const totalPages=Math.ceil(totalOrders/limit)
+        // Base query (search)
+        let query = {
+            orderId: { $regex: search, $options: "i" }
+        };
 
-        res.render('orders',{
-            currentPage:page,
+        // Payment Filter
+        if (paymentStatus !== 'All') {
+            query.paymentStatus = paymentStatus;
+        }
+
+        // Fetch orders + count BEFORE pagination
+        const totalOrders = await Order.countDocuments(query);
+
+        const orders = await Order.find(query)
+            .sort(sortQuery)
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .populate("userId", "email");
+
+        const totalPages = Math.ceil(totalOrders / limit);
+
+        res.render("orders", {
+            currentPage: page,
             totalPages,
             orders,
             search,
+            sort,
+            paymentStatus,
             limit
+        });
 
-        })
-
-    }catch(error){
-        next(error)
+    } catch (error) {
+        next(error);
     }
-}
+};
 
 
 const orderDetails=async(req,res,next)=>{
@@ -58,11 +68,22 @@ const updateItemstatus = async (req, res, next) => {
     try {
         const { itemId, status, orderId } = req.body;
 
-        const updatedOrder = await Order.findOneAndUpdate(
+        let order=await Order.findOne({orderId})
+
+        if(status=='Delivered'&&order.paymentMethod=='cod'){
+            order.paymentStatus='Completed'
+            await order.save()
+        }
+
+            const updatedOrder = await Order.findOneAndUpdate(
             { orderId, "orderedItems._id": itemId },
             { $set: { "orderedItems.$.status": status } },
             { new: true }
         );
+
+
+        
+
 
         if (!updatedOrder) {
             return res.status(httpStatus.BAD_REQUEST).json({
@@ -90,7 +111,7 @@ const handleReturnRequest=async(req,res,next)=>{
                                                 {$set:{
                                                     
                                                     'orderedItems.$.returnRequest.resolvedAt':Date.now(),
-                                                    'orderedItems.$.status':'Returning'
+                                                    'orderedItems.$.status':'Returned'
                                                 }}
             )
             if(!acceptReturn){
@@ -116,10 +137,66 @@ const handleReturnRequest=async(req,res,next)=>{
         next(error)
     }
 }
+const updateExpectedDeliveryDate = async (req, res, next) => {
+    try {
+        const { itemId, orderId, selectedDate } = req.body;
+
+        const update = await Order.findOneAndUpdate(
+            {
+                orderId,
+                'orderedItems._id': itemId
+            },
+            {
+                $set: {
+                    'orderedItems.$.expectedDelivery': selectedDate
+                }
+            },
+            { new: true }
+        );
+
+        if (!update) {
+            return res.json({ success: false, message: "Order not found" });
+        }
+
+        return res.json({ success: true, message: "Expected delivery updated!" });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+const incrementStock=async(req,res,next)=>{
+    try{
+        const {itemId,orderId}=req.body 
+        const order=await Order.findOne({orderId})
+        const orderedItem=order.orderedItems.id(itemId) 
+        const incrementStock=await Variant.findOneAndUpdate({
+                _id:orderedItem.variant,
+                size:orderedItem.size,
+                color:orderedItem.color
+
+        },
+            {$inc:{quantity:orderedItem.quantity}},{new:true}
+        )
+
+        if(incrementStock){
+            res.status(httpStatus.OK).json({success:true})
+        }
+
+
+
+
+
+    }catch(error){
+        next(error)
+    }
+}
 
 module.exports={
     listOrders,
     orderDetails,
     updateItemstatus,
-    handleReturnRequest
+    handleReturnRequest,
+    updateExpectedDeliveryDate,
+    incrementStock
 }

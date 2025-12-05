@@ -1,11 +1,19 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-const { v4: uuidv4 } = require('uuid');
+
+function generateOrderId() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 8; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return 'ZA-' + result;
+}
 
 const orderSchema = new Schema({
     orderId: {
         type: String,
-        default: () => uuidv4(),
+        default: generateOrderId,
         unique: true
     },
     userId: {
@@ -35,7 +43,7 @@ const orderSchema = new Schema({
             type: Number,
             required: true
         },
-         totalPrice: {
+         itemsTotal: {
             type: Number,
             required: true
         },
@@ -53,7 +61,7 @@ const orderSchema = new Schema({
         },
         status: {
             type: String,
-            enum: ['Processing','Packed', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled','Cancellation Requested', 'Return Requested', 'Returning','Return Rejected', 'Returned','Failed'],
+            enum: ['Pending','Processing','Packed', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled','Cancellation Requested', 'Return Requested', 'Returning','Return Rejected', 'Returned','Failed'],
             default: 'Processing'
         },
         returnRequest: {
@@ -74,8 +82,19 @@ const orderSchema = new Schema({
           reason: String,
           refundAmount: Number,
         },
+    expectedDelivery:{
+        type:Date
+    }
     }],
     subTotal: {
+        type: Number,
+        required: true
+    },
+    taxRate: {
+        type: Number,
+        required: true
+    },
+    taxAmount: {
         type: Number,
         required: true
     },
@@ -83,7 +102,7 @@ const orderSchema = new Schema({
         type: Number,
         default: 0
     },
-    discount: {
+    couponDiscount: {
         type: Number,
         default: 0
     },
@@ -97,16 +116,20 @@ const orderSchema = new Schema({
     },
     paymentMethod: {
         type: String,
-        enum: ['cod','razorpay','Wallet'],
+        enum: ['cod','razorpay','wallet'],
         default: 'cod'
     },
     invoiceDate: {
         type: Date,
         default: Date.now
     },
+    razorpayorderId:{
+        type:String,
+        default:null
+    },
     paymentStatus: {
         type: String,
-        enum: ['pending', 'completed', 'failed', 'refunded'],
+        enum: ['Pending', 'Completed', 'Failed', 'Refunded'],
         default: 'pending'
     },
     status: {

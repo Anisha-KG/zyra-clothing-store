@@ -14,6 +14,7 @@ const product_editController=require('../controller/admin/product-editController
 const variantController=require('../controller/admin/variantController')
 const categoryUpload=require('../middleware/categoryMulter')
 const orderController=require('../controller/admin/ordersController')
+const couponController=require('../controller/admin/couponController')
 
 router.get('/pageerror',adminController.pageerror)
 router.get('/login',isAdminLogin,adminController.loadLogin)
@@ -82,5 +83,16 @@ router.get('/orders',adminAuth,orderController.listOrders)
 router.get('/orders/:orderId',adminAuth,orderController.orderDetails)
 router.patch('/updateOrderStatus',adminAuth,orderController.updateItemstatus)
 router.patch('/orders/handleReturnRequest',adminAuth,orderController.handleReturnRequest)
+router.patch('/orders/updateExpectedDate',adminAuth,orderController.updateExpectedDeliveryDate)
+router.patch('/orders/increment-stock',adminAuth,orderController.incrementStock)
+
+router.get('/coupons',adminAuth,couponController.getCoupons)
+router.post('/coupon/addCoupon',adminAuth,couponController.addCoupon)
+router.patch('/coupon/editCoupon',adminAuth,couponController.editCoupon)
+router.patch('/coupon/deactivateCoupon',adminAuth,couponController.deactivateCoupon)
+router.patch('/coupon/activateCoupon',adminAuth,couponController.activateCoupon)
+router.delete('/coupon/deleteCoupon',adminAuth,couponController.deleteCoupon)
+
+//router.post('/coupon/addCoupon',adminAuth,couponController.addCoupon)
 
 module.exports=router

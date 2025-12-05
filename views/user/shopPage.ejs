@@ -1,197 +1,245 @@
-
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
 <%- include("../../views/partials/user/header") %>
+
 <style>
-body {
-  background: #f8f5f4;
-  font-family: 'Poppins', sans-serif;
-  min-height: 100vh;
-}
+  body {
+    background: #f8f5f4;
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+  }
 
-/* Sidebar */
-.sidebar {
-  background-color: #fffdfd;
-  min-height: 100vh;
-  padding: 1.5rem;
-  border-right: 1px solid #e2d3d0;
-  position: sticky;
-  top: 0;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(123, 44, 47, 0.05);
-}
-.filter-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  margin-bottom: 1rem;
-  color: #4a2d2e;
-}
-.filter-header a {
-  font-size: 0.85rem;
-  color: #9b6a6c;
-  text-decoration: none;
-}
-.filter-section {
-  margin-bottom: 1.5rem;
-  text-align: left;
-}
-.filter-title {
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #4a2d2e;
-  font-size: 0.95rem;
-}
-.form-check-label {
-  font-size: 0.9rem;
-  color: #4a2d2e;
-}
-.form-check-input {
-  border-color: #c2a8a4;
-  cursor: pointer;
-}
-.search-box {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-.search-box input {
-  border-radius: 50px;
-  border: 1px solid #d9c7c3;
-  padding: 0.45rem 1rem;
-  background-color: #fffdfd;
-  width: 100%;
-}
-.search-box button {
-  border-radius: 50px;
-  border: 1px solid #7b2c2f;
-  background-color: #fff;
-  color: #7b2c2f;
-  padding: 0.45rem 0.8rem;
-  cursor: pointer;
-  transition: 0.3s ease;
-}
-.search-box button:hover {
-  background-color: #7b2c2f;
-  color: #fff;
-}
-hr {
-  margin: 1.2rem 0;
-  color: #e2d2ce;
-}
-
-/* Right content */
-.main-content {
-  padding: 2rem 2.5rem;
-}
-.top-bar {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  border-bottom: 1px solid #e2d2ce;
-  padding-bottom: 1rem;
-}
-.filters {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
-.zyra-btn, .zyra-dropdown-btn {
-  border: 1px solid #7b2c2f;
-  color: #7b2c2f;
-  border-radius: 25px;
-  padding: 0.4rem 1.2rem;
-  background-color: #fff;
-  transition: 0.3s ease;
-}
-.zyra-btn:hover, .zyra-dropdown-btn:hover {
-  background-color: #7b2c2f;
-  color: #fff;
-}
-.zyra-dropdown-menu {
-  min-width: 8rem;
-  border-radius: 12px;
-  padding: 0.3rem 0;
-}
-.zyra-dropdown-menu .dropdown-item:hover {
-  background-color: #f8f0ef;
-  color: #7b2c2f;
-}
-
-/* Product grid */
-.product-card {
-  background-color: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid #e7d8d6;
-  text-align: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-}
-.product-card img {
-  width: 100%;
-  height: 230px;
-  object-fit: cover;
-}
-.product-info {
-  padding: 1rem;
-}
-.product-name {
-  font-weight: 600;
-  color: #3b1f20;
-  font-size: 1rem;
-  margin-bottom: 0.3rem;
-}
-.product-price {
-  color: #7b2c2f;
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-.old-price {
-  color: #b8a4a3;
-  text-decoration: line-through;
-  font-size: 0.85rem;
-  margin-left: 5px;
-}
-.offer-badge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background-color: #7b2c2f;
-  color: #fff;
-  padding: 0.25em 0.6em;
-  border-radius: 4px;
-  font-size: 0.8rem;
-}
-@media (max-width: 991px) {
+  /* Sidebar */
   .sidebar {
-    position: relative;
-    min-height: auto;
-    border-right: none;
-    border-bottom: 1px solid #e2d3d0;
-  }
-  .main-content {
+    background-color: #fffdfd;
+    min-height: 100vh;
     padding: 1.5rem;
+    border-right: 1px solid #e2d3d0;
+    position: sticky;
+    top: 0;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(123, 44, 47, 0.05);
   }
+
+  .filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    color: #4a2d2e;
+  }
+
+  .filter-header a {
+    font-size: 0.85rem;
+    color: #9b6a6c;
+    text-decoration: none;
+  }
+
+  .filter-section {
+    margin-bottom: 1.5rem;
+    text-align: left;
+  }
+
+  .filter-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #4a2d2e;
+    font-size: 0.95rem;
+  }
+
+  .form-check-label {
+    font-size: 0.9rem;
+    color: #4a2d2e;
+  }
+
+  .form-check-input {
+    border-color: #c2a8a4;
+    cursor: pointer;
+  }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
   .search-box input {
+    border-radius: 50px;
+    border: 1px solid #d9c7c3;
+    padding: 0.45rem 1rem;
+    background-color: #fffdfd;
     width: 100%;
   }
-}
+
+  .search-box button {
+    border-radius: 50px;
+    border: 1px solid #7b2c2f;
+    background-color: #fff;
+    color: #7b2c2f;
+    padding: 0.45rem 0.8rem;
+    cursor: pointer;
+    transition: 0.3s ease;
+  }
+
+  .search-box button:hover {
+    background-color: #7b2c2f;
+    color: #fff;
+  }
+
+  hr {
+    margin: 1.2rem 0;
+    color: #e2d2ce;
+  }
+
+  /* Right content */
+  .main-content {
+    padding: 2rem 2.5rem;
+  }
+
+  .top-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #e2d2ce;
+    padding-bottom: 1rem;
+  }
+
+  .filters {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .zyra-btn,
+  .zyra-dropdown-btn {
+    border: 1px solid #7b2c2f;
+    color: #7b2c2f;
+    border-radius: 25px;
+    padding: 0.4rem 1.2rem;
+    background-color: #fff;
+    transition: 0.3s ease;
+  }
+
+  .zyra-btn:hover,
+  .zyra-dropdown-btn:hover {
+    background-color: #7b2c2f;
+    color: #fff;
+  }
+
+  .zyra-dropdown-menu {
+    min-width: 8rem;
+    border-radius: 12px;
+    padding: 0.3rem 0;
+  }
+
+  .zyra-dropdown-menu .dropdown-item:hover {
+    background-color: #f8f0ef;
+    color: #7b2c2f;
+  }
+
+  /* Product grid */
+  .product-card {
+    background-color: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e7d8d6;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .product-card img {
+    width: 100%;
+    height: 230px;
+    object-fit: cover;
+  }
+
+  .product-info {
+    padding: 1rem;
+  }
+
+  .product-name {
+    font-weight: 500;
+    color: #3b1f20;
+    font-size: 0.9rem; /* reduced font size */
+    margin-bottom: 0.3rem;
+  }
+
+  .product-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .final-price {
+    color: #7b2c2f !important;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .old-price {
+    color: #b8a4a3;
+    text-decoration: line-through;
+    font-size: 0.85rem;
+  }
+
+  .product-variant {
+    font-size: 0.85rem;
+    color: #4a2d2e;
+  }
+
+  .wishlist-icon {
+    color: #fff; /* default white */
+    transition: transform 0.2s, color 0.2s;
+  }
+
+  .wishlist-icon.active {
+    color: #7b2c2f; /* red when in wishlist */
+    transform: scale(1.2);
+  }
+
+  .offer-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background-color: #7b2c2f;
+    color: #fff;
+    padding: 0.25em 0.6em;
+    border-radius: 4px;
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 991px) {
+    .sidebar {
+      position: relative;
+      min-height: auto;
+      border-right: none;
+      border-bottom: 1px solid #e2d3d0;
+    }
+
+    .main-content {
+      padding: 1.5rem;
+    }
+
+    .search-box input {
+      width: 100%;
+    }
+  }
 </style>
 </head>
 <body>
@@ -202,73 +250,66 @@ hr {
       <div class="sidebar">
         <div class="filter-header">
           <span>Filters & Sort</span>
-          <a href="#"  id="clearFilters">Clear All</a>
+          <a href="#" id="clearFilters">Clear All</a>
         </div>
-
         <div class="mt-3">
           <button id="applyFiltersBtn" class="zyra-btn w-100">Apply Filters</button>
         </div>
-
         <div class="search-box mt-3">
-          <input type="text" placeholder="Search Products" >
-          <button class="btn btn-outline-dark btn-sm" type="submit">Search</button>
+          <input type="text" placeholder="Search Products">
+          <button class="btn btn-outline-dark btn-sm" type="submit" value="<%= search%>">Search</button>
         </div>
-
         <!-- Sort -->
         <div class="filter-section">
           <div class="filter-title">Sort By</div>
-          <% ['lowhigh','highlow','az','za','newest'].forEach(sort => { %>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="sort" id="<%= sort %>" value="<%= sort %>" <%= selectedSort===sort?'checked':'' %>>
-              <label class="form-check-label" for="<%= sort %>">
-                <% if(sort==='lowhigh'){ %>Price: Low To High<% } %>
-                <% if(sort==='highlow'){ %>Price: High To Low<% } %>
-                <% if(sort==='az'){ %>Alphabetic: A-Z<% } %>
-                <% if(sort==='za'){ %>Alphabetic: Z-A<% } %>
-                <% if(sort==='newest'){ %>Newest<% } %>
-              </label>
-            </div>
+          <% ['lowhigh','highlow','az','za','newest'].forEach(sort=> { %>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="sortBy"  id="<%= sort %>" value="<%= sort %>" <%=selectedSort===sort?'checked':'' %>>
+            <label class="form-check-label" for="<%= sort %>">
+              <% if(sort==='lowhigh' ){ %>Price: Low To High<% } %>
+              <% if(sort==='highlow' ){ %>Price: High To Low<% } %>
+              <% if(sort==='az' ){ %>Alphabetic: A-Z<% } %>
+              <% if(sort==='za' ){ %>Alphabetic: Z-A<% } %>
+              <% if(sort==='newest' ){ %>Newest<% } %>
+            </label>
+          </div>
           <% }) %>
         </div>
         <hr>
-
         <!-- Size -->
         <div class="filter-section">
           <div class="filter-title">Size</div>
-          <% availableSizes.forEach(size => { %>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="size" id="size-<%= size %>" value="<%= size %>" <%= selectedSizes.includes(size)?'checked':'' %>>
-              <label class="form-check-label" for="size-<%= size %>"><%= size %></label>
-            </div>
+          <% availableSizes.forEach(size=> { %>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="size" id="size-<%= size %>" value="<%= size %>" <%=selectedSizes.includes(size)?'checked':'' %>>
+            <label class="form-check-label" for="size-<%= size %>"> <%= size %> </label>
+          </div>
           <% }) %>
         </div>
         <hr>
-
         <!-- Color -->
         <div class="filter-section">
           <div class="filter-title">Color</div>
-          <% availableColors.forEach(color => { %>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="color" id="color-<%= color.replace(/\s+/g,'-') %>" value="<%= color %>" <%= selectedColors.includes(color)?'checked':'' %>>
-              <label class="form-check-label" for="color-<%= color.replace(/\s+/g,'-') %>"><%= color %></label>
-            </div>
+          <% availableColors.forEach(color=> { %>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="color" id="color-<%= color.replace(/\s+/g,'-') %>" value="<%= color %>" <%=selectedColors.includes(color)?'checked':'' %>>
+            <label class="form-check-label" for="color-<%= color.replace(/\s+/g,'-') %>"> <%= color %> </label>
+          </div>
           <% }) %>
         </div>
         <hr>
-
         <!-- Price -->
         <div class="filter-section">
           <div class="filter-title">Price</div>
           <% ['price1','price2','price3','price4'].forEach(p=>{
               const text = p==='price1'?'Under 500':p==='price2'?'500-1000':p==='price3'?'1000-2000':'Over 2000';
           %>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="price" id="<%= p %>" value="<%= p %>" <%= selectedPrice===p?'checked':'' %>>
-              <label class="form-check-label" for="<%= p %>"><%= text %></label>
-            </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="price" id="<%= p %>" value="<%= p %>" <%=selectedPrice===p?'checked':'' %>>
+            <label class="form-check-label" for="<%= p %>"> <%= text %> </label>
+          </div>
           <% }) %>
         </div>
-
       </div>
     </div>
 
@@ -277,310 +318,288 @@ hr {
       <div class="main-content">
         <div class="top-bar d-flex justify-content-between flex-wrap gap-3">
           <!-- Filters dropdowns -->
-          
         </div>
- <!-- Filters -->
+        <!-- Filters -->
         <div class="filters">
           <button class="zyra-btn" id="allProductsBtn">All Products</button>
-         
-  <!-- Category Dropdown -->
-  <div class="zyra-dropdown dropdown">
-    <button
-      id="categoryDropdown"
-      class="zyra-dropdown-btn dropdown-toggle"
-      type="button"
-      data-bs-toggle="dropdown"
-      data-id="<%= selectedCategoryId || '' %>"
-    >
-      <%= category.find(c => c._id.toString() === selectedCategoryId)?.name || 'Category' %>
-    </button>
-    <ul class="dropdown-menu zyra-dropdown-menu" id="categoryMenu">
-      <% category.forEach(cat => { %>
-        <li>
-          <a class="dropdown-item category-item" href="#" data-id="<%= cat._id %>"><%= cat.name %></a>
-        </li>
-      <% }) %>
-    </ul>
-  </div>
+          <!-- Category Dropdown -->
+          <div class="zyra-dropdown dropdown">
+            <button id="categoryDropdown" class="zyra-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-id="<%= selectedCategoryId || '' %>">
+              <%= category.find(c=> c._id.toString() === selectedCategoryId)?.name || 'Category' %>
+            </button>
+            <ul class="dropdown-menu zyra-dropdown-menu" id="categoryMenu">
+              <% category.forEach(cat=> { %>
+              <li>
+                <a class="dropdown-item category-item" href="#" data-id="<%= cat._id %>"> <%= cat.name %> </a>
+              </li>
+              <% }) %>
+            </ul>
+          </div>
 
-  <!-- Subcategory Dropdown -->
-  <div class="zyra-dropdown dropdown">
-    <button
-      id="subcategoryDropdown"
-      class="zyra-dropdown-btn dropdown-toggle"
-      type="button"
-      data-bs-toggle="dropdown"
-      data-id="<%= selectedSubcategoryId || '' %>"
-    >
-      Subcategory
-    </button>
-    <ul class="dropdown-menu zyra-dropdown-menu" id="subcategoryMenu">
-      <!-- Subcategories will be dynamically added here -->
-    </ul>
-  </div>
+          <!-- Subcategory Dropdown -->
+          <div class="zyra-dropdown dropdown">
+            <button id="subcategoryDropdown" class="zyra-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-id="<%= selectedSubcategoryId || '' %>">
+              Subcategory
+            </button>
+            <ul class="dropdown-menu zyra-dropdown-menu" id="subcategoryMenu">
+              <!-- Subcategories will be dynamically added here -->
+            </ul>
+          </div>
+
           <!-- Brand Dropdown -->
           <div class="zyra-dropdown dropdown">
-            <button
-              id="brandDropdown"
-              class="zyra-dropdown-btn dropdown-toggle"
-              type="button"
-              data-bs-toggle="dropdown"
-              data-id="<%= selectedBrandId || '' %>"
-            >
-              <%= brand.find(b => b._id.toString() === selectedBrandId)?.brandName || 'Brand' %>
+            <button id="brandDropdown" class="zyra-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-id="<%= selectedBrandId || '' %>">
+              <%= brand.find(b=> b._id.toString() === selectedBrandId)?.brandName || 'Brand' %>
             </button>
             <ul class="dropdown-menu zyra-dropdown-menu" id="brandMenu">
-              <% brand.forEach(b => { %>
-                <li>
-                  <a class="dropdown-item brand-item" href="#" data-id="<%= b._id %>"><%= b.brandName %></a>
-                </li>
+              <% brand.forEach(b=> { %>
+              <li>
+                <a class="dropdown-item brand-item" href="#" data-id="<%= b._id %>"> <%= b.brandName %> </a>
+              </li>
               <% }) %>
             </ul>
           </div>
         </div>
-      </div>
-<% let shownProducts = new Set(); %>
 
-<div class="row g-4 mt-2">
-  <% variants.forEach(variant => { 
-        const product = products.find(p => p._id.toString() === variant.product.toString());
-        if (!product) return;
+         <% let shownProducts = new Set(); %>
+        <div class="row g-4 mt-2">
+          <% variants.forEach(variant => {
+            const product = products.find(p => p._id.toString() === variant.product.toString());
+            if (!product) return;
 
-        // Skip if this product is already shown
-        if (shownProducts.has(product._id.toString())) return;
-        shownProducts.add(product._id.toString());
-  %>
+            if (shownProducts.has(product._id.toString())) return;
+            shownProducts.add(product._id.toString());
 
-    <div class="col-6 col-md-4 col-lg-3">
-      <a href="/product/<%= product._id %>" class="text-decoration-none text-dark">
-        <div class="product-card position-relative p-2 border rounded">
+            const isInWishlist = wishlistProducts.some(
+              wp => wp.productId.toString() === product._id.toString() &&
+                    wp.variantId.toString() === variant._id.toString()
+            );
+          %>
 
-          <% if (product.offer) { %>
-            <span class="offer-badge"><%= product.offer %></span>
-          <% } %>
+          <div class="col-6 col-md-4 col-lg-3">
+            <div class="product-card position-relative p-2 border rounded">
 
-          <img src="<%= variant.images && variant.images.length > 0 ? '/uploads/variants/' + variant.images[0] : '/uploads/default.png' %>" 
-               alt="<%= product.name %>" 
-               class="img-fluid">
+              <a href="/product/<%= product._id %>" class="text-decoration-none text-dark">
+                <img
+                  src="<%= variant.images?.[0] ? '/uploads/variants/' + variant.images[0] : '/uploads/default.png' %>"
+                  alt="<%= product.name %>" class="img-fluid">
 
-          <h5 class="mt-2"><%= product.name %></h5>
-          <p class="mb-0">Size: <%= variant.size %></p>
-          <p class="mb-0">Color: <%= variant.color %></p>
-          <p class="mb-0 text-success"><%= product.price %></p>
+                <h5 class="product-name mt-2"><%= product.name %></h5>
 
+                <div class="product-price-row">
+                  <span class="final-price"><%= product.finalPrice %></span>
+                  <span class="old-price"><%= product.price %></span>
+                </div>
+
+                <div class="product-variant">
+                  Size: <%= variant.size %> | Color: <%= variant.color %>
+                </div>
+              </a>
+
+              <!-- Wishlist Icon -->
+              <i
+                onclick="wishlistToggle('<%= product._id %>','<%= variant._id %>')"
+                class="fa fa-heart wishlist-icon <%= isInWishlist ? 'active' : '' %>"
+                style="cursor:pointer; position:absolute; top:14px; right:14px; font-size:20px;">
+              </i>
+
+            </div>
+          </div>
+
+          <% }) %>
         </div>
-      </a>
-    </div>
-
-  <% }) %>
-</div>
-
 
         <!-- Pagination -->
-<nav aria-label="Page navigation" class="mt-4">
-  <ul class="pagination justify-content-center" id="pagination">
-    <% for(let i = 1; i <= totalPages; i++) { %>
-      <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-        <a class="page-link page-number" href="#" data-page="<%= i %>"><%= i %></a>
-      </li>
-    <% } %>
-  </ul>
-</nav>
+        <nav aria-label="Page navigation" class="mt-4">
+          <ul class="pagination justify-content-center" id="pagination">
+            <% for(let i=1; i <=totalPages; i++) { %>
+            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+              <a class="page-link page-number" href="#" data-page="<%= i %>"> <%= i %> </a>
+            </li>
+            <% } %>
+          </ul>
+        </nav>
       </div>
     </div>
   </div>
 </div>
 
+  <%- include("../../views/partials/user/footer") %>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
- 
-  function getSidebarFilters() {
-    const filters = {};
-    const searchInput = document.querySelector('.search-box input');
-    if (searchInput && searchInput.value.trim()) filters.search = searchInput.value.trim();
 
-    const sort = document.querySelector('input[name="sort"]:checked');
-    if (sort) filters.sortBy = sort.value;
 
-    const sizes = Array.from(document.querySelectorAll('input[name="size"]:checked')).map(i => i.value);
-    if (sizes.length) filters.size = sizes;
+ // ---------------- GET SIDEBAR FILTERS ----------------
+function getSidebarFilters() {
+  const filters = {};
 
-    const colors = Array.from(document.querySelectorAll('input[name="color"]:checked')).map(i => i.value);
-    if (colors.length) filters.color = colors;
+  const searchInput = document.querySelector('.search-box input');
+  if (searchInput && searchInput.value.trim())
+    filters.search = searchInput.value.trim();
 
-    const price = document.querySelector('input[name="price"]:checked');
-    if (price) filters.price = price.value;
+  // FIXED: Correct sortBy name
+  const sort = document.querySelector('input[name="sortBy"]:checked');
+  if (sort) filters.sortBy = sort.value;
 
-    return filters;
-  }
+  const sizes = Array.from(
+    document.querySelectorAll('input[name="size"]:checked')
+  ).map(i => i.value);
+  if (sizes.length) filters.size = sizes;
 
-  function buildQueryString(sidebarFilters) {
-    const params = new URLSearchParams();
+  const colors = Array.from(
+    document.querySelectorAll('input[name="color"]:checked')
+  ).map(i => i.value);
+  if (colors.length) filters.color = colors;
 
-    ['categoryDropdown', 'subcategoryDropdown', 'brandDropdown'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el && el.dataset.id) params.append(id.replace('Dropdown', 'Id'), el.dataset.id);
-    });
+  const price = document.querySelector('input[name="price"]:checked');
+  if (price) filters.price = price.value;
 
-    for (const key in sidebarFilters) {
-      const val = sidebarFilters[key];
-      if (Array.isArray(val)) val.forEach(v => params.append(key, v));
-      else params.append(key, val);
+  return filters;
+}
+
+// ---------------- BUILD QUERY ----------------
+function buildQueryString(filters) {
+  const params = new URLSearchParams();
+
+  ['categoryDropdown', 'subcategoryDropdown', 'brandDropdown'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.dataset.id) {
+      params.append(id.replace('Dropdown', 'Id'), el.dataset.id);
     }
+  });
 
-    return params.toString();
+  for (const key in filters) {
+    const val = filters[key];
+    if (Array.isArray(val)) val.forEach(v => params.append(key, v));
+    else params.append(key, val);
   }
 
-  function applyFilters() {
-    const sidebarFilters = getSidebarFilters();
-    const queryString = buildQueryString(sidebarFilters);
-    window.location.href = '/shop?' + queryString;
-  }
+  return params.toString();
+}
 
+// ---------------- APPLY FILTERS ----------------
+function applyFilters() {
+  const filters = getSidebarFilters();
+  window.location.href = '/shop?' + buildQueryString(filters);
+}
 
-  document.getElementById('applyFiltersBtn')?.addEventListener('click', applyFilters);
-  document.querySelector('.search-box button')?.addEventListener('click', applyFilters);
-  document.querySelector('.search-box input')?.addEventListener('keypress', e => {
-    if (e.key === 'Enter') applyFilters();
-  });
-  
+document.getElementById('applyFiltersBtn')?.addEventListener('click', applyFilters);
+document.querySelector('.search-box button')?.addEventListener('click', applyFilters);
+document.querySelector('.search-box input')?.addEventListener('keypress', e => {
+  if (e.key === 'Enter') applyFilters();
+});
 
-  document.getElementById('clearFilters')?.addEventListener('click', e => {
-    e.preventDefault();
-    document.querySelector('.search-box input').value = '';
-    document.querySelectorAll('input[name="size"], input[name="color"], input[name="price"], input[name="sort"]').forEach(i => i.checked = false);
-
-    ['categoryDropdown', 'subcategoryDropdown', 'brandDropdown'].forEach(id => {
-      const el = document.getElementById(id);
-      el.dataset.id = '';
-      el.textContent = el.id.includes('category') ? 'Category' : el.id.includes('subcategory') ? 'Subcategory' : 'Brand';
-    });
-  });
-
- 
-  const allSubcategories = <%- JSON.stringify(subcategory) %>;
-
-
-  function attachSubcategoryClick() {
-    document.querySelectorAll('.subcategory-item').forEach(subItem => {
-      subItem.addEventListener('click', e => {
-        e.preventDefault();
-        const subBtn = document.getElementById('subcategoryDropdown');
-        subBtn.textContent = e.target.textContent;
-        subBtn.dataset.id = e.target.getAttribute('data-id');
-      
-        applyFilters();
-      });
-    });
-  }
-
-
-  document.querySelectorAll('.category-item').forEach(item => {
-    item.addEventListener('click', e => {
-      e.preventDefault();
-      const categoryId = e.target.getAttribute('data-id');
-      const categoryName = e.target.textContent;
-
-
-      const categoryBtn = document.getElementById('categoryDropdown');
-      categoryBtn.textContent = categoryName;
-      categoryBtn.dataset.id = categoryId;
-
-
-      const filteredSubs = allSubcategories.filter(sub => sub.categoryId.toString() === categoryId.toString());
-
-
-      const subBtn = document.getElementById('subcategoryDropdown');
-      const subMenu = document.getElementById('subcategoryMenu');
-      subMenu.innerHTML = '';
-
-      if (filteredSubs.length > 0) {
-        filteredSubs.forEach(sub => {
-          const li = document.createElement('li');
-          li.innerHTML = `<a class="dropdown-item subcategory-item" href="#" data-id="${sub._id}">${sub.name}</a>`;
-          subMenu.appendChild(li);
-        });
-      } else {
-        subMenu.innerHTML = '<li><a class="dropdown-item disabled" href="#">No subcategories</a></li>';
-      }
-
-
-      subBtn.textContent = 'Subcategory';
-      subBtn.dataset.id = '';
-
-
-      attachSubcategoryClick();
-    });
-  });
-
-
-  document.querySelectorAll('.brand-item').forEach(item => {
-    item.addEventListener('click', e => {
-      e.preventDefault();
-      const brandBtn = document.getElementById('brandDropdown');
-      brandBtn.textContent = e.target.textContent;
-      brandBtn.dataset.id = e.target.getAttribute('data-id');
-      applyFilters();
-    });
-  });
-
-
-  attachSubcategoryClick();
-</script>
-<script>
-  document.getElementById('clearFilters')?.addEventListener('click', e => {
+// ---------------- FIXED CLEAR FILTERS ----------------
+document.getElementById('clearFilters')?.addEventListener('click', e => {
   e.preventDefault();
 
-
   document.querySelector('.search-box input').value = '';
-  document.querySelectorAll('input[name="size"], input[name="color"], input[name="price"], input[name="sort"]').forEach(i => i.checked = false);
 
+  // FIXED: Now clears sortBy also
+  document.querySelectorAll(
+    'input[name="size"], input[name="color"], input[name="price"], input[name="sortBy"]'
+  ).forEach(i => i.checked = false);
 
   ['categoryDropdown', 'subcategoryDropdown', 'brandDropdown'].forEach(id => {
     const el = document.getElementById(id);
     el.dataset.id = '';
-    el.textContent = el.id.includes('category') ? 'Category' : el.id.includes('subcategory') ? 'Subcategory' : 'Brand';
+    el.textContent = el.id.includes('category')
+      ? 'Category'
+      : el.id.includes('subcategory')
+      ? 'Subcategory'
+      : 'Brand';
   });
-
 
   window.location.href = '/shop';
 });
 
-</script>
-<script>
-  document.getElementById('allProductsBtn')?.addEventListener('click', e => {
+// ---------------- FIXED ALL PRODUCTS BUTTON ----------------
+document.getElementById('allProductsBtn')?.addEventListener('click', e => {
   e.preventDefault();
 
-
   document.querySelector('.search-box input').value = '';
-  document.querySelectorAll('input[name="size"], input[name="color"], input[name="price"], input[name="sort"]').forEach(i => i.checked = false);
 
+  document.querySelectorAll(
+    'input[name="size"], input[name="color"], input[name="price"], input[name="sortBy"]'
+  ).forEach(i => i.checked = false);
 
   ['categoryDropdown', 'subcategoryDropdown', 'brandDropdown'].forEach(id => {
     const el = document.getElementById(id);
     el.dataset.id = '';
-    el.textContent = el.id.includes('category') ? 'Category' : el.id.includes('subcategory') ? 'Subcategory' : 'Brand';
+    el.textContent = el.id.includes('category')
+      ? 'Category'
+      : el.id.includes('subcategory')
+      ? 'Subcategory'
+      : 'Brand';
   });
-
 
   window.location.href = '/shop';
 });
-</script>
-<script>
 
+// ---------------- PAGINATION FIXED ----------------
 document.querySelectorAll('.page-number').forEach(link => {
   link.addEventListener('click', e => {
     e.preventDefault();
+
     const page = e.target.dataset.page;
-    const sidebarFilters = getSidebarFilters();
+    const filters = getSidebarFilters();
 
+    filters.page = page;
 
-    sidebarFilters.page = page;
-
-    const queryString = buildQueryString(sidebarFilters);
-    window.location.href = '/shop?' + queryString;
+    window.location.href = '/shop?' + buildQueryString(filters);
   });
 });
+
+
+
+
+    async function wishlistToggle(productId,variantId){
+      
+      try{
+        const response=await fetch(`/wishlist/toggle`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({productId,variantId})
+      })
+
+      const result=await response.json()
+
+      if (result.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: result.message,
+                confirmButtonColor: '#198754'
+            }).then(()=>window.location.reload())
+        }else if(result.removed){
+          Swal.fire({
+                icon: 'warning',
+                title: 'Removed!',
+                text: result.message,
+                confirmButtonColor: '#dc3545'
+            }).then(()=>window.location.reload())
+        }
+        
+        else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: result.message,
+                confirmButtonColor: '#dc3545'
+            });
+        }
+      }catch(error){
+        Swal.fire({
+            icon: 'error',
+            title: 'Server Error',
+            text: 'Something went wrong',
+            confirmButtonColor: '#dc3545'
+        });
+      }
+
+
+    }
 </script>
 
 
