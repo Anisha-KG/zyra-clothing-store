@@ -42,6 +42,7 @@ const viewCheckoutPage = async (req, res, next) => {
     const total = subtotal + tax;
 
     const addresses=await Address.findOne({userId})
+    
 
     res.render("checkoutPage", {
       user,
@@ -49,7 +50,7 @@ const viewCheckoutPage = async (req, res, next) => {
       subTotal: subtotal,
       total,
       tax,
-      addresses
+      addresses: addresses?.address || []
     });
 
   } catch (error) {
@@ -113,7 +114,7 @@ const getconfirmationPage = async (req, res, next) => {
     const user = await User.findById(userId)
     const addressId = req.session.addressId
     const paymentMethod = req.session.paymentMethod
-    const couponId = req.query.couponId || null
+    const couponId = req.query.couponId
 
     const cart = await Cart.findOne({ userId }).populate('items.productId').populate('items.variantId')
     const addresses = await Address.findOne({ userId })
@@ -135,69 +136,99 @@ const getconfirmationPage = async (req, res, next) => {
 
     }
 
-    const coupons = await Coupons.find({
-      minimumOrderAmount: { $lte: subTotal }, status: true
+
+
+      const coupons = await Coupons.find({
+      minimumOrderAmount: { $lte: subTotal },
+      status: true,
+      startingDate: { $lte: Date.now() },   
+      expiryDate: { $gte: Date.now() }   
     });
 
     let appliedCoupon = null
     let discount = 0
 
     if (couponId) {
-      const coupon = await Coupons.findById(couponId)
+      let coupon = await Coupons.findById(couponId)
+      if (coupon) {
+        const userExist = coupon?.usedUsers?.find((u) => u.userId.toString() == userId.toString())
+        if (userExist) {
+          if (userExist.count >= coupon.usagePerUser) {
+            
+                const CGST = Math.round(subTotal * 0.09)
+                const SGST = Math.round(subTotal * 0.09)
+                const totalTax = CGST + SGST
+                const TotalPayable = subTotal + totalTax
+                let shippingCharge = subTotal < 1000 ? 60 : 0;
+                const referralCoupons = user.referralCoupons.filter((c) => c.isUsed == false)
 
-      const userExist = coupon.usedUsers.find((u) => u.userId.toString() == userId.toString())
-      if (userExist) {
-        if (userExist.count >= coupon.usagePerUser) {
 
-          const CGST = Math.round(subTotal * process.env.TAX_RATE)
-          const SGST = Math.round(subTotal * process.env.TAX_RATE)
-          const totalTax = CGST + SGST
-          let shippingCharge = subTotal < 1000 ? 60 : 0;
-          const TotalPayable = subTotal + totalTax+shippingCharge
-          
 
-          return res.render("confirmationPage", {
-            user,
-            address,
-            paymentMethod,
-            cart,
-            subTotal,
-            totalMRP,
-            CGST,
-            SGST,
-            totalTax,
-            shippingCharge,
-            applicableDiscount,
-            TotalPayable,
-            coupons,
-            couponError: "You already used this coupon maximum times.",
-            appliedCoupon: null
-          });
+               return  res.render('confirmationPage', {
+                  user,
+                  address,
+                  paymentMethod,
+                  cart,
+                  subTotal,
+                  totalMRP,
+                  CGST,
+                  SGST,
+                  totalTax,
+                  shippingCharge,
+                  applicableDiscount,
+                  TotalPayable,
+                  coupons,
+                  appliedCoupon,
+                  couponError:"You reached the maximum usage limit of this coupon",
+                  rewardCoupons: referralCoupons,
+
+                }
+                )
+          }
+
         }
-        
-      }
 
-
-
-      if (coupon.type == 'fixed') {
-        discount = coupon.discountValue
       } else {
-        discount = subTotal * (coupon.discountValue / 100)
+        coupon = user.referralCoupons.id(couponId)
+        if (coupon) {
+     coupon.isReferral = true  
+  }
       }
 
-      if (discount > coupon.maximumDiscount) {
-        discount = coupon.maximumDiscount
+      if (coupon.isReferral) {
+        discount = coupon.discount
+        coupon.isUsed = true
+        appliedCoupon = {
+          code: coupon.couponCode,
+          discountValue: coupon.discount,
+          discount: discount
+        }
+      } else {
+
+        if (coupon.type == 'fixed') {
+          discount = coupon.discountValue
+        } else {
+          discount = subTotal * (coupon.discountValue / 100)
+        }
+
+        if (discount > coupon.maximumDiscount) {
+          discount = coupon.maximumDiscount
+        }
+        appliedCoupon = {
+          code: coupon.code,
+          discountValue: coupon.discountValue,
+          discount: discount
+        }
+
       }
+
+
 
       subTotal = subTotal - discount
 
-      appliedCoupon = {
-        code: coupon.code,
-        discountValue: coupon.discountValue,
-        discount: discount
-      }
-      req.session.couponCode=coupon.code 
-      req.session.couponDiscount=discount
+
+      req.session.couponCode = coupon.isReferral ? coupon.couponCode : coupon.code;
+      req.session.couponDiscount = discount
 
     }
 
@@ -210,8 +241,8 @@ const getconfirmationPage = async (req, res, next) => {
     const totalTax = CGST + SGST
     const TotalPayable = subTotal + totalTax
     let shippingCharge = subTotal < 1000 ? 60 : 0;
+    const referralCoupons = user.referralCoupons.filter((c) => c.isUsed == false)
 
-    
 
 
     res.render('confirmationPage', {
@@ -228,7 +259,8 @@ const getconfirmationPage = async (req, res, next) => {
       applicableDiscount,
       TotalPayable,
       coupons,
-      appliedCoupon
+      appliedCoupon,
+      rewardCoupons: referralCoupons,
 
     }
     )
@@ -236,6 +268,8 @@ const getconfirmationPage = async (req, res, next) => {
     next(error)
   }
 }
+
+
 
 const selectedAddress=async(req,res,next)=>{
   try{
@@ -274,7 +308,8 @@ viewCheckoutPage,
 selectPayment,
 getconfirmationPage,
 selectedAddress,
-selectPaymentmethod
+selectPaymentmethod,
+
 }
 
 

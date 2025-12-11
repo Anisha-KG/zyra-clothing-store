@@ -183,37 +183,47 @@
 
               <div class="order-actions">
                 <div class="actions-wrapper">
-                  <div class="status-text text-success"><%= item.status %></div>
+  <div class="status-text text-success"><%= item.status %></div>
 
-                  <% let st = item.status.toUpperCase(); 
-                     const disableCancel = item.cancellationRequest.status === true;
-                     const disableReturn = item.returnRequest.status === true;
-                     const cancelBlocked = (st === "CANCELLED" || st === "CANCELLATION REQUESTED");
-                     const returnBlocked = (st === "RETURNED" || st === "RETURN REQUESTED" || st === "RETURN REJECTED" || st === "RETURNING");
-                  %>
+  <% 
+    let st = item.status.toUpperCase(); 
+    const disableCancel = item.cancellationRequest?.status === true;
+    const disableReturn = item.returnRequest?.status === true;
+    const cancelBlocked = (st === "CANCELLED" || st === "CANCELLATION REQUESTED");
+    const returnBlocked = (
+      st === "CANCELLED" ||  // <--- added: cancel blocks return
+      st === "RETURNED" || 
+      st === "RETURN REQUESTED" || 
+      st === "RETURN REJECTED" || 
+      st === "RETURNING"
+    );
+  %>
 
-                  <% if (st === "PROCESSING" || st === "PACKED" || st === "CONFIRMED") { %>
-                  <% if (!cancelBlocked && !disableCancel) { %>
-                  <button class="btn btn-outline-danger btn-sm cancel-btn"
-                    onclick="event.stopPropagation(); openCancelModal('<%= order.orderId %>','<%= item._id %>')"
-                    data-bs-toggle="offcanvas" data-bs-target="#cancelModal">Cancel Item</button>
-                  <% } %>
-                  <% } else { %>
-                  <% if (!cancelBlocked) { %>
-                  <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation();">Review</button>
-                  <% } %>
-                  <% if (!returnBlocked && !disableReturn) { %>
-                  <button class="btn btn-outline-warning btn-sm return-btn"
-                    onclick="event.stopPropagation(); openReturnModal('<%= order.orderId %>','<%= item._id %>')"
-                    data-bs-toggle="offcanvas" data-bs-target="#returnModal">Return</button>
-                  <% } %>
-                  <% } %>
+  <% if (st === "PROCESSING" || st === "PACKED" || st === "CONFIRMED") { %>
+    <% if (!cancelBlocked && !disableCancel) { %>
+      <button class="btn btn-outline-danger btn-sm cancel-btn"
+        onclick="event.stopPropagation(); openCancelModal('<%= order.orderId %>','<%= item._id %>')"
+        data-bs-toggle="offcanvas" data-bs-target="#cancelModal">Cancel Item</button>
+    <% } %>
+  <% } else { %>
+    <% if (!cancelBlocked) { %>
+      <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation();">Review</button>
+    <% } %>
 
-                  <button class="btn order-btn btn-outline-primary btn-sm"
-                    onclick="event.stopPropagation(); window.location.href='/profile/orders/<%= item._id %>'">
-                    View Details
-                  </button>
-                </div>
+    <% if (!returnBlocked && !disableReturn) { %>
+      <button class="btn btn-outline-warning btn-sm return-btn"
+        onclick="event.stopPropagation(); openReturnModal('<%= order.orderId %>','<%= item._id %>')"
+        data-bs-toggle="offcanvas" data-bs-target="#returnModal">Return</button>
+    <% } %>
+  <% } %>
+
+  <!-- View Details button always visible -->
+  <button class="btn order-btn btn-outline-primary btn-sm"
+    onclick="event.stopPropagation(); window.location.href='/profile/orders/<%= item._id %>'">
+    View Details
+  </button>
+</div>
+
               </div>
 
             </div>

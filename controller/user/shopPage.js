@@ -111,10 +111,10 @@ const shopPage = async (req, res) => {
     if (user) {
       const wishlist = await Wishlist.findOne({ userId }).lean();
       wishlistProducts = wishlist?.products
-        ?.filter(p => p && p.productId && p.variantId)
+        ?.filter(p => p && p.productId && p.color)
         ?.map(p => ({
           productId: p.productId.toString(),
-          variantId: p.variantId.toString()
+          color: p.color
         })) || [];
     }
 

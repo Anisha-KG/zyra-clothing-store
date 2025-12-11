@@ -8,6 +8,14 @@ require('dotenv').config();
 
 // ---------- PAGE LOAD FUNCTIONS ----------
 
+
+const generateReferralCode = (name) => {
+    return (
+        name.substring(0, 4).toUpperCase() +
+        Math.random().toString(36).substring(2, 7).toUpperCase()
+    );
+};
+
 const loadsignup = async (req, res) => {
   try {
     res.render('signup', { user: null, message: null });
@@ -97,8 +105,9 @@ async function sendVarificationMail(email, otp) {
 // ---------- SIGNUP ----------
 
 const signup = async (req, res) => {
+  console.log(req.body)
   try {
-    let { name, phone, email, password, cpassword } = req.body;
+    let { name, phone, email, password, cpassword,referralCode,deviceId } = req.body;
     email = email.trim().toLowerCase();
 
     if (password !== cpassword) return res.render('signup', { message: "Passwords do not match" });
@@ -113,7 +122,7 @@ const signup = async (req, res) => {
     if (!emailSent) return res.render('signup', { message: "Failed to send OTP. Try again." });
 
     // Store temporary signup info in session
-    req.session.userData = { name, phone, email, password };
+    req.session.userData = { name, phone, email, password,referralCode,deviceId };
     req.session.userotp = otp;
 
     res.render('verify-otp', { message: null });
@@ -124,13 +133,13 @@ const signup = async (req, res) => {
   }
 };
 
-// ---------- PASSWORD HASHING ----------
+
 
 const securePassword = async (password) => {
   return await bcrypt.hash(password, 10);
 };
 
-// ---------- VERIFY OTP ----------
+
 
 const verify_otp = async (req, res) => {
   try {
@@ -142,21 +151,59 @@ const verify_otp = async (req, res) => {
 
     const newUser = req.session.userData;
     const hashedPassword = await securePassword(newUser.password);
+    const referralCode=generateReferralCode(newUser.name)
+    let couponforNewUser=null
+
+    if(newUser.referralCode){
+      const referrer=await user.findOne({referralcode:newUser.referralCode})
+
+      if(referrer){
+        let fraudDetected = false
+        if (process.env.NODE_ENV === "production") {
+        const existingUser = await user.findOne({ signupDeviceId: newUser.deviceId });
+        if (existingUser) fraudDetected = true
+}
+
+        if(!fraudDetected){
+           const couponforReferrer = {
+                couponCode: "REF-" + Math.random().toString(36).substring(2, 8).toUpperCase(),
+                discount: 100, 
+                createdAt: new Date()
+            }
+            referrer.referralCoupons.push(couponforReferrer)
+            await referrer.save()
+
+          couponforNewUser={
+            couponCode: "REF-" + Math.random().toString(36).substring(2, 8).toUpperCase(),
+            discount: 50, 
+            createdAt: new Date()
+          }
+
+        }
+      }
+    }
 
     const saveUser = new user({
       name: newUser.name,
       email: newUser.email,
       phone: newUser.phone,
-      password: hashedPassword
+      password: hashedPassword,
+      signupDeviceId: newUser.deviceId,
+      referralcode:referralCode,
+      redeemed:newUser.referralCode,
+      referralCoupons: []
+      
     });
+
+    if (couponforNewUser) {
+      saveUser.referralCoupons.push(couponforNewUser);
+    }
 
     await saveUser.save();
 
-    // Clear temporary session data
     req.session.userData = null;
     req.session.userotp = null;
 
-    // Do NOT log in automatically, redirect to login page
     res.json({ success: true, redirectUrl: '/login' });
 
   } catch (error) {

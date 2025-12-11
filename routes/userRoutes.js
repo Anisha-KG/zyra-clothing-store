@@ -104,8 +104,6 @@ router.post('/wallet/verify-payment',auth.checkSession,walletController.verifyWa
 
 
 router.get('/wishlist',auth.checkSession,wishlistController.getWishlist)
-router.post('/wishlist/add',auth.checkSession,wishlistController.addToWishlist)
-router.delete('/wishlist/remove',auth.checkSession,wishlistController.removeFromWishlist)
 router.post('/wishlist/toggle',auth.checkSession,wishlistController.manageWishlist)
 
 

@@ -5,6 +5,7 @@ const Cart=require('../../models/cartSchema')
 const Variant=require('../../models/variantSchema')
 const Category=require('../../models/categprySchema')
 const Subcategory=require('../../models/subcategorySchema')
+const Wishlist=require('../../models/wishlistSchema')
 
 const viewCart = async (req, res, next) => {
     try {
@@ -89,7 +90,7 @@ const viewCart = async (req, res, next) => {
             await cart.save()
         }
 
-        const tax = Math.round(subTotal * 0.09)
+        const tax = Math.round(subTotal * 0.18)
         const total = subTotal + tax
         const cartCount = cart.items.reduce((acc, item) => {
             return acc += item.quantity
@@ -183,7 +184,7 @@ const addToCart=async(req,res,next)=>{
                 return res.status(httpStatus.BAD_REQUEST).json({status:false,message:'Insufficient stock'})
             }
             existingItem.quantity=existingItem.quantity+quantity 
-            existingItem.totalPrice=product.finalPrice*quantity
+            existingItem.itemsTotal = product.finalPrice * qty; 
         }else{
             cart.items.push({
                 productId:productId,
@@ -194,11 +195,23 @@ const addToCart=async(req,res,next)=>{
                 price:product.finalPrice,
                 //price:product.finalPrice,
                 quantity:Math.min(quantity,5),
-                itemsTotal:product.finalPrice*Math.min(quantity,5)
+                itemsTotal:product.finalPrice*quantity
             })
         }
 
             await cart.save()
+
+            await Wishlist.findOneAndUpdate(
+                { userId }, 
+                {
+                    $pull: {
+                        products: { 
+                            productId: productId, 
+                            color 
+                        }
+                    }
+                }
+);
 
 
         res.status(httpStatus.OK).json({success:true,message:'Product added to cart successfully'})
@@ -212,168 +225,90 @@ const addToCart=async(req,res,next)=>{
 }
 
 
-const increment=async(req,res,next)=>{
-    try{
-        const userId=req.session.user 
-        const {itemId}=req.body 
+const increment = async (req, res, next) => {
+    try {
+        const userId = req.session.user;
+        const { itemId } = req.body;
 
-        const cart=await Cart.findOne({userId})
-        if(!cart){
-            return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Cart not found'})
-        }
-        const item=cart.items.id(itemId)
-        if(!item){
-            return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Item not exist in the cart'})
-        }
+        const cart = await Cart.findOne({ userId });
+        if (!cart) return res.status(400).json({ success: false, message: 'Cart not found' });
 
-        const product=await Product.findById(item.productId)
-        if(!product){
-             return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Product not found'})
-        }
-        if(product.isBlocked){
-             return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'This product is currently unavailable'})
-        }
-        
-        const variant=await Variant.findById(item.variantId)
-        if(!variant){
-             return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Varient not found'})
-        }
-        if(!variant.isListed){
-             return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'This variant is currently unavailable'})
-        }
+        const item = cart.items.id(itemId);
+        if (!item) return res.status(400).json({ success: false, message: 'Item not in cart' });
 
-        if(item.quantity==5){
-             return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Can only add 5 items'})
-        }
-        if(item.quantity>=variant.quantity){
-             return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Insufficient stock'})
-        }
+        const product = await Product.findById(item.productId);
+        if (!product || product.isBlocked) return res.status(400).json({ success: false, message: 'Product unavailable' });
 
-        item.quantity+=1
-        await cart.save()
+        const variant = await Variant.findById(item.variantId);
+        if (!variant || !variant.isListed) return res.status(400).json({ success: false, message: 'Variant unavailable' });
 
-        if(item.quantity>variant.quantity){
-            item.quantity=variant.quantity
-            await cart.save()
-            const summary=calculatetotalSummary(cart)
-            const cartTotal=cart.items.reduce((acc,item)=>{
-                return acc+=item.quantity
-            },0)
-            return res.status(httpStatus.OK).json({
-                insufficientStock:true,
-                message:'Insufficiant stock ',
-                summary,
-                itemTotal:item.quantity*product.finalPrice,
-                quantity:item.quantity,
-                cartTotal
-                
-            })
-        }
-        
-        const summary=await calculatetotalSummary(cart)
-        console.log(summary)
-            const cartTotal=cart.items.reduce((acc,item)=>{
-                return acc+=item.quantity
-            },0)
-            return res.status(httpStatus.OK).json({
-                success:true,
-                message:'quntity incremented',
-                summary,
-                itemTotal:item.quantity*product.finalPrice,
-                quantity:item.quantity,
-                cartTotal
-                
-            })
+        // Max quantity per item
+        if (item.quantity >= 5) return res.status(400).json({ success: false, message: 'Max 5 items allowed' });
 
-        
-    }catch(error){
-        next(error)
+        // Max stock check
+        if (item.quantity >= variant.quantity) return res.status(400).json({ success: false, message: 'Insufficient stock' });
+
+        // Increment quantity
+        item.quantity += 1;
+
+        // Update cart totals
+        await cart.save();
+        const summary = await calculatetotalSummary(cart);
+        const cartTotal = cart.items.reduce((acc, i) => acc + i.quantity, 0);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Quantity incremented',
+            itemTotal: item.quantity * product.finalPrice,
+            quantity: item.quantity,
+            cartTotal,
+            summary
+        });
+
+    } catch (error) {
+        next(error);
     }
-}
+};
 
+const decrement = async (req, res, next) => {
+    try {
+        const userId = req.session.user;
+        const { itemId } = req.body;
 
-const decrement=async(req,res,next)=>{
-    try{
-        const userId=req.session.user 
-        const {itemId}=req.body 
+        const cart = await Cart.findOne({ userId });
+        if (!cart) return res.status(400).json({ success: false, message: 'Cart not found' });
 
-        const cart=await Cart.findOne({userId})
-        if(!cart){
-            return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Cart not found'})
-        }
-        const item=cart.items.id(itemId)
-        if(!item){
-            return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Item not exist in the cart'})
-        }
+        const item = cart.items.id(itemId);
+        if (!item) return res.status(400).json({ success: false, message: 'Item not in cart' });
 
-        const product=await Product.findById(item.productId)
-        if(!product){
-             return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Product not found'})
-        }
-        if(product.isBlocked){
-             return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'This product is currently unavailable'})
-        }
-        
-        const variant=await Variant.findById(item.variantId)
-        if(!variant){
-             return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Varient not found'})
-        }
-        if(!variant.isListed){
-             return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'This variant is currently unavailable'})
+        const product = await Product.findById(item.productId);
+        if (!product || product.isBlocked) return res.status(400).json({ success: false, message: 'Product unavailable' });
+
+        const variant = await Variant.findById(item.variantId);
+        if (!variant || !variant.isListed) return res.status(400).json({ success: false, message: 'Variant unavailable' });
+
+        // Only decrement if quantity > 1
+        if (item.quantity > 1) {
+            item.quantity -= 1;
+            await cart.save();
         }
 
-        if(variant.quantity==0){
-             return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Item out of stock'})
-        }
-        //if(item.quantity>=variant.quantity){
-           //  return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Insufficient stock'})
-       // }
+        const summary = await calculatetotalSummary(cart);
+        const cartTotal = cart.items.reduce((acc, i) => acc + i.quantity, 0);
 
-        if(item.quantity!==1){
-            item.quantity-=1
-        await cart.save()
+        return res.status(200).json({
+            success: true,
+            message: 'Quantity decremented',
+            itemTotal: item.quantity * product.finalPrice,
+            quantity: item.quantity,
+            cartTotal,
+            summary
+        });
 
-        }
-        if(item.quantity>variant.quantity){
-            item.quantity=variant.quantity
-            await cart.save()
-            const summary=await calculatetotalSummary(cart)
-            const cartTotal=cart.items.reduce((acc,item)=>{
-                return acc+=item.quantity
-            },0)
-            return res.status(httpStatus.OK).json({
-                insufficientStock:true,
-                message:'Insufficiant stock ',
-                summary,
-                itemTotal:item.quantity*product.finalPrice,
-                quantity:item.quantity,
-                cartTotal
-                
-            })
-        }
-
-        
-        
-        const summary=await calculatetotalSummary(cart)
-        console.log(summary)
-            const cartTotal=cart.items.reduce((acc,item)=>{
-                return acc+=item.quantity
-            },0)
-            return res.status(httpStatus.OK).json({
-                success:true,
-                message:'quntity decremented',
-                itemTotal:item.quantity*product.finalPrice,
-                summary,
-                quantity:item.quantity,
-                cartTotal
-                
-            })
-
-        
-    }catch(error){
-        next(error)
+    } catch (error) {
+        next(error);
     }
-}
+};
 
 const removeItem=async(req,res,next)=>{
     try{

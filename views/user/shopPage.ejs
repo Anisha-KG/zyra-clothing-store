@@ -372,7 +372,7 @@
 
             const isInWishlist = wishlistProducts.some(
               wp => wp.productId.toString() === product._id.toString() &&
-                    wp.variantId.toString() === variant._id.toString()
+                    wp.color === variant.color
             );
           %>
 
@@ -398,10 +398,11 @@
 
               <!-- Wishlist Icon -->
               <i
-                onclick="wishlistToggle('<%= product._id %>','<%= variant._id %>')"
-                class="fa fa-heart wishlist-icon <%= isInWishlist ? 'active' : '' %>"
-                style="cursor:pointer; position:absolute; top:14px; right:14px; font-size:20px;">
-              </i>
+  onclick="wishlistToggle(this, '<%= product._id %>', '<%= variant.color %>')"
+  class="fa fa-heart wishlist-icon <%= isInWishlist ? 'active' : '' %>"
+  style="cursor:pointer; position:absolute; top:14px; right:14px; font-size:20px;">
+</i>
+
 
             </div>
           </div>
@@ -553,34 +554,40 @@ document.querySelectorAll('.page-number').forEach(link => {
 
 
 
+async function wishlistToggle(element, productId, color) {
+    try {
+        const response = await fetch(`/wishlist/toggle`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId, color })
+        });
 
-    async function wishlistToggle(productId,variantId){
-      
-      try{
-        const response=await fetch(`/wishlist/toggle`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({productId,variantId})
-      })
+        const result = await response.json();
 
-      const result=await response.json()
+        if (result.success) {
+            // ADD active class
+            element.classList.add("active");
 
-      if (result.success) {
             Swal.fire({
                 icon: 'success',
                 title: 'Success!',
                 text: result.message,
                 confirmButtonColor: '#198754'
-            }).then(()=>window.location.reload())
-        }else if(result.removed){
-          Swal.fire({
+            });
+        }
+
+        else if (result.removed) {
+            // REMOVE active class
+            element.classList.remove("active");
+
+            Swal.fire({
                 icon: 'warning',
                 title: 'Removed!',
                 text: result.message,
                 confirmButtonColor: '#dc3545'
-            }).then(()=>window.location.reload())
+            });
         }
-        
+
         else {
             Swal.fire({
                 icon: 'error',
@@ -589,17 +596,16 @@ document.querySelectorAll('.page-number').forEach(link => {
                 confirmButtonColor: '#dc3545'
             });
         }
-      }catch(error){
+    } catch (error) {
         Swal.fire({
             icon: 'error',
             title: 'Server Error',
             text: 'Something went wrong',
             confirmButtonColor: '#dc3545'
         });
-      }
-
-
     }
+}
+
 </script>
 
 

@@ -1,9 +1,74 @@
 const Wishlist=require('../../models/wishlistSchema')
 const httpStatus=require('../../Constants/httpStatuscode')
-const Varinat=require('../../models/variantSchema')
+const Variant=require('../../models/variantSchema')
 const User=require('../../models/userScema')
+const Product=require('../../models/productSchema')
+const Category=require('../../models/categprySchema')
+const Subcategory=require('../../models/subcategorySchema')
 
-const getWishlist=async(req,res,next)=>{
+const getWishlist = async (req, res, next) => {
+    try {
+        const userId = req.session.user;
+        const user = await User.findById(userId);
+
+        const wishlist = await Wishlist.findOne({ userId })
+            .populate({
+                path: 'products.productId'
+            });
+
+        if (!wishlist) {
+            return res.render('wishlist', {
+                user,
+                items: [],
+                totalItems: 0
+            });
+        }
+
+        const items = [];
+
+        // FIXED LOOP
+        for (let entry of wishlist.products) {
+            let product = entry.productId;
+            const color = entry.color;
+
+            const variant = await Variant.findOne({
+                product: product._id,
+                color: color
+            });
+
+            const variants = await Variant.find({
+                product: product._id,
+                color: color
+            });
+
+            const availableSizes = variants.map(v => v.size);
+
+            if (!variant) continue;
+
+            items.push({
+                productId: product._id,
+                name: product.name,
+                color: color,
+                prize: product.finalPrice,
+                mrp: product.price,
+                variant,
+                availableSizes
+            });
+        }
+
+        return res.render('wishlist', {
+            user,
+            items,
+            totalItems: items.length
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+const getWishlist1=async(req,res,next)=>{
     try{
 
         const userId=req.session.user 
@@ -32,8 +97,9 @@ const getWishlist=async(req,res,next)=>{
 }
 
 
+
 const addToWishlist=async(req,res,next)=>{
-    console.log('controller hit add')
+    
     try{
 
         const {productId,variantId}=req.body 
@@ -162,20 +228,51 @@ const removeFromWishlist=async(req,res,next)=>{
     }
 }
 
-const manageWishlist=async(req,res,next)=>{
+const manageWishlist1=async(req,res,next)=>{
     try{
 
         let{productId,variantId}=req.body 
         const size=req.query.size 
         const color=req.query.color 
         if(!variantId&&size&&color){
-            const variant=await Varinat.findOne({product:productId,size,color})
-            variantId=variant._id
+            const variant=await Variant.findOne({product:productId,size,color})
+            if (!variant) {
+        return res.status(404).json({ success: false, message: "Variant not found" });
+    }
+    variantId = variant._id;
         }
          const userId=req.session.user
         if(!productId||!variantId){
             return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Cannot complete request'})
         }
+
+        const product=await Product.findById(productId)
+                if(!product){
+                    return res.status(httpStatus.NOT_FOUND).json({success:false,message:'Product is not found'})
+                }
+                if(product.isBlocked){
+                    return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'This product is currently unavailable'})
+                }
+        
+                const category=await Category.findById(product.category)
+                if(!category||!category.isListed){
+                    return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'This product Category is not available'})
+                }
+        
+                const subcategory=await Subcategory.findById(product.subcategory)
+                if(!subcategory||!subcategory.isListed){
+                    return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'This product subcategory is not available'})
+                }
+        
+                const variant=await Variant.findById(variantId)
+                
+                
+                if(!variant||!variant.isListed||variant.quantity==0){
+                    return res.status(httpStatus.NOT_FOUND).json({success:false,message:'Selected Color and size are not available'})
+                }
+
+
+
 
         const wishlist=await Wishlist.findOne({userId})
         if(!wishlist){
@@ -221,6 +318,120 @@ const manageWishlist=async(req,res,next)=>{
                     products:{
                     productId,
                     variantId
+                    }
+                }},
+                {new:true}
+            )
+
+            if(!update){
+                return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Cannot add to wishlist'})
+            }
+            
+
+            
+
+        return res.status(httpStatus.OK).json({success:true,message:'Product added to wishlist successfully'})
+
+
+
+        }
+
+
+
+        }
+
+
+        
+
+    }catch(error){
+        next(error)
+    }
+}
+
+const manageWishlist=async(req,res,next)=>{
+    try{
+
+        let{productId,color}=req.body 
+        const userId=req.session.user
+
+        if(!productId||!color){
+            return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Cannot complete request'})
+        }
+       
+        const variant=await Variant.findOne({product:productId,color})
+        if (!variant) {
+        return res.status(404).json({ success: false, message: "Variant not found" });
+        }
+            
+        
+         const product=await Product.findById(productId)
+                if(!product){
+                    return res.status(httpStatus.NOT_FOUND).json({success:false,message:'Product is not found'})
+                }
+                if(product.isBlocked){
+                    return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'This product is currently unavailable'})
+                }
+        
+                const category=await Category.findById(product.category)
+                if(!category||!category.isListed){
+                    return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'This product Category is not available'})
+                }
+        
+                const subcategory=await Subcategory.findById(product.subcategory)
+                if(!subcategory||!subcategory.isListed){
+                    return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'This product subcategory is not available'})
+                }
+        
+                
+
+
+
+
+        const wishlist=await Wishlist.findOne({userId})
+        if(!wishlist){
+            const newWishlist=new Wishlist({
+                userId,
+                products:[
+                    {
+                        productId,
+                        color,
+                        addedOn:Date.now()
+                    }
+
+                ]
+            })
+
+             await newWishlist.save()
+
+        return res.status(httpStatus.OK).json({success:true,message:'Product added to wishlist successfully'})
+        }else{
+
+            const productExist=wishlist.products.some((item)=>{
+            return item.productId.toString()==productId.toString()&&item.color === color
+
+        })
+
+        if(productExist){
+            const update=await Wishlist.findOneAndUpdate({userId},
+                {$pull:{
+                    products:{
+                    productId,
+                    color
+                    }
+                }},
+                {new:true}
+            )
+
+            if(!update){
+                return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Cannot remove from wishlist'})
+            }
+            return res.status(httpStatus.OK).json({removed:true,message:'Product removed from wishlist'})
+        }else{
+             const update=await Wishlist.findOneAndUpdate({userId},
+                {$push:{
+                    products:{
+                    productId,
+                    color
                     }
                 }},
                 {new:true}

@@ -63,16 +63,34 @@ const userSchema=new Schema({
     type:Date,
     default:Date.now
   },
-  refferalcode:{
+  referralcode:{
     type:String,
 
   },redeemed:{
-    type:Boolean
+    type:String
   },
   redeemedUsers:[{
     type:Schema.Types.ObjectId,
     ref:'User'
   }],
+
+  referralCoupons:[{
+    couponCode:{
+      type:String,
+      required:true
+    },
+    discount:{
+      type:Number
+    },
+    createdAt:{
+      type:Date
+    },
+    isUsed:{
+      type:Boolean,
+      default:false
+    }
+
+}],
   searchHistory:[{
     category:{
       type:Schema.Types.ObjectId,

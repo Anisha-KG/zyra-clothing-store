@@ -202,9 +202,9 @@ body {
         <h5 class="mb-3">Select Delivery Address</h5>
         <div id="address-Error" class="text-danger"></div>
 
-        <% if (addresses && addresses.address && addresses.address.length > 0) { %>
+        <% if (addresses.length > 0) { %>
 
-          <% addresses.address.forEach((addr) => { %>
+          <% addresses.forEach((addr) => { %>
 
             <div class="address-box mb-3" onclick="selectAddress('<%= addr._id %>', event)">
 
@@ -472,7 +472,7 @@ body {
 
   function openEditModal(id) {
   // Find the address object from your addresses array (you need to pass it from server-side)
-  const addr = <%- JSON.stringify(addresses.address) %>.find(a => a._id === id);
+  const addr = <%- JSON.stringify(addresses) %>.find(a => a._id === id);
 
   if (!addr) return;
 

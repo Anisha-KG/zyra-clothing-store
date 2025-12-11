@@ -13,10 +13,9 @@ const wishlistSchema = new Schema({
             ref: 'Product',
             required: true
         },
-         variantId:{
-            type: Schema.Types.ObjectId,
-            ref: 'variant',
-            required: true
+        color:{
+            type:String,
+            required:true
         },
         addedOn:{
             type: Date,

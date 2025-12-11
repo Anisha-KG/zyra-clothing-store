@@ -156,10 +156,10 @@
           <div class="col-md-9">
 
             <!-- PRODUCT HEADER -->
-            <div class="d-flex align-items-start gap-3" onclick='window.location.href="/product/<%= orderedItem.product._id %>"'>
+            <div class="d-flex align-items-start gap-3" >
 
 
-              <img src="/uploads/variants/<%= orderedItem.variant?.images?.[0] || 'default.jpg' %>" width="130"
+              <img onclick='window.location.href="/product/<%= orderedItem.product._id %>"' src="/uploads/variants/<%= orderedItem.variant?.images?.[0] || 'default.jpg' %>" width="130"
                 height="130" style="object-fit:contain; border:1px solid #ddd; border-radius:10px;">
 
               <div>
@@ -178,15 +178,12 @@
                   class=" <%= orderedItem.status === 'Cancelled' || orderedItem.status === 'Returned' ? 'text-danger' : 'text-success' %>">
                   Order Status: <%= orderedItem.status %>
                 </p>
-  <% 
-  let st = order.orderedItems[0].status.toUpperCase(); 
-  
-  const disableCancel = order.orderedItems.every(i => i.cancellationRequest?.status === true);
-  const disableReturn = order.orderedItems.every(i => i.returnRequest?.status === true);
+<% 
+  // Use the current orderedItem for status
+  let st = orderedItem.status.toUpperCase(); 
 
+  // Check if this item has already a cancellation or return request
   const cancelBlocked = (st === "CANCELLED" || st === "CANCELLATION REQUESTED");
-
-  // UPDATED: Now CANCELLED also blocks RETURN button
   const returnBlocked = (
     st === "CANCELLED" ||
     st === "RETURN REQUESTED" ||
@@ -196,17 +193,19 @@
   );
 %>
 
-<% if (st==="PROCESSING" || st==="PACKED" || st==="CONFIRMED" || st==="SHIPPED") { %>
+<% if (st === "PROCESSING" || st === "PACKED" || st === "CONFIRMED" || st === "SHIPPED") { 
+     if (orderedItem.expectedDelivery) { %>
   <div class="text-primary">
     Expected Delivery: <%= new Date(orderedItem.expectedDelivery).toLocaleDateString("en-IN") %>
   </div>
-<% } %>
+<%   } 
+} %>
 
 <div class="order-actions d-flex flex-wrap gap-2">
 
   <% if (st === "PROCESSING" || st === "PACKED" || st === "CONFIRMED") { %>
 
-      <% if (!cancelBlocked && !disableCancel) { %>
+      <% if (!cancelBlocked && !orderedItem.cancellationRequest?.status) { %>
         <button class="btn btn-outline-danger btn-sm" 
           data-bs-toggle="modal" data-bs-target="#cancelModal">
           Cancel Item
@@ -219,7 +218,7 @@
         <button class="btn btn-outline-primary btn-sm">Review</button>
       <% } %>
 
-      <% if (!returnBlocked && !disableReturn) { %>
+      <% if (!returnBlocked && !orderedItem.returnRequest?.status) { %>
         <button class="btn btn-outline-warning btn-sm"
           data-bs-toggle="modal" data-bs-target="#returnModal">
           Return

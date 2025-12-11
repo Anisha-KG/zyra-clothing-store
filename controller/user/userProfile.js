@@ -4,6 +4,8 @@ const httpStatus=require('../../Constants/httpStatuscode')
 const nodemailer = require("nodemailer");
 const bcrypt=require('bcrypt')
 
+
+
 function generateOtp() {
   const digits = '123456789';
   let otp = '';
@@ -81,7 +83,8 @@ const getUserprofile=async(req,res,next)=>{
 
 const updateProfile=async(req,res,next)=>{
     try{
-        console.log(req.body)
+        
+
         const{name,email,phone,addressId}=req.body 
 
         if(!name||!email||!phone||!addressId){

@@ -45,39 +45,30 @@ const placeOrder = async (req, res, next) => {
         const paymentMethod = req.session.paymentMethod
         const couponCode=req.session.couponCode||null
         const couponDiscount=req.session.couponDiscount ||0
-        console.log(couponCode,couponDiscount)
-
+        
+        const user = await User.findById(userId)
+        
+        let coupon = null;
+        let normaliseCode = null;
         if(couponCode&&couponDiscount){
-            
-        const normaliseCode=couponCode.toUpperCase()
-        const coupon = await Coupons.findOne({ code: normaliseCode, status: true });
+            normaliseCode=couponCode.toUpperCase()
+        coupon = await Coupons.findOne({
+                code: normaliseCode,
+                status: true,
+                startingDate: { $lte: new Date() },
+                expiryDate: { $gte: new Date() }
+                });
+        if(!coupon){
+            coupon = user.referralCoupons.find(c => c.couponCode.toUpperCase() === normaliseCode)
+            if (coupon) {
+                coupon.isReferral = true;
+                }
+        }
 
         if(!coupon){
             return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'coupon expired or not available'})
         }
-
-        
-
-        const userExist=coupon.usedUsers.find((u)=>u.userId.toString()==userId.toString())
-        if(userExist){
-            userExist.count++
-        }else{
-            coupon.usedUsers.push({
-                userId,
-                count:1
-            })
         }
-
-        coupon.usedCount++ 
-        if(coupon.usedCount>=coupon.usageLimit){
-            coupon.status=false
-        }
-
-        await coupon.save()
-
-        }
-
-
 
 
 
@@ -86,7 +77,7 @@ const placeOrder = async (req, res, next) => {
         }
 
         
-        const user = await User.findById(userId)
+        
 
         const cart = await Cart.findOne({ userId }).populate('items.productId').populate('items.variantId')
         if (!cart || cart.items.length == 0) {
@@ -126,7 +117,7 @@ const placeOrder = async (req, res, next) => {
                 size: item.size,
                 color: item.color,
                 quantity: item.quantity,
-                itemsTotal: item.itemsTotal,
+                 itemsTotal: item.quantity * item.price, 
                 status: 'Pending'
             }
         })
@@ -164,6 +155,8 @@ const placeOrder = async (req, res, next) => {
 
     }
 
+    let orderSuccessfull=false
+
 
         if(paymentMethod=='cod'){
 
@@ -187,7 +180,11 @@ const placeOrder = async (req, res, next) => {
 
 
         })
-        await newOrder.save()
+        
+        const successfull=await newOrder.save()
+        if(successfull){
+            orderSuccessfull=true
+        }
     
     }
 
@@ -241,14 +238,52 @@ const placeOrder = async (req, res, next) => {
         await newOrder.save()
 
 
-        
+        orderSuccessfull=true
         
     
     }
 
 
 
-     
+     if(orderSuccessfull){
+
+        if(couponCode&&couponDiscount){
+            
+        
+
+        if(coupon.isReferral){
+            await User.findOneAndUpdate(
+                {
+                    _id: userId,
+                    "referralCoupons.couponCode": normaliseCode
+                },
+                {
+                    $set: { "referralCoupons.$.isUsed": true }
+                }
+                );
+        }else{
+
+            const userExist=coupon.usedUsers.find((u)=>u.userId.toString()==userId.toString())
+        if(userExist){
+            userExist.count++
+        }else{
+            coupon.usedUsers.push({
+                userId,
+                count:1
+            })
+        }
+
+        coupon.usedCount++ 
+        if(coupon.usedCount>=coupon.usageLimit){
+            coupon.status=false
+        }
+
+        await coupon.save()
+
+        }
+
+        }
+
 
         for (let item of orderedProducts) {
             await Variant.findOneAndUpdate(
@@ -266,7 +301,11 @@ const placeOrder = async (req, res, next) => {
         delete req.session.address
         delete req.session.paymentMethod
 
-        res.status(httpStatus.OK).json({ success: true, message: 'Order placed successfully' })
+       return  res.status(httpStatus.OK).json({ success: true, message: 'Order placed successfully' })
+
+     }
+
+        
 
     } catch (error) {
         next(error)
@@ -366,14 +405,10 @@ const CancelItem = async (req, res, next) => {
         const order=await Order.findOne({orderId})
         const cancelledItem=order.orderedItems.id(itemId)
         
-            await Variant.findOneAndUpdate({
-                _id:cancelledItem.variant,
-                color:cancelledItem.color,
-                size:cancelledItem.size
-
-            },
-            {$inc:{quantity:cancelledItem.quantity}}
-        )
+            await Variant.findByIdAndUpdate(
+    cancelledItem.variant,
+    { $inc: { quantity: cancelledItem.quantity } }
+);
         
 
         return res.status(200).json({ success: true, message: 'Item cancelled' });
@@ -393,7 +428,7 @@ async function calculatetotalSummary(cart,couponDiscount) {
     for (let item of cart.items) {
 
 
-        subTotal += item.itemsTotal
+        subTotal += (item.quantity*item.price)
     }
 
     subTotal=subTotal-couponDiscount

@@ -14,6 +14,8 @@
   <%- include("../../views/partials/user/header") %>
 
   <style>
+
+
     body {
       background-color: #fdf6f0;
     }
@@ -109,6 +111,33 @@
       background-color: #912f2f;
       color: white;
     }
+
+    .size-btn {
+  width: 38px;
+  height: 38px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  background: white;
+  transition: 0.2s;
+}
+
+.size-btn:hover {
+  border-color: #912f2f;
+  color: #912f2f;
+}
+
+.size-btn.selected {
+  background: #912f2f;
+  color: white;
+  border-color: #912f2f;
+  font-weight: 600;
+}
+
   </style>
 </head>
 <body>
@@ -126,74 +155,89 @@
 
   <div class="row g-3">
 
-    <% if (wishlist && wishlist.products.length > 0) { %>
+  <% if (items && items.length > 0) { %>
 
-      <% wishlist.products.forEach(item => { %>
-       <div class="col-6 col-md-4 col-lg-3">
+    <% items.forEach(item => { %>
 
-  <div class="wishlist-card position-relative"
-       style="cursor:pointer;"
-       onclick="window.location.href='/product/<%= item.productId?._id %>'">
+      <div class="col-6 col-md-4 col-lg-3">
 
-    <!-- Remove Icon -->
-    <span class="remove-icon" 
-          onclick='event.stopPropagation(); removeWishlist("<%= item.productId?._id %>", "<%= item.variantId?._id %>")'>
-      <i class="fa-solid fa-xmark"></i>
-    </span>
+        <div class="wishlist-card position-relative"
+            style="cursor:pointer;"
+            onclick="window.location.href='/product/<%= item.productId %>'">
 
-    <!-- Product Image -->
-    <img 
-      src="/uploads/variants/<%= item.variantId?.images?.[0] %>" 
-      alt="product image"
-      class="wishlist-img"
-    >
+          <!-- Remove Icon -->
+          <span class="remove-icon"
+                onclick='event.stopPropagation(); removeWishlist("<%= item.productId %>", "<%= item.color %>")'>
+            <i class="fa-solid fa-xmark"></i>
+          </span>
 
-    <div class="p-2">
-      
-      <!-- Product Title -->
-      <div class="product-title">
-        <%= item.productId?.name %>
+          <!-- Product Image -->
+          <img 
+            src="/uploads/variants/<%= item.variant.images[0] %>" 
+            alt="product image"
+            class="wishlist-img"
+          >
+
+          <div class="p-2">
+
+            <!-- Product Title -->
+            <div class="product-title">
+              <%= item.name %>
+            </div>
+
+            <input value="<%= item.color%>" id="color" hidden>
+
+            <!-- Price Section -->
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <span class="price-section">Rs.<%= item.prize %></span>
+
+              <% if (item.mrp) { %>
+                <span class="old-price">Rs.<%= item.mrp %></span>
+              <% } %>
+            </div>
+
+<!-- Size selector (hidden initially) -->
+<div class="size-box mt-2" id="sizeBox-<%= item.productId %>" style="display:none;">
+  <label class="fw-semibold small mb-1">Select Size</label>
+
+  <div class="d-flex gap-2 flex-wrap">
+    <% item.availableSizes.forEach(size => { %>
+      <div class="size-btn"
+           data-size="<%= size %>"
+           onclick="event.stopPropagation();selectSize('<%= item.productId %>', '<%= size %>')"
+           id="sizeBtn-<%= item.productId %>-<%= size %>">
+        <%= size %>
       </div>
-
-      <!-- Price Section -->
-      <div class="d-flex justify-content-between align-items-center mt-1">
-        <span class="price-section">Rs.<%= item.productId?.finalPrice %></span>
-
-        <% if (item.productId?.price) { %>
-          <span class="old-price">Rs.<%= item.productId.price %></span>
-        <% } %>
-      </div>
-
-      <% if (item.productId?.price?.discount) { %>
-        <div class="discount">(<%= item.productId.discount %>% OFF)</div>
-      <% } %>
-
-      <!-- Move to Bag -->
-      <button class="btn move-btn mt-2"
-              onclick="event.stopPropagation(); moveToCart(
-                  '<%= item.productId._id %>',
-                  '<%= item.variantId.size %>',
-                  '<%= item.variantId.color %>'
-              )">
-        MOVE TO CART
-      </button>
-
-    </div>
+    <% }) %>
   </div>
+
+  <!-- Hidden field to store selected size -->
+  <input type="hidden" id="selectedSize-<%= item.productId %>">
+</div>
+
+            <!-- Move to Bag -->
+            <button class="btn move-btn mt-2"
+  onclick="event.stopPropagation(); handleMoveToCart('<%= item.productId %>')">
+  MOVE TO CART
+</button>
+
+          </div>
+        </div>
+
+      </div>
+
+    <% }) %>
+
+  <% } else { %>
+
+    <div class="text-center text-muted">
+      <h6>No items in wishlist</h6>
+    </div>
+
+  <% } %>
 
 </div>
 
-      <% }) %>
-
-    <% } else { %>
-
-      <div class="text-center text-muted">
-        <h6>No items in wishlist</h6>
-      </div>
-
-    <% } %>
-
-  </div>
 
 </div>
   <%- include("../../views/partials/user/footer") %>
@@ -204,19 +248,56 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 
-    
- 
+  function selectSize(productId, size) {
 
+  // Set hidden input value
+  document.getElementById(`selectedSize-${productId}`).value = size;
+
+  // Remove "selected" class from all size buttons
+  const allSizeBtns = document.querySelectorAll(`#sizeBox-${productId} .size-btn`);
+  allSizeBtns.forEach(btn => btn.classList.remove("selected"));
+
+  // Add "selected" class to clicked button
+  const selectedBtn = document.getElementById(`sizeBtn-${productId}-${size}`);
+  if (selectedBtn) selectedBtn.classList.add("selected");
+}
+
+function handleMoveToCart(productId) {
+
+  const box = document.getElementById(`sizeBox-${productId}`);
+  const selectedSize = document.getElementById(`selectedSize-${productId}`).value;
+
+  // Step 1 — First click: show sizes
+  if (box.style.display === "none") {
+    box.style.display = "block";
+    return;
+  }
+
+  // Step 2 — Must select size
+  if (!selectedSize) {
+    Swal.fire({
+      icon: "warning",
+      title: "Select a size",
+      text: "Please choose a size before adding to cart."
+    });
+    return;
+  }
+
+  // Step 3 — Proceed to cart
+  moveToCart(productId, selectedSize);
+}
   
 
-  async function moveToCart(id,selectedSize,selectedColor) {
+  async function moveToCart(id,selectedSize) {
+
+    const color=document.getElementById('color').value
       
  const quantity=1
       try {
         const response = await fetch('/cart/addProduct', {
           method: "POST",
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId: id, size: selectedSize, color: selectedColor, quantity })
+          body: JSON.stringify({ productId: id, size: selectedSize, color: color, quantity })
         });
         const result = await response.json();
         if (result.success) {
@@ -231,14 +312,14 @@
 
 
     
-    async function removeWishlist(productId,variantId){
-        console.log(productId,variantId)
+    async function removeWishlist(productId,color){
+        
       
       try{
         const response=await fetch(`/wishlist/toggle`,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({productId,variantId})
+        body:JSON.stringify({productId,color})
       })
 
       const result=await response.json()

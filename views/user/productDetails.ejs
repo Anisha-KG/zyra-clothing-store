@@ -387,14 +387,16 @@ zoomContainer.addEventListener('mousemove', (e) => {
 
     async function addToWishlist(productId){
       let hasError=false
-      if (!selectedSize) { document.getElementById('sizeError').innerText = 'Select size'; hasError = true; }
+      
+      
       if (!selectedColor) { document.getElementById('ColorError').innerText = 'Select color'; hasError = true; }
+      const color=selectedColor
       if (hasError) return;
       try{
-        const response=await fetch(`/wishlist/toggle?size=${selectedSize}&color=${selectedColor}`,{
+        const response=await fetch(`/wishlist/toggle`,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({productId})
+        body:JSON.stringify({productId,color})
       })
 
       const result=await response.json()
