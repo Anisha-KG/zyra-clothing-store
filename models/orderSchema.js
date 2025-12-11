@@ -106,6 +106,10 @@ const orderSchema = new Schema({
         type: Number,
         default: 0
     },
+    totalDiscount: {
+        type: Number,
+        default: 0
+    },
     totalPayable: {
         type: Number,
         required: true

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sales Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            font-size: 12px;
+        }
+        h2 {
+            text-align: center;
+        }
+        .totals {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            display: flex;
+            justify-content: space-around;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #aaa;
+        }
+        th, td {
+            padding: 6px 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .right-align {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Sales Report</h2>
+    <p style="text-align:center;">Filter: <%= filterType %> <% if (fromDate || toDate) { %> | From: <%= fromDate %> To: <%= toDate %> <% } %></p>
+
+    <div class="totals">
+        <div>Total Orders: <%= totalOrders %></div>
+        <div>Total Revenue: ₹<%= totalRevenue.toFixed(2) %></div>
+        <div>Total Discount: ₹<%= totalDiscount.toFixed(2) %></div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Order No</th>
+                <th>User</th>
+                <th>Date</th>
+                <th>Subtotal (₹)</th>
+                <th>Discount (₹)</th>
+                <th>Total (₹)</th>
+                <th>Payment</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (orders.length === 0) { %>
+                <tr>
+                    <td colspan="7">No orders found.</td>
+                </tr>
+            <% } else { %>
+                <% orders.forEach(order => { %>
+                    <tr>
+                        <td><%= order.orderId %></td>
+                        <td><%= order.user?.name || "N/A" %></td>
+                        <td><%= new Date(order.createdAt).toLocaleDateString("en-GB") %></td>
+                        <td class="right-align">₹<%= order.subTotal?.toFixed(2) || 0 %></td>
+                        <td class="right-align">₹<%= order.totalDiscount?.toFixed(2) || 0 %></td>
+                        <td class="right-align">₹<%= order.totalPayable?.toFixed(2) || 0 %></td>
+                        <td><%= order.paymentMethod || "N/A" %></td>
+                    </tr>
+                <% }) %>
+            <% } %>
+        </tbody>
+    </table>
+
+</body>
+</html>

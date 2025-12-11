@@ -15,6 +15,7 @@ const variantController=require('../controller/admin/variantController')
 const categoryUpload=require('../middleware/categoryMulter')
 const orderController=require('../controller/admin/ordersController')
 const couponController=require('../controller/admin/couponController')
+const salesReportController=require('../controller/admin/salesReportController')
 
 router.get('/pageerror',adminController.pageerror)
 router.get('/login',isAdminLogin,adminController.loadLogin)
@@ -93,6 +94,8 @@ router.patch('/coupon/deactivateCoupon',adminAuth,couponController.deactivateCou
 router.patch('/coupon/activateCoupon',adminAuth,couponController.activateCoupon)
 router.delete('/coupon/deleteCoupon',adminAuth,couponController.deleteCoupon)
 
-//router.post('/coupon/addCoupon',adminAuth,couponController.addCoupon)
+router.get('/salesReport',adminAuth,salesReportController.getSalesReport)
+router.get('/sales-report/pdf',adminAuth,salesReportController.downloadSalesPdf)
+router.get('/sales-report/excel',adminAuth,salesReportController.downloadSalesExcel)
 
 module.exports=router
