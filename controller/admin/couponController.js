@@ -10,7 +10,7 @@ const getCoupons = async (req, res, next) => {
 
         let sortBy = req.query.sortBy;
         if (!sortBy) sortBy = 'newest';  
-        let sortQuery = sortBy === 'oldest' ? { createdAt: 1 } : { createdAt: -1 };
+        let sortQuery = sortBy === 'oldest' ? { createdAt: -1 } : { createdAt: 1 };
 
         const limit = 8;
         const skip = (page - 1) * limit;
@@ -91,8 +91,8 @@ const addCoupon=async(req,res,next)=>{
                 discountValue,
                 minimumOrderAmount:minOrderAmount,
                 maximumDiscount:maxDiscount,
-                usageLimit,
-                usagePerUser,
+                usageLimit: usageLimit || null,
+                usagePerUser:usagePerUser||null,
                 status,
                 couponType
             

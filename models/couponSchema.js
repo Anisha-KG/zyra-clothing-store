@@ -44,7 +44,7 @@ const couponSchema = new Schema({
         type: Boolean,
         default: true
     },
-    usageLimit: { type: Number, default: 1 },
+    usageLimit: { type: Number, default: null },
     usagePerUser: { type: Number, default: 1 },
     usedCount: { type: Number, default: 0 }, 
     usedUsers: [

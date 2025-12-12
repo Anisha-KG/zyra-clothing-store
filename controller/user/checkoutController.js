@@ -109,12 +109,14 @@ const selectPayment=async(req,res,next)=>{
 }
 
 const getconfirmationPage = async (req, res, next) => {
+  console.log('comntroller hit')
   try {
     const userId = req.session.user
     const user = await User.findById(userId)
     const addressId = req.session.addressId
     const paymentMethod = req.session.paymentMethod
     const couponId = req.query.couponId
+    console.log(couponId)
 
     const cart = await Cart.findOne({ userId }).populate('items.productId').populate('items.variantId')
     const addresses = await Address.findOne({ userId })
@@ -136,21 +138,25 @@ const getconfirmationPage = async (req, res, next) => {
 
     }
 
-
+    
 
       const coupons = await Coupons.find({
-      minimumOrderAmount: { $lte: subTotal },
       status: true,
-      startingDate: { $lte: Date.now() },   
-      expiryDate: { $gte: Date.now() }   
+       
     });
+
+    
+
+      
+    
 
     let appliedCoupon = null
     let discount = 0
 
     if (couponId) {
       let coupon = await Coupons.findById(couponId)
-      if (coupon) {
+      
+      if (coupon&&coupon.usagePerUser!==null) {
         const userExist = coupon?.usedUsers?.find((u) => u.userId.toString() == userId.toString())
         if (userExist) {
           if (userExist.count >= coupon.usagePerUser) {
@@ -188,14 +194,14 @@ const getconfirmationPage = async (req, res, next) => {
 
         }
 
-      } else {
-        coupon = user.referralCoupons.id(couponId)
-        if (coupon) {
-     coupon.isReferral = true  
-  }
-      }
+      } 
 
-      if (coupon.isReferral) {
+        if (!coupon) {
+        coupon = user.referralCoupons.id(couponId);
+        if (coupon) coupon.isReferral = true;
+    }
+
+      if (coupon && coupon.isReferral) {
         discount = coupon.discount
         coupon.isUsed = true
         appliedCoupon = {
@@ -205,7 +211,7 @@ const getconfirmationPage = async (req, res, next) => {
         }
       } else {
 
-        if (coupon.type == 'fixed') {
+        if (coupon &&coupon.type == 'fixed') {
           discount = coupon.discountValue
         } else {
           discount = subTotal * (coupon.discountValue / 100)

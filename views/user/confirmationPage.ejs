@@ -47,6 +47,14 @@
   margin-top: 4px;
 }
 
+.disabled-coupon {
+    background-color: #e0e0e0 !important;
+    color: #777 !important;
+    pointer-events: none;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
   </style>
 </head>
 <body>
@@ -228,26 +236,33 @@
           <!-- LEFT SIDE — ALL COUPONS -->
           <div class="col-md-6 border-end pe-3" style="max-height: 70vh; overflow-y: auto;">
 
-            <% coupons.forEach(coupon => { %>
-            <div class="coupon-card mb-3" onclick="selectCoupon('<%= coupon.code %>', '<%= coupon._id %>')">
-              
-              <div class="d-flex justify-content-between">
-                <h6 class="fw-bold"><%= coupon.code %></h6>
-                <span class="fw-bold">
-                  <%= coupon.couponType === 'percentage'
-                      ? coupon.discountValue + '%' 
-                      : '₹' + coupon.discountValue %>
-                </span>
-              </div>
+  <% coupons.forEach(coupon => { 
+       const isDisabled = coupon.minimumOrderAmount > subTotal; // CHECK CONDITION
+  %>
 
-              <p class="small mb-1">Minimum Order: ₹<%= coupon.minimumOrderAmount %></p>
-              <p class="small mb-1">Expires: <%= coupon.expiryDate.toLocaleDateString() %></p>
-              <p class="desc small text-muted"><%= coupon.description %></p>
+  <div class="coupon-card mb-3 
+              <%= isDisabled ? 'disabled-coupon' : '' %>"
+       onclick="<%= isDisabled ? '' : `selectCoupon('${coupon.code}', '${coupon._id}')` %>">
 
-            </div>
-            <% }) %>
+    <div class="d-flex justify-content-between">
+      <h6 class="fw-bold"><%= coupon.code %></h6>
+      <span class="fw-bold">
+        <%= coupon.couponType === 'percentage'
+            ? coupon.discountValue + '%' 
+            : '₹' + coupon.discountValue %>
+      </span>
+    </div>
 
-          </div>
+    <p class="small mb-1">Minimum Order: ₹<%= coupon.minimumOrderAmount %></p>
+    <p class="small mb-1">Expires: <%= coupon.expiryDate.toLocaleDateString() %></p>
+    <p class="desc small text-muted"><%= coupon.description %></p>
+
+  </div>
+
+  <% }) %>
+
+</div>
+
 
           <!-- RIGHT SIDE — REWARD COUPONS -->
           <div class="col-md-6 ps-3" style="max-height: 70vh; overflow-y: auto;">

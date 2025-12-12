@@ -11,6 +11,8 @@ const razorpay=require('razorpay')
 const Coupons=require('../../models/couponSchema')
 require('dotenv').config()
 
+require('dotenv').config()
+
 const razorpayInstance=new razorpay({
     key_id:process.env.RAZORPAY_KEY_ID,
     key_secret:process.env.RAZORPAY_KEY_SECRET,
@@ -55,8 +57,7 @@ const placeOrder = async (req, res, next) => {
         coupon = await Coupons.findOne({
                 code: normaliseCode,
                 status: true,
-                startingDate: { $lte: new Date() },
-                expiryDate: { $gte: new Date() }
+                
                 });
         if(!coupon){
             coupon = user.referralCoupons.find(c => c.couponCode.toUpperCase() === normaliseCode)
@@ -122,7 +123,7 @@ const placeOrder = async (req, res, next) => {
             }
         })
         const summary = await calculatetotalSummary(cart,couponDiscount)
-        const deliveryCharge = summary.subTotal > 1000 ? 0 : 60
+        const deliveryCharge = summary.total > 1000 ? 0 : 60
 
     if(paymentMethod=='razorpay'){
          const newOrder = new Order({
@@ -274,9 +275,10 @@ const placeOrder = async (req, res, next) => {
         }
 
         coupon.usedCount++ 
-        if(coupon.usedCount>=coupon.usageLimit){
-            coupon.status=false
+        if(coupon.usageLimit !== null && coupon.usedCount >= coupon.usageLimit){
+            coupon.status = false;
         }
+        
 
         await coupon.save()
 
@@ -384,6 +386,7 @@ const orderedProducts = async (req, res, next) => {
 const CancelItem = async (req, res, next) => {
     try {
         const { orderId, itemId, cancelReason } = req.body;
+        const userId=req.session.user
 
         const updatedOrder = await Order.findOneAndUpdate(
             { orderId, 'orderedItems._id': itemId },
@@ -409,9 +412,40 @@ const CancelItem = async (req, res, next) => {
     cancelledItem.variant,
     { $inc: { quantity: cancelledItem.quantity } }
 );
+    if(updatedOrder.paymentMethod!=='cod'){
+        const couponDiscount=updatedOrder.couponDiscount 
+        const couponDiscountPeritem=(cancelledItem.finalPrice/updatedOrder.subTotal)*couponDiscount 
+        const AfterDiscountPrice=cancelledItem.finalPrice-couponDiscountPeritem
+        const taxRate = Number(process.env.TAX_RATE);
+        const refundTax=AfterDiscountPrice*taxRate
+        const refundingAmount=AfterDiscountPrice+refundTax
+
+        let wallet=await Wallet.findOne({userId})
+        if(!wallet){
+            wallet=await new Wallet({
+                userId,
+                balance:0,
+                walletTransactions:[]
+            })
+            await wallet.save()
+        }
+
+        wallet.balance+=Math.round(refundingAmount )
+        wallet.walletTransactions.push({
+            date:Date.now(),
+            amount:Math.round(refundingAmount ),
+            description:'Product Cancellation Refund',
+            type:'Credit',
+            status:'Refund'
+        })
+
+        await wallet.save()
+
+
+    }
         
 
-        return res.status(200).json({ success: true, message: 'Item cancelled' });
+    return res.status(200).json({ success: true, message: 'Item cancelled. The amount will be credited to your wallet ' });
     } catch (error) {
         next(error);
     }
@@ -431,10 +465,10 @@ async function calculatetotalSummary(cart,couponDiscount) {
         subTotal += (item.quantity*item.price)
     }
 
-    subTotal=subTotal-couponDiscount
+    subTotalAfterDiscount=subTotal-couponDiscount
 
-    const taxAmount = Math.round(subTotal * taxRate)
-    const total = subTotal + taxAmount
+    const taxAmount = Math.round(subTotalAfterDiscount * taxRate)
+    const total = subTotalAfterDiscount + taxAmount
 
     return { subTotal, taxAmount, total, taxRate }
 

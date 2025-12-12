@@ -541,15 +541,9 @@ document.getElementById('addCouponForm').addEventListener('submit', async functi
         hasError = true;
     }
 
-    if (!usageLimit || usageLimit <= 0) {
-        document.getElementById('usageLimit-Error').innerText = 'Usage limit must be greater than 0';
-        hasError = true;
-    }
+    
 
-    if (!usagePerUser || usagePerUser <= 0) {
-        document.getElementById('usagePerUser-Error').innerText = 'Usage per user must be greater than 0';
-        hasError = true;
-    }
+    
 
     if (hasError) return;
 
@@ -669,15 +663,8 @@ document.getElementById('editCouponForm').addEventListener('submit', async funct
         hasError = true;
     }
 
-    if (!usageLimit || usageLimit <= 0) {
-        document.getElementById('usageLimit-Error').innerText = 'Usage limit must be greater than 0';
-        hasError = true;
-    }
+    
 
-    if (!usagePerUser || usagePerUser <= 0) {
-        document.getElementById('usagePerUser-Error').innerText = 'Usage per user must be greater than 0';
-        hasError = true;
-    }
 
     if (hasError) return;
 

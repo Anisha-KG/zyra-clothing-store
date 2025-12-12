@@ -73,7 +73,7 @@ const productSchema = new Schema({
 
   offer: {
     type: Number,
-    default : '' // Optional: '20% Off', 'BOGO', 'Flat ₹200 Off'
+    default : '' 
   },
   startDate: {
     type: Date,

@@ -7,6 +7,7 @@ const Brand = require("../../models/brandsSchema");
 const mongoose=require('mongoose')
 const User=require('../../models/userScema')
 const Wishlist=require('../../models/wishlistSchema')
+const {calculateBestOffer}=require('../../helpers/calculatingBestOffer')
 
 const shopPage = async (req, res) => {
   try {
@@ -101,6 +102,16 @@ const shopPage = async (req, res) => {
       .skip(skip)
       .limit(limit)
       .lean();
+
+
+      for(let product of products){
+        
+        const bestOffer = await calculateBestOffer(product);
+        product.finalPriceDynamic = product.m;
+        product.bestOffer = bestOffer;
+        product.appliedOffer = offerData.bestOffer;
+
+      }
 
     const productIds = products.map(p => p._id.toString());
 

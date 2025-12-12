@@ -2,6 +2,8 @@ const Order=require('../../models/orderSchema')
 const User=require('../../models/userScema')
 const Variant=require('../../models/variantSchema')
 const httpStatus=require('../../Constants/httpStatuscode')
+const Wallet=require('../../models/wallet')
+
 const listOrders = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -102,38 +104,81 @@ const updateItemstatus = async (req, res, next) => {
     }
 };
 
-const handleReturnRequest=async(req,res,next)=>{
-    try{
-        const{itemId,orderId,action}=req.body 
+const handleReturnRequest = async (req, res, next) => {
+    try {
+        const { itemId, orderId, action } = req.body
+        const userId=req.session.user
 
-        if(action=='accept'){
-            const acceptReturn=await Order.findOneAndUpdate({orderId,'orderedItems._id':itemId},
-                                                {$set:{
-                                                    
-                                                    'orderedItems.$.returnRequest.resolvedAt':Date.now(),
-                                                    'orderedItems.$.status':'Returned'
-                                                }}
+
+        if (action == 'accept') {
+            const acceptReturn = await Order.findOneAndUpdate({ orderId, 'orderedItems._id': itemId },
+                {
+                    $set: {
+
+                        'orderedItems.$.returnRequest.resolvedAt': Date.now(),
+                        'orderedItems.$.status': 'Returned'
+                    }
+                },
+                { new: true }
             )
-            if(!acceptReturn){
-                return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Error while updating'})
+            if (!acceptReturn) {
+                return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: 'Error while updating' })
+            }
+            
+            const returnedItem = acceptReturn.orderedItems.id(itemId)
+            
+            if (acceptReturn.paymentMethod !== 'cod') {
+                const couponDiscount = acceptReturn.couponDiscount
+                const couponDiscountPeritem = (returnedItem.finalPrice / acceptReturn.subTotal) * couponDiscount
+                const AfterDiscountPrice = returnedItem.finalPrice - couponDiscountPeritem
+                const taxRate = Number(process.env.TAX_RATE);
+                const refundTax = AfterDiscountPrice * taxRate
+                const refundingAmount = AfterDiscountPrice + refundTax
+
+                let wallet = await Wallet.findOne({ userId })
+                if (!wallet) {
+                    wallet = await new Wallet({
+                        userId,
+                        balance: 0,
+                        walletTransactions: []
+                    })
+                    await wallet.save()
+                }
+
+                wallet.balance += Math.round(refundingAmount )
+                wallet.walletTransactions.push({
+                    date: Date.now(),
+                    amount: Math.round(refundingAmount ),
+                    description: 'Product Return Refund',
+                    type: 'Credit',
+                    status: 'Refund'
+                })
+
+                await wallet.save()
+
+
             }
 
-            return res.status(httpStatus.OK).json({success:true,message:'Return Approved'})
-        }else if(action=='reject'){
-            const acceptReturn=await Order.findOneAndUpdate({orderId,'orderedItems._id':itemId},
-                                                {$set:{
-                                                    
-                                                    'orderedItems.$.returnRequest.resolvedAt':Date.now(),
-                                                    'orderedItems.$.status':'Return Rejected'
-                                                }}
+
+
+            return res.status(httpStatus.OK).json({ success: true, message: 'Return Approved' })
+        } else if (action == 'reject') {
+            const rejectReturn = await Order.findOneAndUpdate({ orderId, 'orderedItems._id': itemId },
+                {
+                    $set: {
+
+                        'orderedItems.$.returnRequest.resolvedAt': Date.now(),
+                        'orderedItems.$.status': 'Return Rejected'
+                    }
+                }
             )
-            if(!acceptReturn){
-                return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Error while updating'})
+            if (!rejectReturn) {
+                return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: 'Error while updating' })
             }
 
-            return res.status(httpStatus.OK).json({success:true,message:'Return Rejected'})
+            return res.status(httpStatus.OK).json({ success: true, message: 'Return Rejected' })
         }
-    }catch(error){
+    } catch (error) {
         next(error)
     }
 }

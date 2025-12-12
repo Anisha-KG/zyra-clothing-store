@@ -1,6 +1,7 @@
 const HttpStatus = require('../../Constants/httpStatuscode')
 const Order=require('../../models/orderSchema')
 const Variant=require('../../models/variantSchema')
+const Wallet=require('../../models/wallet')
 
 const requestReturn=async(req,res,next)=>{
     
@@ -32,6 +33,7 @@ const cancelOrder=async(req,res,next)=>{
     try{
 
         const {orderId,reason}=req.body 
+        const userId=req.session.user
         
         const orders=await Order.findOne({orderId})
         
@@ -57,7 +59,30 @@ const cancelOrder=async(req,res,next)=>{
             return res.status(HttpStatus.BAD_REQUEST).json({success:false,message:'Cannot submit request'})
         }
 
-        res.status(HttpStatus.OK).json({success:true,message:'Order Cancelled requested'})
+        if(orders.paymentMethod!=='cod'){
+            let wallet=await Wallet.findOne({userId})
+            if(!wallet){
+               wallet= await new Wallet({
+                    userId,
+                    balance:0,
+                    walletTransactions:[]
+                })
+                await wallet.save()
+            }
+
+            wallet.balance+=Math.round(orders.totalPayable)
+            wallet.walletTransactions.push({
+                date:Date.now(),
+                amount:Math.round(orders.totalPayable),
+                description:'Order cancelation refund',
+                type:'Credit',
+                status:'Refund'
+            })
+
+            await wallet.save()
+        }
+
+        res.status(HttpStatus.OK).json({success:true,message:'Order Cancelled'})
 
 
         
