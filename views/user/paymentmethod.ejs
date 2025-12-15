@@ -86,21 +86,34 @@ body {
       <div class="col-lg-6">
         <div class="section-box">
           
-          <% if(cart.items && cart.items.length > 0) { %>
-            <% cart.items.forEach(item => { %>
-              <div class="d-flex mb-3">
-                <img src="/uploads/variants/<%= item.variantId.images?.length ? item.variantId.images[0] : 'placeholder.png' %>" class="product-img" alt="Product Image">
-                <div class="ms-3">
-                  <p class="fw-bold mb-1"><%= item.productId.name %></p>
-                  <p class="mb-0">Qty: <%= item.quantity %></p>
-                  <p class="text-muted mb-0">Size: <%= item.variantId.size %> | Color: <%= item.variantId.color %></p>
-                </div>
-                <div class="ms-auto fw-bold">₹<%= item.productId.finalPrice * item.quantity %></div>
-              </div>
-            <% }) %>
-          <% } else { %>
-            <p class="text-muted">Your cart is empty.</p>
-          <% } %>
+          <% if (cartItems && cartItems.length > 0) { %>
+
+  <% cartItems.forEach(item => { %>
+    <div class="d-flex mb-3">
+      <img 
+        src="/uploads/variants/<%= item.variant.images?.length ? item.variant.images[0] : 'placeholder.png' %>" 
+        class="product-img" 
+        alt="Product Image"
+      >
+
+      <div class="ms-3">
+        <p class="fw-bold mb-1"><%= item.product.name %></p>
+        <p class="mb-0">Qty: <%= item.quantity %></p>
+        <p class="text-muted mb-0">
+          Size: <%= item.variant.size %> | Color: <%= item.variant.color %>
+        </p>
+      </div>
+
+      <div class="ms-auto fw-bold">
+        ₹<%= item.price * item.quantity %>
+      </div>
+    </div>
+  <% }) %>
+
+<% } else { %>
+  <p class="text-muted">Your cart is empty.</p>
+<% } %>
+
 
           <hr>
 
@@ -109,7 +122,7 @@ body {
             <p class="fw-bold">₹<%= subTotal %></p>
           </div>
           <div class="d-flex justify-content-between">
-            <p class="mb-1">Tax (2%):</p>
+            <p class="mb-1">Tax (18%):</p>
             <p class="fw-bold">₹<%= tax %></p>
           </div>
           <div class="d-flex justify-content-between">
@@ -138,7 +151,7 @@ body {
           </div>
 
           <div class="mt-3 text-center">
-            <a href="/cart" class="btn btn-outline-dark px-4">Back to Cart</a>
+            <a href="/getCart" class="btn btn-outline-dark px-4">Back to Cart</a>
           </div>
 
         </div>

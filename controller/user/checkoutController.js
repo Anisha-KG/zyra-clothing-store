@@ -5,6 +5,7 @@ const Variant=require('../../models/variantSchema')
 const Address=require('../../models/addressSchema')
 const Coupons=require('../../models/couponSchema')
 const httpStatus=require('../../Constants/httpStatuscode')
+const {calculateBestOffer}=require('../../helpers/calculatingBestOffer')
 require('dotenv').config()
 
 
@@ -31,14 +32,33 @@ const viewCheckoutPage = async (req, res, next) => {
     }
 
     let subtotal = 0;
-
+    let cartItems=[]
     for (let item of cart.items) {
+
+      const product=item.productId
+      const variant=item.variantId
+
+      const bestOffer = await calculateBestOffer(product);
+                  
+      const discountAmount = (product.price * bestOffer) / 100;
+      const finalPriceDynamic = Math.round(product.price - discountAmount);
       let quantity = item.quantity;
-      let price = item.productId.finalPrice;
+      let price = finalPriceDynamic
       subtotal += quantity * price;
+
+      cartItems.push({
+                _id: item._id,
+                product,
+                variant,
+                price,
+                quantity:item.quantity,
+                isOutOfStock: variant.quantity === 0   
+            })
+
+
     }
 
-    const tax = Math.round(subtotal * 0.02);
+    const tax = Math.round(subtotal * 0.18);
     const total = subtotal + tax;
 
     const addresses=await Address.findOne({userId})
@@ -46,7 +66,7 @@ const viewCheckoutPage = async (req, res, next) => {
 
     res.render("checkoutPage", {
       user,
-      cart,
+      cartItems,
       subTotal: subtotal,
       total,
       tax,
@@ -82,21 +102,40 @@ const selectPayment=async(req,res,next)=>{
     }
 
     let subtotal = 0;
-
+ let cartItems=[]
     for (let item of cart.items) {
+
+      const product=item.productId
+      const variant=item.variantId
+
+      const bestOffer = await calculateBestOffer(product);
+                  
+      const discountAmount = (product.price * bestOffer) / 100;
+      const finalPriceDynamic = Math.round(product.price - discountAmount);
       let quantity = item.quantity;
-      let price = item.productId.finalPrice;
+      let price = finalPriceDynamic
       subtotal += quantity * price;
+
+      cartItems.push({
+                _id: item._id,
+                product,
+                variant,
+                price,
+                quantity:item.quantity,
+                isOutOfStock: variant.quantity === 0   
+            })
+
+
     }
 
-    const tax = Math.round(subtotal * 0.02);
+    const tax = Math.round(subtotal * 0.18);
     const total = subtotal + tax;
 
     
 
     res.render("paymentmethod", {
       user,
-      cart,
+      cartItems,
       subTotal: subtotal,
       total,
       tax,
@@ -126,25 +165,54 @@ const getconfirmationPage = async (req, res, next) => {
     let totalMRP = 0
     let applicableDiscount = 0
 
+    let cartItems=[]
     for (let item of cart.items) {
-      const price = item.productId.finalPrice
+
+      const product=item.productId
+      const variant=item.variantId
+
+      
+      const bestOffer = await calculateBestOffer(product);
+                  
+      const discountAmount = (product.price * bestOffer) / 100;
+      const finalPriceDynamic = Math.round(product.price - discountAmount);
+
+      
+  item.price = finalPriceDynamic;      
+  item.mrp = product.price;
+      let quantity = item.quantity;
+      let price = finalPriceDynamic
       const mrp = item.productId.price
-      const quantity = item.quantity
-      const itemTotal = quantity * price
       const priceDifference = mrp - price
-      subTotal += itemTotal
       totalMRP += mrp * quantity
-      applicableDiscount += priceDifference
+      subTotal += quantity * price;
+      applicableDiscount += priceDifference * quantity
+
+      cartItems.push({
+                _id: item._id,
+                product,
+                variant,
+                price,
+                quantity:item.quantity,
+                isOutOfStock: variant.quantity === 0   
+            })
+
 
     }
 
+    await cart.save()
+
+   
+
     
 
-      const coupons = await Coupons.find({
-      status: true,
-       
-    });
+    const today = new Date();
 
+const coupons = await Coupons.find({
+  status: true,
+  startingDate: { $lte: today },
+  expiryDate: { $gte: today }
+});
     
 
       
@@ -156,7 +224,9 @@ const getconfirmationPage = async (req, res, next) => {
     if (couponId) {
       let coupon = await Coupons.findById(couponId)
       
-      if (coupon&&coupon.usagePerUser!==null) {
+      if ( coupon &&
+          typeof coupon.usagePerUser === 'number' &&
+          coupon.usagePerUser > 0) {
         const userExist = coupon?.usedUsers?.find((u) => u.userId.toString() == userId.toString())
         if (userExist) {
           if (userExist.count >= coupon.usagePerUser) {
@@ -168,13 +238,15 @@ const getconfirmationPage = async (req, res, next) => {
                 let shippingCharge = subTotal < 1000 ? 60 : 0;
                 const referralCoupons = user.referralCoupons.filter((c) => c.isUsed == false)
 
+                
+
 
 
                return  res.render('confirmationPage', {
                   user,
                   address,
                   paymentMethod,
-                  cart,
+                  cartItems,
                   subTotal,
                   totalMRP,
                   CGST,
@@ -249,13 +321,16 @@ const getconfirmationPage = async (req, res, next) => {
     let shippingCharge = subTotal < 1000 ? 60 : 0;
     const referralCoupons = user.referralCoupons.filter((c) => c.isUsed == false)
 
+    
+   
+
 
 
     res.render('confirmationPage', {
       user,
       address,
       paymentMethod,
-      cart,
+      cartItems,
       subTotal,
       totalMRP,
       CGST,

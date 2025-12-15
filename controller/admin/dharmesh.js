@@ -1,3 +1,50 @@
+
+ for (let item of cart.items) {
+      const price = item.productId.finalPrice
+      const mrp = item.productId.price
+      const quantity = item.quantity
+      const itemTotal = quantity * price
+      const priceDifference = mrp - price
+      subTotal += itemTotal
+      totalMRP += mrp * quantity
+      applicableDiscount += priceDifference
+
+    }
+
+
+      for (let item of cart.items) {
+    
+          const product=item.productId
+          const variant=item.variantId
+    
+          const bestOffer = await calculateBestOffer(product);
+                      
+          const discountAmount = (product.price * bestOffer) / 100;
+          const finalPriceDynamic = Math.round(product.price - discountAmount);
+          let quantity = item.quantity;
+          let price = finalPriceDynamic
+          const mrp = item.productId.price
+          const priceDifference = mrp - price
+          totalMRP += mrp * quantity
+          subTotal += quantity * price;
+          applicableDiscount += priceDifference * quantity
+    
+          cartItems.push({
+                    _id: item._id,
+                    product,
+                    variant,
+                    price,
+                    quantity:item.quantity,
+                    isOutOfStock: variant.quantity === 0   
+                })
+    
+    
+        }
+    
+
+
+
+
 const asyncHandler = require('express-async-handler')
 const Order = require('../../models/orderSchema')
 const {buildDateRange, buildMatch} = require('../../utils/dateFilter')

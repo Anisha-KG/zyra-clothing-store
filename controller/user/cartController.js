@@ -6,6 +6,7 @@ const Variant=require('../../models/variantSchema')
 const Category=require('../../models/categprySchema')
 const Subcategory=require('../../models/subcategorySchema')
 const Wishlist=require('../../models/wishlistSchema')
+const {calculateBestOffer}=require('../../helpers/calculatingBestOffer')
 
 const viewCart = async (req, res, next) => {
     try {
@@ -39,11 +40,22 @@ const viewCart = async (req, res, next) => {
         for (let item of cart.items) {
 
             const product = await Product.findById(item.productId)
+
+
             if (!product || product.isBlocked) {
                 cart.items.pull(item._id)
                 modified = true
                 continue
             }
+
+            const bestOffer = await calculateBestOffer(product);
+            
+            const discountAmount = (product.price * bestOffer) / 100;
+            product.bestOffer = bestOffer;
+            product.finalPriceDynamic = Math.round(product.price - discountAmount);
+
+
+
 
             const variant = await Variant.findById(item.variantId)
             if (!variant || !variant.isListed) {
@@ -71,7 +83,7 @@ const viewCart = async (req, res, next) => {
 
             }
 
-            const price = product.finalPrice
+            const price = product.finalPriceDynamic 
             const itemsTotal = item.quantity * price
             subTotal = subTotal + itemsTotal
 
@@ -144,6 +156,12 @@ const addToCart=async(req,res,next)=>{
             return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'This product is currently unavailable'})
         }
 
+        const bestOffer = await calculateBestOffer(product);
+            
+            const discountAmount = (product.price * bestOffer) / 100;
+            product.bestOffer = bestOffer;
+            product.finalPriceDynamic = Math.round(product.price - discountAmount);
+
         const category=await Category.findById(product.category)
         if(!category||!category.isListed){
             return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'This product Category is not available'})
@@ -184,7 +202,7 @@ const addToCart=async(req,res,next)=>{
                 return res.status(httpStatus.BAD_REQUEST).json({status:false,message:'Insufficient stock'})
             }
             existingItem.quantity=existingItem.quantity+quantity 
-            existingItem.itemsTotal = product.finalPrice * qty; 
+            existingItem.itemsTotal = product.finalPriceDynamic * qty; 
         }else{
             cart.items.push({
                 productId:productId,
@@ -192,10 +210,10 @@ const addToCart=async(req,res,next)=>{
                 size,
                 color,
                 MRPprice:product.price,
-                price:product.finalPrice,
+                price:product.finalPriceDynamic,
                 //price:product.finalPrice,
                 quantity:Math.min(quantity,5),
-                itemsTotal:product.finalPrice*quantity
+                itemsTotal:product.finalPriceDynamic*quantity
             })
         }
 
@@ -251,6 +269,11 @@ const increment = async (req, res, next) => {
         // Increment quantity
         item.quantity += 1;
 
+        const bestOffer = await calculateBestOffer(product);
+            
+        const discountAmount = (product.price * bestOffer) / 100;
+        product.finalPriceDynamic = Math.round(product.price - discountAmount);
+
         // Update cart totals
         await cart.save();
         const summary = await calculatetotalSummary(cart);
@@ -259,7 +282,7 @@ const increment = async (req, res, next) => {
         return res.status(200).json({
             success: true,
             message: 'Quantity incremented',
-            itemTotal: item.quantity * product.finalPrice,
+            itemTotal: item.quantity * product.finalPriceDynamic,
             quantity: item.quantity,
             cartTotal,
             summary
@@ -293,13 +316,18 @@ const decrement = async (req, res, next) => {
             await cart.save();
         }
 
+        const bestOffer = await calculateBestOffer(product);
+            
+        const discountAmount = (product.price * bestOffer) / 100;
+        product.finalPriceDynamic = Math.round(product.price - discountAmount);
+
         const summary = await calculatetotalSummary(cart);
         const cartTotal = cart.items.reduce((acc, i) => acc + i.quantity, 0);
 
         return res.status(200).json({
             success: true,
             message: 'Quantity decremented',
-            itemTotal: item.quantity * product.finalPrice,
+            itemTotal: item.quantity * product.finalPriceDynamic,
             quantity: item.quantity,
             cartTotal,
             summary
@@ -347,7 +375,12 @@ async function calculatetotalSummary(cart){
             return
         }
 
-        const price=product.finalPrice
+        const bestOffer = await calculateBestOffer(product);
+            
+        const discountAmount = (product.price * bestOffer) / 100;
+        product.finalPriceDynamic = Math.round(product.price - discountAmount);
+
+        const price=product.finalPriceDynamic
          
          subTotal+=price*item.quantity
     }

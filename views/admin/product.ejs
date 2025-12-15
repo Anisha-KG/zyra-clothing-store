@@ -294,6 +294,58 @@
 </main>
 
 
+<!-- ===================== ADD PRODUCT OFFER MODAL ===================== -->
+<div class="modal fade" id="addProductOfferModal" tabindex="-1" aria-labelledby="addProductOfferLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="addProductOfferLabel">Add Offer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form onsubmit="addProductOffer(event)">
+        <div class="modal-body">
+
+          <!-- Hidden Product ID -->
+          <input type="hidden" id="offerProductId" name="productId">
+
+          <!-- Offer Percentage -->
+          <div class="mb-3">
+            <label class="form-label">Offer Percentage (%)</label>
+            <input type="number" name="offerPercentage" class="form-control" min="1" max="100" placeholder="Enter offer %" />
+            <small id="offer-error" class="text-danger"></small>
+          </div>
+
+          <!-- Start Date -->
+          <div class="mb-3">
+            <label class="form-label">Start Date</label>
+            <input type="date" name="startDate" class="form-control" />
+            <small id="date1-error" class="text-danger"></small>
+          </div>
+
+          <!-- End Date -->
+          <div class="mb-3">
+            <label class="form-label">End Date</label>
+            <input type="date" name="endDate" class="form-control" />
+            <small id="date2-error" class="text-danger"></small>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-custom">Add Offer</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+<!-- =================== END ADD OFFER MODAL =================== -->
+
+
+
 <script>
   // Sidebar Toggle Fix (same as variant page)
   const toggleBtn = document.getElementById("sidebarToggle");

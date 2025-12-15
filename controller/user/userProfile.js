@@ -63,8 +63,8 @@ const getUserprofile=async(req,res,next)=>{
             user=await User.findById(userId)
         }
         const userAddresses=await Address.findOne({userId}).lean()
-        const addresses=userAddresses.address?userAddresses.address:[]
-        const defaultAddress=userAddresses.address.find((addr)=>addr.isDefault==true)||null
+        const addresses=userAddresses?.address?userAddresses.address:[]
+        const defaultAddress=userAddresses?.address?.find((addr)=>addr.isDefault==true)||null
         
 
         res.render('userProfile',{
@@ -304,6 +304,33 @@ const validateOtp=async(req,res,next)=>{
   
 }
 
+const getReferalCode=async(req,res,next)=>{
+  try{
+    const userId=req.session.user
+    const user=await User.findById(userId)
+    res.render('referralCode',{
+      user,
+      referralCode:user.referralcode})
+
+  }catch(error){
+    res.redirect('/pagenotfound')
+  }
+}
+
+const rewardCoupons=async(req,res,next)=>{
+  try{
+    const userId=req.session.user
+    const user=await User.findById(userId)
+    referralCoupons=user.referralCoupons
+    res.render('rewardCoupons',{
+      user,
+      referralCoupons})
+
+  }catch(error){
+    res.redirect('/pagenotfound')
+  }
+}
+
 
 module.exports={
     getUserprofile,
@@ -314,5 +341,7 @@ module.exports={
     changePassword,
     sendEmailOtp,
     validateOtp,
-    updatePassword
+    updatePassword,
+    getReferalCode,
+    rewardCoupons
 }

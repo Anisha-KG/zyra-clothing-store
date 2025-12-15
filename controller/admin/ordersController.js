@@ -126,14 +126,20 @@ const handleReturnRequest = async (req, res, next) => {
             }
             
             const returnedItem = acceptReturn.orderedItems.id(itemId)
+
+            await Variant.findByIdAndUpdate(
+                returnedItem.variant,
+                { $inc: { quantity: returnedItem.quantity } }
+            );
             
             if (acceptReturn.paymentMethod !== 'cod') {
-                const couponDiscount = acceptReturn.couponDiscount
-                const couponDiscountPeritem = (returnedItem.finalPrice / acceptReturn.subTotal) * couponDiscount
-                const AfterDiscountPrice = returnedItem.finalPrice - couponDiscountPeritem
+                const couponDiscount = acceptReturn.couponDiscount;
+                const itemTotal = returnedItem.finalPrice * returnedItem.quantity;
+                const couponDiscountPeritem=(itemTotal/acceptReturn.subTotal)*couponDiscount 
+                const AfterDiscountPrice=itemTotal-couponDiscountPeritem
                 const taxRate = Number(process.env.TAX_RATE);
-                const refundTax = AfterDiscountPrice * taxRate
-                const refundingAmount = AfterDiscountPrice + refundTax
+                const refundTax=AfterDiscountPrice*taxRate
+                const refundingAmount=AfterDiscountPrice+refundTax
 
                 let wallet = await Wallet.findOne({ userId })
                 if (!wallet) {
@@ -148,7 +154,7 @@ const handleReturnRequest = async (req, res, next) => {
                 wallet.balance += Math.round(refundingAmount )
                 wallet.walletTransactions.push({
                     date: Date.now(),
-                    amount: Math.round(refundingAmount ),
+                    amount: Math.round(refundingAmount) ,
                     description: 'Product Return Refund',
                     type: 'Credit',
                     status: 'Refund'

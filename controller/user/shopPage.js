@@ -104,14 +104,22 @@ const shopPage = async (req, res) => {
       .lean();
 
 
-      for(let product of products){
-        
-        const bestOffer = await calculateBestOffer(product);
-        product.finalPriceDynamic = product.m;
-        product.bestOffer = bestOffer;
-        product.appliedOffer = offerData.bestOffer;
+    
 
+
+      for (let product of products) {
+
+          const bestOffer = await calculateBestOffer(product);
+          
+
+          const discountAmount = (product.price * bestOffer) / 100;
+
+          product.bestOffer = bestOffer;
+        
+          product.finalPriceDynamic = Math.round(product.price - discountAmount);
       }
+
+      
 
     const productIds = products.map(p => p._id.toString());
 
@@ -175,6 +183,14 @@ const productDetails = async (req, res) => {
       return res.json({ success: false, message: 'Cannot find product' });
     }
 
+     const bestOffer = await calculateBestOffer(product);
+
+
+const discountAmount = (product.price * bestOffer) / 100;
+
+product.bestOffer = bestOffer;
+product.finalPriceDynamic = Math.round(product.price - discountAmount);
+
     // Fetch all variants of this product
     const variants = await Variant.find({ product: productId }).lean();
     const availableSizes = [...new Set(variants.map(v => v.size))];
@@ -192,6 +208,11 @@ const productDetails = async (req, res) => {
     const likeProductVariants = await Promise.all(
       likeProducts.map(async (p) => {
         const variant = await Variant.findOne({ product: p._id }).lean();
+
+        const productBestOffer = await calculateBestOffer(p);
+    const discountAmount = (p.price * productBestOffer) / 100;
+    p.bestOffer = productBestOffer;
+    p.finalPriceDynamic = Math.round(p.price - discountAmount);
         return {
           ...p,
           variantImage: variant?.images?.[0] || null,

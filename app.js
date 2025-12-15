@@ -7,6 +7,7 @@ const logger=require('../Zyra/logger')
 const userRouter=require('./routes/userRoutes')
 const adminRouter=require('./routes/adminRouter')
 const passport = require('./config/passport');
+const {countCartMiddleware}=require('./middleware/cartCountMiddleware')
 const session=require('express-session')
 require('dotenv').config()
 const db=require('./config/db')
@@ -36,9 +37,10 @@ app.use(morgan('combined', {
     write: (message) => logger.info(message.trim())
   }
 }));
-
+app.use(countCartMiddleware)
 app.use('/',userRouter)
 app.use('/admin',adminRouter)
+
 
 app.use((err, req, res, next) => {
   logger.error({

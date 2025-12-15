@@ -27,11 +27,11 @@ const getSalesReport=async(req,res,next)=>{
             {$match:match},
             {$facet:{
                 totals:[
-                    {$group:{_id:null,totalOrders:{$sum:1},totalRevenue:{$sum:'$totalPayable'},totalDiscount:{$sum:'$totalDiscount'}}}
+                    {$group:{_id:null,totalOrders:{$sum:1},totalRevenue:{$sum:'$totalPayable'},totalDiscount:{$sum:'$couponDiscount'}}}
                 ],
 
                 orders:[
-                    {$sort:{createdAt:1}},
+                    {$sort:{createdAt:-1}},
                     {$skip:skip},
                     {$limit:limit},
 

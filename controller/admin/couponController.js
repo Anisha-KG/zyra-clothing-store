@@ -94,7 +94,7 @@ const addCoupon=async(req,res,next)=>{
                 usageLimit: usageLimit || null,
                 usagePerUser:usagePerUser||null,
                 status,
-                couponType
+                type:couponType
             
             })
 
@@ -132,8 +132,11 @@ const editCoupon=async(req,res,next)=>{
                 usageLimit,
                 usagePerUser,
                 status,
-                couponType
+                couponType,
             }=req.body 
+            console.log(couponType)
+
+            
 
             
 
@@ -159,7 +162,7 @@ const editCoupon=async(req,res,next)=>{
                 usageLimit,
                 usagePerUser,
                 status,
-                couponType
+                type:couponType
             }},{new:true})
 
 

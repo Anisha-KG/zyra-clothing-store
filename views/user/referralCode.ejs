@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Referral Code</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #f6e9e2;
+      min-height: 100vh;
+    }
+
+    /* Sidebar placeholder */
+    .sidebar {
+      min-height: 100vh;
+      background-color: #f6e9e2;
+    }
+
+    .breadcrumb-text {
+      font-size: 14px;
+      color: #6c6c6c;
+    }
+
+    .referral-card {
+      border: 3px solid #000;
+      border-radius: 20px;
+      padding: 40px 30px;
+      background-color: #fff;
+      max-width: 750px;
+      margin: auto;
+    }
+
+    .referral-title {
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .referral-desc {
+      color: #6b6b6b;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    .code-box {
+      background-color: #a79d9d;
+      color: #fff;
+      border-radius: 10px;
+      padding: 15px 20px;
+      font-size: 18px;
+      letter-spacing: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .code-box i {
+      font-size: 18px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+      <%- include("../../views/partials/user/header") %>
+
+<div class="container py-5">
+  <div class="row">
+
+    <div class="col-md-3 mb-4">
+          <%- include("../../views/partials/user/userProfile-sidebar") %>
+        </div>
+  
+
+    <!-- Main Content -->
+    <div class="col-md-9">
+
+      <!-- Breadcrumb -->
+      <div class="breadcrumb-text mb-4">
+        profile &nbsp;&gt;&nbsp; Referral
+      </div>
+
+      <h4 class="referral-title">My Referral Code</h4>
+
+      <!-- Referral Card -->
+      <div class="referral-card">
+
+        <p class="referral-desc">
+          "Invite your friends and earn rewards! Share your unique referral code to get coupon worth
+          ₹100  when they join, and your friend receives ₹50 too.
+          Spread the word and start earning together!"
+        </p>
+
+        <!-- Referral Code -->
+        <div class="code-box" onclick="copyCode()">
+          <span id="refCode"><%= referralCode || '' %></span>
+          <i class="bi bi-clipboard"></i>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+<%- include("../../views/partials/user/footer") %>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  function copyCode() {
+    const code = document.getElementById('refCode').innerText;
+    navigator.clipboard.writeText(code);
+    alert("Referral code copied!");
+  }
+</script>
+
+</body>
+</html>

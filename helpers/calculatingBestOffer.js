@@ -22,8 +22,8 @@ async function calculateBestOffer(product) {
     if (
         category &&
         category.categoryOffer &&
-        category.offerStartDate <= new Date() &&
-        category.offerEndDate >= new Date()
+        category.startDate <= new Date() &&
+        category.endDate >= new Date()
     ) {
         offers.push(category.categoryOffer);
     }
@@ -33,11 +33,11 @@ async function calculateBestOffer(product) {
 
     if (
         subcategory &&
-        subcategory.subcategoryOffer &&
-        subcategory.offerStartDate <= new Date() &&
-        subcategory.offerEndDate >= new Date()
+        subcategory.offer &&
+        subcategory.startDate <= new Date() &&
+        subcategory.endDate >= new Date()
     ) {
-        offers.push(subcategory.subcategoryOffer);
+        offers.push(subcategory.offer);
     }
 
     
@@ -46,8 +46,8 @@ async function calculateBestOffer(product) {
     if (
         brand &&
         brand.brandOffer &&
-        brand.offerStartDate <= new Date() &&
-        brand.offerEndDate >= new Date()
+        brand.startDate <= new Date() &&
+        brand.endDate >= new Date()
     ) {
         offers.push(brand.brandOffer);
     }

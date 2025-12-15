@@ -82,7 +82,7 @@ router.post('/checkout/selectAddress',auth.checkSession,checkCart.validateCart,c
 router.get('/checkout/paymentmethod',auth.checkSession,checkCart.validateCart,checkoutController.selectPayment)
 router.post('/checkout/paymentmethod',auth.checkSession,checkCart.validateCart,checkoutController.selectPaymentmethod)
 router.get('/checkout/confirmationPage',auth.checkSession,checkCart.validateCart,checkoutController.getconfirmationPage)
-router.post('/checkout/placeOrder',auth.checkSession,checkCart.validateCartt,orderController.placeOrder)
+router.post('/checkout/placeOrder',auth.checkSession,orderController.placeOrder)
 router.get('/orderSuccessfull',auth.checkSession,orderController.orderSuccessfull)
 
 router.get('/profile/orders',auth.checkSession,orderController.listOrder)
@@ -105,6 +105,10 @@ router.post('/wallet/verify-payment',auth.checkSession,walletController.verifyWa
 
 router.get('/wishlist',auth.checkSession,wishlistController.getWishlist)
 router.post('/wishlist/toggle',auth.checkSession,wishlistController.manageWishlist)
+
+router.get('/referralCode',auth.checkSession,profileController.getReferalCode)
+router.get('/rewardCoupons',auth.checkSession,profileController.rewardCoupons)
+
 
 
 

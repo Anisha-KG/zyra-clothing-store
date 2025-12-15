@@ -1,289 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Wishlist</title>
+  <meta charset="UTF-8">
+  <title>My Referral Code</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <%- include("../../views/partials/user/header") %>
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
   <style>
     body {
-      background-color: #fdf6f0;
+      background-color: #f6e9e2;
+      min-height: 100vh;
     }
 
-    .wishlist-card {
-      border: none;
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      transition: 0.3s ease;
+    /* Sidebar placeholder */
+    .sidebar {
+      min-height: 100vh;
+      background-color: #f6e9e2;
     }
 
-    .wishlist-card:hover {
-      box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+    .breadcrumb-text {
+      font-size: 14px;
+      color: #6c6c6c;
     }
 
-    .wishlist-img {
-      width: 100%;
-      height: 300px;
-      object-fit: cover;
-      border-bottom: 1px solid #eee;
+    .referral-card {
+      border: 3px solid #000;
+      border-radius: 20px;
+      padding: 40px 30px;
+      background-color: #fff;
+      max-width: 750px;
+      margin: auto;
     }
 
-    .remove-icon {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: white;
-      border-radius: 50%;
-      width: 26px;
-      height: 26px;
+    .referral-title {
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .referral-desc {
+      color: #6b6b6b;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    .code-box {
+      background-color: #a79d9d;
+      color: #fff;
+      border-radius: 10px;
+      padding: 15px 20px;
+      font-size: 18px;
+      letter-spacing: 4px;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      border: 1px solid #ddd;
       cursor: pointer;
-      z-index: 20;
-      font-size: 12px;
     }
 
-    .product-title {
-      font-size: 15px;
-      font-weight: 500;
-      min-height: 34px;
-      line-height: 17px;
-      overflow: hidden;
+    .code-box i {
+      font-size: 18px;
     }
 
-    .price-section {
-      font-size: 16px;
-      font-weight: 600;
-    }
-
-    .old-price {
-      text-decoration: line-through;
-      font-size: 12px;
-      color: #777;
-      margin-left: 4px;
-    }
-
-    .discount {
-      font-size: 12px;
-      color: #ff3f6c;
-      margin-left: 4px;
-    }
-
-    .move-btn {
-      width: 100%;
-      border: 1px solid #912f2f;
-      color: #912f2f;
-      font-weight: 600;
-      border-radius: 3px;
-      padding: 6px;
-      font-size: 13px;
-    }
-
-    .move-btn:hover {
-      background: #912f2f;
-      color: white;
-    }
-
-    /* Profile button styling */
-    .profile-btn {
-      border: 1px solid #912f2f;
-      color: #912f2f;
-      font-weight: 600;
-      border-radius: 3px;
-      padding: 6px 12px;
-      transition: 0.2s;
-    }
-
-    .profile-btn:hover {
-      background-color: #912f2f;
-      color: white;
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
     }
   </style>
 </head>
+
 <body>
+      <%- include("../../views/partials/user/header") %>
 
-<div class="container py-4">
-
-  <!-- Header: Profile button left, Wishlist + item count right -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <button class="profile-btn" onclick="window.location.href='/profile'">Profile</button>
-
-    <div class="text-end">
-      <h6 class="fw-bold mb-0">My Wishlist <span class="text-secondary small">(<%= totalItems %> items)</span></h6>
-    </div>
-  </div>
-
-  <div class="row g-3">
-
-    <% if (wishlist && wishlist.products.length > 0) { %>
-
-      <% wishlist.products.forEach(item => { %>
-
-        <%
-
-        const variant=item
-        
-        %>
-       <div class="col-6 col-md-4 col-lg-3">
-
-  <div class="wishlist-card position-relative"
-       style="cursor:pointer;"
-       onclick="window.location.href='/product/<%= item.productId?._id %>'">
-
-    <!-- Remove Icon -->
-    <span class="remove-icon" 
-          onclick='event.stopPropagation(); removeWishlist("<%= item.productId?._id %>", "<%= item.variantId?._id %>")'>
-      <i class="fa-solid fa-xmark"></i>
-    </span>
-
-    <!-- Product Image -->
-    <img 
-      src="/uploads/variants/<%= item.variantId?.images?.[0] %>" 
-      alt="product image"
-      class="wishlist-img"
-    >
-
-    <div class="p-2">
-      
-      <!-- Product Title -->
-      <div class="product-title">
-        <%= item.productId?.name %>
-      </div>
-
-      <!-- Price Section -->
-      <div class="d-flex justify-content-between align-items-center mt-1">
-        <span class="price-section">Rs.<%= item.productId?.finalPrice %></span>
-
-        <% if (item.productId?.price) { %>
-          <span class="old-price">Rs.<%= item.productId.price %></span>
-        <% } %>
-      </div>
-
-      <% if (item.productId?.price?.discount) { %>
-        <div class="discount">(<%= item.productId.discount %>% OFF)</div>
-      <% } %>
-
-      <!-- Move to Bag -->
-      <button class="btn move-btn mt-2"
-              onclick="event.stopPropagation(); moveToCart(
-                  '<%= item.productId._id %>',
-                  '<%= item.variantId.size %>',
-                  '<%= item.variantId.color %>'
-              )">
-        MOVE TO CART
-      </button>
-
-    </div>
-  </div>
-
-</div>
-
-      <% }) %>
-
-    <% } else { %>
-
-      <div class="text-center text-muted">
-        <h6>No items in wishlist</h6>
-      </div>
-
-    <% } %>
-
-  </div>
-
-</div>
-  <%- include("../../views/partials/user/footer") %>
-</body>
-</html>
-
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-
-    
- 
+<div class="container-fluid">
+  <div class="row">
 
   
 
-  async function moveToCart(id,selectedSize,selectedColor) {
-      
- const quantity=1
-      try {
-        const response = await fetch('/cart/addProduct', {
-          method: "POST",
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId: id, size: selectedSize, color: selectedColor, quantity })
-        });
-        const result = await response.json();
-        if (result.success) {
-          Swal.fire({ icon: 'success', title: 'Success!', text: result.message }).then(() => { window.location.reload(); });
-        } else {
-          Swal.fire({ icon: 'error', title: 'Error', text: result.message });
-        }
-      } catch (error) {
-        Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong' });
-      }
-    }
+    <!-- Main Content -->
+    <div class="col-md-10 py-4 px-4">
 
+      <!-- Breadcrumb -->
+      <div class="breadcrumb-text mb-4">
+        profile &nbsp;&gt;&nbsp; Referral
+      </div>
 
-    
-    async function removeWishlist(productId,variantId){
-        
-      
-      try{
-        const response=await fetch(`/wishlist/toggle`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({productId,variantId})
-      })
+      <h4 class="referral-title">My Referral Code</h4>
 
-      const result=await response.json()
+      <!-- Referral Card -->
+      <div class="referral-card">
 
-      if (result.success) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: result.message,
-                confirmButtonColor: '#198754'
-            })
-        }else if(result.removed){
-          Swal.fire({
-                icon: 'warning',
-                title: 'Removed!',
-                text: result.message,
-                confirmButtonColor: '#dc3545'
-            }).then(()=>window.location.reload())
-        }
-        
-        else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: result.message,
-                confirmButtonColor: '#dc3545'
-            });
-        }
-      }catch(error){
-        Swal.fire({
-            icon: 'error',
-            title: 'Server Error',
-            text: 'Something went wrong',
-            confirmButtonColor: '#dc3545'
-        });
-      }
+        <p class="referral-desc">
+          "Invite your friends and earn rewards! Share your unique referral code to get
+          ₹200 credited to your wallet when they join, and your friend receives ₹100 too.
+          Spread the word and start earning together!"
+        </p>
 
+        <!-- Referral Code -->
+        <div class="code-box" onclick="copyCode()">
+          <span id="refCode"><%= referralCode || '' %></span>
+          <i class="bi bi-clipboard"></i>
+        </div>
 
-    }
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  function copyCode() {
+    const code = document.getElementById('refCode').innerText;
+    navigator.clipboard.writeText(code);
+    alert("Referral code copied!");
+  }
 </script>
 
 </body>

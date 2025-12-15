@@ -70,14 +70,8 @@ const verifyRazorpayPayment = async (req, res, next) => {
         order.paymentStatus = 'Completed';
         await order.save();
 
-        // Reduce variant quantities
-        for (let item of order.orderedItems) {
-            await Variant.findOneAndUpdate(
-                { _id: item.variant, size: item.size, color: item.color },
-                { $inc: { quantity: -item.quantity } }
-            );
-        }
-
+        
+        
         // Clear cart
         await Cart.updateOne({ userId: order.userId }, { $set: { items: [] } });
 
@@ -97,6 +91,9 @@ const getFailurePage = async (req, res, next) => {
         const { orderId, message } = req.query
         const userId = req.session.user
         const user = await User.findById(userId)
+        const cart=await Cart.findOne({userId})
+
+        
 
         if (!message) {
             res.render('onlinepaymentFailure', { orderId, user })

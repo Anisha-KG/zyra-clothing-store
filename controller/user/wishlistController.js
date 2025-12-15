@@ -5,6 +5,7 @@ const User=require('../../models/userScema')
 const Product=require('../../models/productSchema')
 const Category=require('../../models/categprySchema')
 const Subcategory=require('../../models/subcategorySchema')
+const {calculateBestOffer}=require('../../helpers/calculatingBestOffer')
 
 const getWishlist = async (req, res, next) => {
     try {
@@ -29,6 +30,15 @@ const getWishlist = async (req, res, next) => {
         // FIXED LOOP
         for (let entry of wishlist.products) {
             let product = entry.productId;
+            if(product.isBlocked) continue
+
+            const bestOffer = await calculateBestOffer(product);
+            
+            const discountAmount = (product.price * bestOffer) / 100;
+            product.bestOffer = bestOffer;
+            product.finalPriceDynamic = Math.round(product.price - discountAmount);
+
+
             const color = entry.color;
 
             const variant = await Variant.findOne({
@@ -49,7 +59,8 @@ const getWishlist = async (req, res, next) => {
                 productId: product._id,
                 name: product.name,
                 color: color,
-                prize: product.finalPrice,
+                prize: product.finalPriceDynamic,
+                bestOffer:product.bestOffer,
                 mrp: product.price,
                 variant,
                 availableSizes

@@ -265,16 +265,15 @@ const loginUser = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
-    req.session.destroy(err => {
-      if (err) {
-        console.log('Error destroying session:', err);
-        return res.redirect('/pageNotFound');
-      }
-      res.redirect('/login');
-    });
+    if (req.session.user) {
+      delete req.session.user;
+    }
+
+    return res.redirect('/login');
+
   } catch (error) {
     console.log('Logout error:', error);
-    res.redirect('/pageNotFound');
+    return res.redirect('/pageNotFound');
   }
 };
 

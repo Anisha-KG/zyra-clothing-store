@@ -121,22 +121,39 @@
     <!-- RIGHT SIDE: Order Items -->
     <div class="col-lg-6 mb-3">
       <div class="section-box">
-        <h5 class="fw-bold mb-3">Order Items • <%= cart.items.length %> products</h5>
+        <h5 class="fw-bold mb-3">Order Items • <%= cartItems.length %> products</h5>
 
-        <% cart.items.forEach(item => { %>
-          <div class="product-row">
-            <img src="/uploads/variants/<%= item.variantId.images?.length ? item.variantId.images[0] : 'placeholder.png' %>" alt="Product Image">
-            <div style="flex:1;">
-              <div class="fw-semibold"><%= item.productId.name %></div>
-              <div class="text-muted small">Size: <%= item.variantId.size %> | Color: <%= item.variantId.color %></div>
-              <div class="text-muted small">Qty: <%= item.quantity %></div>
-            </div>
-            <div class="text-end">
-              <div class="text-muted text-decoration-line-through">₹<%= item.productId.price * item.quantity %></div>
-              <div class="fw-bold">₹<%= item.productId.finalPrice * item.quantity %></div>
-            </div>
-          </div>
-        <% }) %>
+       <% cartItems.forEach(item => { %>
+  <div class="product-row">
+    <img 
+      src="/uploads/variants/<%= item.variant.images?.length ? item.variant.images[0] : 'placeholder.png' %>" 
+      alt="Product Image"
+    >
+
+    <div style="flex:1;">
+      <div class="fw-semibold"><%= item.product.name %></div>
+      <div class="text-muted small">
+        Size: <%= item.variant.size %> | Color: <%= item.variant.color %>
+      </div>
+      <div class="text-muted small">
+        Qty: <%= item.quantity %>
+      </div>
+    </div>
+
+    <div class="text-end">
+      <!-- MRP -->
+      <div class="text-muted text-decoration-line-through">
+        ₹<%= item.product.price * item.quantity %>
+      </div>
+
+      <!-- Final discounted price -->
+      <div class="fw-bold">
+        ₹<%= item.price * item.quantity %>
+      </div>
+    </div>
+  </div>
+<% }) %>
+
 
       </div>
     </div>
@@ -152,7 +169,7 @@
           <span>₹<%= totalMRP %></span>
         </div>
         <div class="d-flex justify-content-between mb-2 text-success fw-bold">
-          <span>Applicable Discount</span>
+          <span>Offer Discount</span>
           <span>- ₹<%= applicableDiscount %></span>
         </div>
         <% if (appliedCoupon) { %>
@@ -218,10 +235,10 @@
 
 
 <!-- ========================= -->
-<!-- COUPON LIST MODAL (NEW) -->
+<!-- COUPON LIST MODAL -->
 <!-- ========================= -->
 <div class="modal fade" id="couponModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">   <!-- smaller width -->
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
 
       <div class="modal-header">
@@ -230,42 +247,43 @@
       </div>
 
       <div class="modal-body p-3">
-
         <div class="row g-3">
 
           <!-- LEFT SIDE — ALL COUPONS -->
-          <div class="col-md-6 border-end pe-3" style="max-height: 70vh; overflow-y: auto;">
+          <div class="col-md-6 border-end pe-3" style="max-height:70vh; overflow-y:auto;">
 
-  <% coupons.forEach(coupon => { 
-       const isDisabled = coupon.minimumOrderAmount > subTotal; // CHECK CONDITION
-  %>
+            <% coupons.forEach(coupon => { 
+                 const isDisabled = coupon.minimumOrderAmount > subTotal;
+            %>
 
-  <div class="coupon-card mb-3 
-              <%= isDisabled ? 'disabled-coupon' : '' %>"
-       onclick="<%= isDisabled ? '' : `selectCoupon('${coupon.code}', '${coupon._id}')` %>">
+            <div class="coupon-card mb-3 <%= isDisabled ? 'disabled-coupon' : '' %>"
+     data-code="<%= coupon.code %>"
+     data-id="<%= coupon._id %>">
+              <div class="d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0"><%= coupon.code %></h6>
 
-    <div class="d-flex justify-content-between">
-      <h6 class="fw-bold"><%= coupon.code %></h6>
-      <span class="fw-bold">
-        <%= coupon.couponType === 'percentage'
-            ? coupon.discountValue + '%' 
-            : '₹' + coupon.discountValue %>
-      </span>
-    </div>
+                <span class="fw-bold">
+                  <%= coupon.type && coupon.type.toLowerCase() === 'percentage'
+                      ? coupon.discountValue + '%'
+                      : '₹' + coupon.discountValue %>
+                </span>
+              </div>
 
-    <p class="small mb-1">Minimum Order: ₹<%= coupon.minimumOrderAmount %></p>
-    <p class="small mb-1">Expires: <%= coupon.expiryDate.toLocaleDateString() %></p>
-    <p class="desc small text-muted"><%= coupon.description %></p>
+              <p class="small text-muted mb-1">Type: <%= coupon.type %></p>
+              <p class="small mb-1">Minimum Order: ₹<%= coupon.minimumOrderAmount %></p>
+              <p class="small mb-1">
+                Expires: <%= new Date(coupon.expiryDate).toLocaleDateString() %>
+              </p>
+              <p class="desc small text-muted mb-0"><%= coupon.description %></p>
 
-  </div>
+            </div>
 
-  <% }) %>
+            <% }) %>
 
-</div>
-
+          </div>
 
           <!-- RIGHT SIDE — REWARD COUPONS -->
-          <div class="col-md-6 ps-3" style="max-height: 70vh; overflow-y: auto;">
+          <div class="col-md-6 ps-3" style="max-height:70vh; overflow-y:auto;">
 
             <h6 class="fw-bold mb-2">Reward Coupons</h6>
 
@@ -274,27 +292,32 @@
             <% } %>
 
             <% rewardCoupons.forEach(rc => { %>
-            <div class="coupon-card reward mb-3" onclick="selectCoupon('<%= rc.couponCode %>', '<%= rc._id %>')">
+               <div class="coupon-card reward mb-3"
+       data-code="<%= rc.couponCode %>"
+       data-id="<%= rc._id %>"
+       onclick="selectCoupon(this)">
 
-              <div class="d-flex justify-content-between">
-                <h6 class="fw-bold text-primary"><%= rc.couponCode %></h6>
-                <span class="fw-bold text-primary">₹<%= rc.discount %></span>
+                <div class="d-flex justify-content-between">
+                  <h6 class="fw-bold text-primary mb-0"><%= rc.couponCode %></h6>
+                  <span class="fw-bold text-primary">₹<%= rc.discount %></span>
+                </div>
+
+                <p class="small text-muted mb-0">
+                  Exclusive reward coupon for you.
+                </p>
+
               </div>
-
-              <p class="small text-muted mb-0">Exclusive reward coupon for you.</p>
-
-            </div>
             <% }) %>
 
           </div>
 
         </div>
-
       </div>
 
     </div>
   </div>
 </div>
+
 
 
 <%- include("../../views/partials/user/footer") %>
@@ -350,23 +373,39 @@
     }
 });
 
- function selectCoupon(code, id) {
-    // put values in inputs
+
+document.addEventListener('click', function (e) {
+  const couponCard = e.target.closest('.coupon-card');
+
+  if (!couponCard) return;
+  if (couponCard.classList.contains('disabled-coupon')) return;
+
+  selectCoupon(couponCard);
+});
+
+
+
+
+
+
+
+ function selectCoupon(el) {
+    const code = el.dataset.code;
+    const id = el.dataset.id;
+
     document.getElementById("couponInput").value = code;
     document.getElementById("couponIdInput").value = id;
 
-    // close modal
     const modalElement = document.getElementById('couponModal');
-    const modal = bootstrap.Modal.getInstance(modalElement);
+    const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
     modal.hide();
 
-    // FIX BACKDROP BUG
     setTimeout(() => {
-      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+      document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
       document.body.classList.remove('modal-open');
-      document.body.style.removeProperty('overflow');
-      document.body.style.removeProperty('padding-right');
-    }, 200);
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    }, 150);
   }
 
 async function applyCoupon() {

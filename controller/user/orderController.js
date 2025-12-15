@@ -264,7 +264,7 @@ const placeOrder = async (req, res, next) => {
                 );
         }else{
 
-            const userExist=coupon.usedUsers.find((u)=>u.userId.toString()==userId.toString())
+        const userExist=coupon.usedUsers.find((u)=>u.userId.toString()==userId.toString())
         if(userExist){
             userExist.count++
         }else{
@@ -286,17 +286,18 @@ const placeOrder = async (req, res, next) => {
 
         }
 
-
-        for (let item of orderedProducts) {
+        for(let item of cart.items){
             await Variant.findOneAndUpdate(
-                {
-                    _id: item.variant,
-                    size: item.size,
-                    color: item.color
-                },
-                { $inc: { quantity: -item.quantity } }
-            );
+                                {
+                                    _id: item.variantId,
+                                    size: item.size,
+                                    color: item.color
+                                },
+                                { $inc: { quantity: -item.quantity } }
+                            );
+            
         }
+        
 
         await Cart.updateOne({ userId: userId }, { $set: { items: [] } })
 
@@ -404,18 +405,23 @@ const CancelItem = async (req, res, next) => {
         if (!updatedOrder) {
             return res.status(400).json({ success: false, message: 'Cannot complete request' });
         }
+         
 
-        const order=await Order.findOne({orderId})
-        const cancelledItem=order.orderedItems.id(itemId)
+       
+        const cancelledItem=updatedOrder.orderedItems.id(itemId)
         
-            await Variant.findByIdAndUpdate(
+
+        await Variant.findByIdAndUpdate(
     cancelledItem.variant,
     { $inc: { quantity: cancelledItem.quantity } }
 );
+        
+           
     if(updatedOrder.paymentMethod!=='cod'){
         const couponDiscount=updatedOrder.couponDiscount 
-        const couponDiscountPeritem=(cancelledItem.finalPrice/updatedOrder.subTotal)*couponDiscount 
-        const AfterDiscountPrice=cancelledItem.finalPrice-couponDiscountPeritem
+        const itemTotal = cancelledItem.finalPrice * cancelledItem.quantity;
+        const couponDiscountPeritem=(itemTotal/updatedOrder.subTotal)*couponDiscount 
+        const AfterDiscountPrice=itemTotal-couponDiscountPeritem
         const taxRate = Number(process.env.TAX_RATE);
         const refundTax=AfterDiscountPrice*taxRate
         const refundingAmount=AfterDiscountPrice+refundTax
@@ -433,7 +439,7 @@ const CancelItem = async (req, res, next) => {
         wallet.balance+=Math.round(refundingAmount )
         wallet.walletTransactions.push({
             date:Date.now(),
-            amount:Math.round(refundingAmount ),
+            amount:Math.round(refundingAmount) ,
             description:'Product Cancellation Refund',
             type:'Credit',
             status:'Refund'
@@ -457,18 +463,18 @@ const CancelItem = async (req, res, next) => {
 async function calculatetotalSummary(cart,couponDiscount) {
     const taxRate = parseFloat(process.env.TAX_RATE)
     let subTotal = 0
-
+   
 
     for (let item of cart.items) {
 
-
+        
         subTotal += (item.quantity*item.price)
     }
 
-    subTotalAfterDiscount=subTotal-couponDiscount
+    subTotal=subTotal-couponDiscount
 
-    const taxAmount = Math.round(subTotalAfterDiscount * taxRate)
-    const total = subTotalAfterDiscount + taxAmount
+    const taxAmount = Math.round(subTotal * taxRate)
+    const total = subTotal + taxAmount
 
     return { subTotal, taxAmount, total, taxRate }
 
