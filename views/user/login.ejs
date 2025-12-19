@@ -101,15 +101,27 @@
       font-family: 'Nanum Myeongjo', serif;
     }
 
+    
+    
     @media (max-width: 768px) {
-      .login-card {
-        flex-direction: column;
-      }
-      .login-left, .login-right {
-        flex: 1 1 100%;
-        padding: 20px;
-      }
-    }
+  .login-card {
+    flex-direction: column;
+  }
+
+  .login-right {
+    order: 1; /* image first */
+  }
+
+  .login-left {
+    order: 2; /* form second */
+  }
+
+  .login-left, .login-right {
+    flex: 1 1 100%;
+    padding: 20px;
+  }
+}
+
   </style>
 </head>
 <body>

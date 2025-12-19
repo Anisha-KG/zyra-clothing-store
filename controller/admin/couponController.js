@@ -8,9 +8,9 @@ const getCoupons = async (req, res, next) => {
         const filter = req.query.filter || 'All';
         const page = parseInt(req.query.page) || 1;
 
-        let sortBy = req.query.sortBy;
-        if (!sortBy) sortBy = 'newest';  
-        let sortQuery = sortBy === 'oldest' ? { createdAt: -1 } : { createdAt: 1 };
+      
+        let sortBy = req.query.sortBy || 'newest';
+         let sortQuery = sortBy === 'newest' ? { createdAt: -1 } : { createdAt: 1 };
 
         const limit = 8;
         const skip = (page - 1) * limit;

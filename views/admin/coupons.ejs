@@ -10,6 +10,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
+        /* Pagination */
         .pagination .page-item.active .page-link {
             background-color: #912f2f;
             border-color: #912f2f;
@@ -19,9 +20,40 @@
             background-color: #912f2f;
             color: white;
         }
+
+        /* Table header */
         .table-head th {
             background-color: #dbcfc5 !important;
             color: #0e0d0d !important;
+        }
+
+        /* Filter Card (same as Orders page) */
+        .filter-card {
+            background: #ffffff;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .btn-style{
+             background-color: #912f2f !important;
+            color: white !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-header {
+                text-align: center;
+            }
+
+            .filter-card {
+                text-align: center;
+            }
+
+            .filter-card input,
+            .filter-card select,
+            .filter-card button {
+                width: 100% !important;
+            }
         }
     </style>
 </head>
@@ -32,38 +64,61 @@
 
 <main class="col-12 col-md-10 px-3 pt-3">
 
-    <div class="d-flex justify-content-between align-items-center my-3">
-        <h4><strong>Coupons</strong></h4>
+    <!-- HEADER -->
+    <div class="page-header my-3">
+        <h4 class="fw-bold">Coupons</h4>
+    </div>
 
-        <div class="d-flex align-items-center gap-3">
+    <!-- FILTER SECTION (Orders-like) -->
+    <div class="filter-card mb-4">
+        <div class="row g-2 justify-content-center align-items-center">
 
             <!-- SEARCH -->
-            <input type="text" id="search" class="form-control" 
-                   placeholder="Search coupon..."
-                   value="<%= search %>" style="width:260px;">
+            <div class="col-12 col-md-3">
+                <input
+                    type="text"
+                    id="search"
+                    class="form-control"
+                    placeholder="Search coupon..."
+                    value="<%= search %>">
+            </div>
 
             <!-- FILTER -->
-            <select  class="form-select" id="filter" style="max-width:150px;">
-                <option value="All" <%= filterType==='All'?'selected':'' %>>All</option>
-                <option value="Active" <%= filterType==='Active'?'selected':'' %>>Active</option>
-                <option value="Inactive" <%= filterType==='Inactive'?'selected':'' %>>Inactive</option>
-            </select>
+            <div class="col-6 col-md-2">
+                <select class="form-select" id="filter">
+                    <option value="All" <%= filterType==='All'?'selected':'' %>>All</option>
+                    <option value="Active" <%= filterType==='Active'?'selected':'' %>>Active</option>
+                    <option value="Inactive" <%= filterType==='Inactive'?'selected':'' %>>Inactive</option>
+                </select>
+            </div>
 
             <!-- SORT -->
-            <select id="sort" class="form-select" style="max-width:150px;">
-                <option value="">Sort By</option>
-                <option value="newest" <%= sortBy==='newest'?'selected':'' %>>Newest</option>
-                <option value="oldest" <%= sortBy==='oldest'?'selected':'' %>>Oldest</option>
-                
-            </select>
+            <div class="col-6 col-md-2">
+                <select id="sort" class="form-select">
+                    <option value="">Sort By</option>
+                    <option value="newest" <%= sortBy==='newest'?'selected':'' %>>Newest</option>
+                    <option value="oldest" <%= sortBy==='oldest'?'selected':'' %>>Oldest</option>
+                </select>
+            </div>
 
-            <!-- CLEAR BUTTON -->
-            <button class="btn btn-outline-secondary" id="clearFilters" onclick="clearFilters()">Clear</button>
+            <!-- CLEAR -->
+            <div class="col-6 col-md-2">
+                <button class="btn btn-outline-secondary w-100"
+                        id="clearFilters"
+                        onclick="clearFilters()">
+                    Clear
+                </button>
+            </div>
 
-            <!-- Add Coupon Modal Trigger -->
-            <button class="btn btn-dark px-4" data-bs-toggle="modal" data-bs-target="#addCouponModal">
-                Add Coupon
-            </button>
+            <!-- ADD COUPON -->
+            <div class="col-6 col-md-2">
+                <button class="btn btn-style w-100"
+                        data-bs-toggle="modal"
+                        data-bs-target="#addCouponModal">
+                    Add Coupon
+                </button>
+            </div>
+
         </div>
     </div>
 

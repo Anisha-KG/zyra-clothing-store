@@ -4,26 +4,37 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Confirm with OTP</title>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   <style>
     body {
-      background-color: #e8d0c7; /* matches your background */
+      background-color: #e8d0c7;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      padding: 15px;
     }
+
     .otp-container {
       max-width: 850px;
-      margin: 50px auto;
+      width: 100%;
       background: white;
       border-radius: 15px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       overflow: hidden;
     }
+
     .otp-image {
-      object-fit: cover;
       width: 100%;
       height: 100%;
+      object-fit: contain;
     }
+
     .otp-input {
       width: 50px;
       height: 50px;
@@ -33,6 +44,7 @@
       border: 1px solid #ccc;
       margin: 0 5px;
     }
+
     .confirm-btn {
       background-color: #8b3f2b;
       color: white;
@@ -42,22 +54,56 @@
       border-radius: 8px;
       transition: 0.3s;
     }
+
     .confirm-btn:hover {
       background-color: #6f2f1f;
     }
+
     .resend {
       font-size: 14px;
       color: #555;
       margin-top: 10px;
+      text-align: center;
     }
+
     .resend a {
       color: #8b3f2b;
       text-decoration: none;
     }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      .otp-container {
+        margin: 0;
+      }
+
+      .otp-input {
+        width: 42px;
+        height: 42px;
+        font-size: 18px;
+        margin: 0 3px;
+      }
+
+      .otp-image {
+        max-height: 280px;
+      }
+    }
+
+    /* Fix for short-height screens */
+    @media (max-height: 650px) {
+      body {
+        align-items: flex-start;
+        padding-top: 20px;
+        padding-bottom: 20px;
+      }
+    }
   </style>
 </head>
+
 <body>
+
   <div class="otp-container row g-0">
+
     <!-- Left Side Image -->
     <div class="col-md-6">
       <img src="/images/verify-otp-image.jpg" class="otp-image" alt="OTP Image">
@@ -66,10 +112,10 @@
     <!-- Right Side Content -->
     <div class="col-md-6 d-flex flex-column justify-content-center align-items-center p-4">
       <h4 class="fw-bold" style="color:#8b3f2b;">Confirm with OTP</h4>
-      <p>Please check your mail address for OTP</p>
+      <p class="text-center">Please check your mail address for OTP</p>
 
       <!-- OTP Inputs -->
-      <div class="d-flex mb-3">
+      <div class="d-flex justify-content-center mb-3 flex-wrap">
         <input type="text" maxlength="1" class="otp-input" id="otp1">
         <input type="text" maxlength="1" class="otp-input" id="otp2">
         <input type="text" maxlength="1" class="otp-input" id="otp3">
@@ -77,21 +123,24 @@
         <input type="text" maxlength="1" class="otp-input" id="otp5">
         <input type="text" maxlength="1" class="otp-input" id="otp6">
       </div>
-      <div class="text-danger" id="otp-error"></div>
+
+      <div class="text-danger mb-2" id="otp-error"></div>
+
       <!-- Confirm Button -->
       <button type="button" class="confirm-btn mb-3" onclick="validateOtpForm()">Confirm</button>
 
       <!-- Resend OTP -->
-        <div class="resend">
-        <span><span id="timer">00:30</span></span>
-<a href="#" id="resend-link">Resend OTP</a>
-        </div>
+      <div class="resend">
+        <span id="timer">00:30</span> &nbsp;
+        <a href="#" id="resend-link">Resend OTP</a>
+      </div>
 
       <!-- Go back -->
       <div class="mt-2">
         <a href="/signup">Go back to Signup page</a>
       </div>
     </div>
+
   </div>
 <script>
 const inputs = document.querySelectorAll(".otp-input");

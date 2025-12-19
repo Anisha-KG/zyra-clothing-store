@@ -6,7 +6,7 @@ const Variant = require('../../models/variantSchema');
 
 require('dotenv').config();
 
-// ---------- PAGE LOAD FUNCTIONS ----------
+
 
 
 const generateReferralCode = (name) => {
@@ -20,8 +20,7 @@ const loadsignup = async (req, res) => {
   try {
     res.render('signup', { user: null, message: null });
   } catch (error) {
-    console.log("Signup page error:", error);
-    res.status(500).send('Server error');
+    res.redirect('/pageNotFound');
   }
 };
 
@@ -29,8 +28,7 @@ const loadLogin = async (req, res) => {
   try {
     res.render('login', { message: null });
   } catch (error) {
-    console.log('Login page error:', error);
-    res.status(500).send('Server error');
+    res.redirect('/pageNotFound');
   }
 };
 
@@ -57,13 +55,12 @@ const loadHomepage = async (req, res) => {
     }
 
     const userData = await user.findById(userId).lean();
-    if (!userData || userData.isBlocked) return res.redirect('/login');
+    if (!userData || userData.isBlocked) return res.render('homepage',{user:null,newArrivals, topTrends, productVariant});
 
     res.render('homepage', { user: userData, newArrivals, topTrends, productVariant });
 
   } catch (error) {
-    console.log('Error while loading homepage:', error);
-    res.status(500).send('Server error');
+    res.redirect('/pageNotFound');
   }
 };
 
@@ -253,7 +250,7 @@ const loginUser = async (req, res) => {
     // Set session after successful login
     req.session.user =existingUser._id
 
-    res.redirect('/home');
+    res.redirect('/');
 
   } catch (error) {
     console.log('Login error:', error);
@@ -277,7 +274,7 @@ const logout = async (req, res) => {
   }
 };
 
-// ---------- DUMMY HOME ----------
+
 
 const loadHome = async (req, res) => {
   try {

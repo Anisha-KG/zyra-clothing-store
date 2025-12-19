@@ -6,7 +6,7 @@ const getBrands = async (req, res) => {
   try {
     const search = req.query.search ? req.query.search : ""
     const page = req.query.page ? req.query.page : 1
-    const limit = 3
+    const limit = 4
     const query = { $or: [{ brandName: { $regex: ".*" + search + ".*", $options: "i" } }] }
     const [brandData, totalcount] = await Promise.all([
       brands.find(query)

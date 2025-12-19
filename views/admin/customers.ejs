@@ -1,120 +1,169 @@
 <%- include("../../views/partials/admin/header")%>
 
-  <style>
-    /* Active page link color */
+<style>
+  /* Table header */
+  .table-head th {
+    background-color: #dbcfc5 !important;
+    color: #0e0d0d !important;
+  }
+
   .pagination .page-item.active .page-link {
-      background-color: #912f2f;
-      border-color: #912f2f;
-      color: white; /* Text color */
+    background-color: #912f2f !important;
+    border-color: #912f2f !important;
+    color: #fff !important;
   }
 
-  /* Optional: Hover effect for non-active pages */
+  .pagination .page-link {
+    color: #912f2f;
+  }
+
   .pagination .page-link:hover {
-      background-color: #912f2f;
-      color: white;
+    background-color: #912f2f;
+    border-color: #912f2f;
+    color: #fff;
   }
-    /* Table header dark brown */
-    .table-head th {
-      background-color: #dbcfc5 !important;
-      /* Dark brown */
-      color: #0e0d0d !important;
-      /* White text for contrast */
-    }
-  </style>
-  <main class="col-12 col-md-10 px-3 pt-3">
 
-    <!-- Page Header & Search -->
-    <div class="d-flex justify-content-between align-items-center my-3">
-      <h4><strong>Customers</strong></h4>
-      <form class="d-flex gap-2" method="get" action="/admin/customers">
-        <!--since it is get method value pass as query string-->
-        <input type="text" name="search" id="searchInput" placeholder="Search category..." class="form-control"
-          style="width: 250px;" value="<%= typeof search !== 'undefined' ? search : '' %>" autocomplete="off" />
-        <button class="btn btn-dark btn-sm">Search</button>
-        <% if(search){ %>
-          <a href="/admin/customers" class="btn btn-outline-secondary btn-sm">Clear</a>
-          <% } %>
+  .pagination .page-link:focus {
+    box-shadow: none;
+  }
+
+  .btn-style {
+    background-color: #912f2f;
+    color: #fff;
+  }
+</style>
+
+<main class="col-12 col-md-10 px-3 pt-3">
+
+  <!-- Page Header & Search -->
+  <div class="row align-items-center my-3 g-2 text-center text-md-start">
+
+    <!-- Title -->
+    <div class="col-12 col-md-4 d-flex justify-content-center justify-content-md-start">
+      <h4 class="mb-2 mb-md-0"><strong>Customers</strong></h4>
+    </div>
+
+    <!-- Search -->
+    <div class="col-12 col-md-8">
+      <form
+        class="row g-2 justify-content-center justify-content-md-end"
+        method="get"
+        action="/admin/customers"
+      >
+        <div class="col-12 col-sm-8 col-md-5 mx-auto mx-md-0">
+          <input
+            type="text"
+            name="search"
+            id="searchInput"
+            placeholder="Search category..."
+            class="form-control"
+            value="<%= typeof search !== 'undefined' ? search : '' %>"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-auto">
+          <button class="btn btn-style btn-sm w-100">Search</button>
+        </div>
+
+        <% if (search) { %>
+        <div class="col-6 col-sm-4 col-md-auto">
+          <a href="/admin/customers" class="btn btn-outline-secondary btn-sm w-100">
+            Clear
+          </a>
+        </div>
+        <% } %>
       </form>
     </div>
 
-    <!-- Customers Table -->
-    <div class="table-responsive bg-white p-3 rounded shadow-sm">
-      <table class="table align-middle table-hover">
-        <thead class="table-head">
-          <tr>
-            <th>Customer</th>
-            <th>Email</th>
-            <th>Customer ID</th>
-            <th>Orders</th>
-            <th>Balance</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% if (data.length===0) { %>
-            <tr>
-              <td colspan="7" class="text-center">No customers found</td>
-            </tr>
-            <% } %>
-              <% data.forEach((user)=> { %>
-                <tr>
-                  <td>
-                    <img
-                      src="<%= user.profilePicture ? '/uploads/profile/' + user.profilePicture : 'https://i.pravatar.cc/40?u=' + user._id %>"
-                      class="rounded-circle me-2" width="40" height="40" alt="">
-                    <%= user.name %>
-                  </td>
-                  <td>
-                    <%= user.email %>
-                  </td>
-                  <td>
-                    <%= user._id.toString().slice(-6).toUpperCase() %>
-                  </td>
-                  <td>
-                    <%= user.orderHistory ? user.orderHistory.length : 0 %>
-                  </td>
-                  <td>₹<%= user.wallet ? user.wallet.toFixed(2) : '0.00' %>
-                  </td>
-                  <td>
-                    <% if (user.isBlocked) { %>
-                      <span class="status-blocked">Blocked</span>
-                      <% } else { %>
-                        <span class="status-active">Active</span>
-                        <% } %>
-                  </td>
-                  <td class="action-icons">
-                    <% if (!user.isBlocked) { %>
-                      <a href="#" onclick="blockCustomer(event,'<%= user._id %>')" title="Block">
-                        <i class="fas fa-ban text-danger"></i>
-                      </a>
-                      <% } else { %>
-                        <a href="#" onclick="unBlockCustomer(event,'<%= user._id %>')" title="Unblock">
-                          <i class="fas fa-check text-success"></i>
-                        </a>
-                        <% } %>
-                  </td>
-                </tr>
-                <% }) %>
-        </tbody>
-      </table>
+  </div>
 
-      <!-- Pagination -->
-      <div class="d-flex justify-content-center mt-4">
-        <nav>
-          <ul class="pagination pagination-sm mb-0">
-            <% for (let i=1; i <=totalPages; i++) { %>
-              <li class="page-item <%= i == currentPage ? 'active' : '' %>">
-                <a class="page-link" href="/admin/customers?page=<%= i %><%= search ? '&search=' + search : '' %>">
-                  <%= i %>
-                </a>
-              </li>
+  <!-- Customers Table -->
+  <div class="table-responsive bg-white p-3 rounded shadow-sm">
+    <table class="table align-middle table-hover">
+      <thead class="table-head">
+        <tr>
+          <th>Customer</th>
+          <th>Email</th>
+          <th>Customer ID</th>
+          <th>Orders</th>
+          <th>Balance</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% if (data.length === 0) { %>
+          <tr>
+            <td colspan="7" class="text-center">No customers found</td>
+          </tr>
+        <% } %>
+
+        <% data.forEach((user) => { %>
+          <tr>
+            <td class="d-flex align-items-center">
+              <img
+                src="<%= user.profilePicture ? '/uploads/profile/' + user.profilePicture : 'https://i.pravatar.cc/40?u=' + user._id %>"
+                class="rounded-circle me-2"
+                width="40"
+                height="40"
+                alt=""
+              />
+              <span><%= user.name %></span>
+            </td>
+
+            <td><%= user.email %></td>
+            <td><%= user._id.toString().slice(-6).toUpperCase() %></td>
+            <td><%= user.orderHistory ? user.orderHistory.length : 0 %></td>
+            <td>₹<%= user.wallet ? user.wallet.toFixed(2) : '0.00' %></td>
+
+            <td>
+              <% if (user.isBlocked) { %>
+                <span class="status-blocked">Blocked</span>
+              <% } else { %>
+                <span class="status-active">Active</span>
               <% } %>
-          </ul>
-        </nav>
-      </div>
+            </td>
+
+            <td>
+              <% if (!user.isBlocked) { %>
+                <a href="#" onclick="blockCustomer(event,'<%= user._id %>')" title="Block">
+                  <i class="fas fa-ban text-danger"></i>
+                </a>
+              <% } else { %>
+                <a href="#" onclick="unBlockCustomer(event,'<%= user._id %>')" title="Unblock">
+                  <i class="fas fa-check text-success"></i>
+                </a>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center mt-4">
+      <nav>
+        <ul class="pagination pagination-sm flex-wrap mb-0">
+          <% for (let i = 1; i <= totalPages; i++) { %>
+            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+              <a
+                class="page-link"
+                href="/admin/customers?page=<%= i %><%= search ? '&search=' + search : '' %>"
+              >
+                <%= i %>
+              </a>
+            </li>
+          <% } %>
+        </ul>
+      </nav>
     </div>
-  </main>
+
+  </div>
+</main>
+
+
   <script>
     async function blockCustomer(event, id) {
       event.preventDefault()

@@ -21,7 +21,7 @@ const upload=require('../middleware/profileImage')
 const uploadProfileImage=require('../controller/user/profileImageController')
 
 router.get('/pagenotfound',userController.pageNotFound)
-router.get('/home',auth.checkSession,userController.loadHomepage)
+router.get('/',userController.loadHomepage)
 router.get('/signup',auth.isLogin,userController.loadsignup)
 router.post('/signup',userController.signup)
 router.post('/verify-otp',userController.verify_otp)
@@ -30,7 +30,7 @@ router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 
 router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/signup' }), async (req, res) => {
   try {
     req.session.user = req.user._id;
-    res.redirect('/home');
+    res.redirect('/');
   } catch (error) {
     console.log("Google login error:", error);
     res.redirect('/signup');

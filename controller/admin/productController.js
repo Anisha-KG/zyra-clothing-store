@@ -9,7 +9,7 @@ const getProducts = async (req, res) => {
   try {
     const search = req.query.search ? req.query.search : ""
     const page = req.query.page ? req.query.page : 1
-    const limit = 5
+    const limit = 8
     const query = { name: { $regex: ".*" + search + ".*", $options: 'i' } }
 
     const [products, productCount] = await Promise.all([

@@ -6,7 +6,7 @@ const loadSubcategories = async (req, res) => {
     const categoryId = req.params.id
     const search = req.query.search ? req.query.search : ""
     const page = req.query.page ? Number(req.query.page) : 1
-    const limit = 3
+    const limit = 4
 
     const [category, subcategories, count] = await Promise.all([
       Category.findById(categoryId),

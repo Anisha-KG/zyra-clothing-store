@@ -59,7 +59,7 @@ const loadforgotPasswordPage=async(req,res)=>{
 }
 
 const forgotPassword=async(req,res)=>{
-    console.log('controller hit')
+    
     try{
         const {email}=req.body
         if(!email){
@@ -156,7 +156,7 @@ const loadChangePassword=async(req,res)=>{
     }
 }
 
-const changePassword=async(req,res)=>{
+const changePassword1=async(req,res)=>{
     try{
         const{currentPassword,newPassword,confirmPassword}=req.body
         const sessionData = req.session.userData;
@@ -195,6 +195,45 @@ req.session.destroy();
         res.redirect('/pageNotFound')
     }
 }
+
+
+const changePassword=async(req,res)=>{
+    try{
+        const{newPassword,confirmPassword}=req.body
+        const sessionData = req.session.userData;
+    if (!sessionData || !sessionData.email) {
+      return res.render('changePassword', {
+        message: 'Session expired or invalid. Please verify your email again.'
+      });
+    }
+        const email=sessionData.email
+
+        const user=await User.findOne({email:email})
+        if(!user){
+            return res.json({success:false,message:'User doesnot exist. Please signup'})
+        }
+        
+
+        if(newPassword!==confirmPassword){
+            return res.json({success:false,message:'Password doesnot match'})
+        }
+        const hashedPassword= await securePassword(newPassword)
+
+        const update=await User.findOneAndUpdate({email:email},{$set:{password:hashedPassword}},{new:true})
+        if(!update){
+           return res.json({success:false,message:'cannot Change password'})
+        }
+
+        res.json({ success: true, message: 'Password changed successfully' });
+req.session.destroy();
+
+
+    }catch(error){
+        console.log(error)
+        res.redirect('/pageNotFound')
+    }
+}
+
 
 
 module.exports={

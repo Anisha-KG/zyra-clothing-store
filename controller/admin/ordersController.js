@@ -7,7 +7,7 @@ const Wallet=require('../../models/wallet')
 const listOrders = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = 5;
+        const limit = 10;
 
         const search = req.query.search || '';
         const paymentStatus = req.query.paymentStatus || 'All';
