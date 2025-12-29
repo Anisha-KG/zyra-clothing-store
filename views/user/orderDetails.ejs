@@ -450,74 +450,170 @@
 
 
     <!-- CANCEL ITEM OFFCANVAS -->
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="cancelModal" aria-labelledby="cancelModalLabel">
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="cancelModalLabel">Cancel Item</h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
-      </div>
-      <div class="offcanvas-body">
-        <div class="mb-3">
-          <label for="cancelReason" class="form-label">Reason</label>
-          <input type="text" class="form-control" id="cancelReason" placeholder="Type your reason">
-          <input type="text" class="form-control" id="orderId_cancel" hidden>
-          <input type="text" class="form-control" id="itemId_cancel" hidden>
-        </div>
-        <button class="btn btn-danger w-100" id="submitCancel" onclick="CancelItem()">Submit Cancel</button>
-      </div>
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="cancelModal">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Cancel Item</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body">
+
+    <label class="fw-bold mb-2">Reason</label>
+
+    <div class="form-check">
+      <input class="form-check-input cancel-item-reason" type="radio" name="cancelItemReason" value="Ordered by mistake">
+      <label class="form-check-label">Ordered by mistake</label>
     </div>
+
+    <div class="form-check">
+      <input class="form-check-input cancel-item-reason" type="radio" name="cancelItemReason" value="Found better price elsewhere">
+      <label class="form-check-label">Found better price elsewhere</label>
+    </div>
+
+    <div class="form-check">
+      <input class="form-check-input cancel-item-reason" type="radio" name="cancelItemReason" value="Delivery is taking too long">
+      <label class="form-check-label">Delivery is taking too long</label>
+    </div>
+
+    <div class="form-check">
+      <input class="form-check-input cancel-item-reason" type="radio" name="cancelItemReason" value="Other">
+      <label class="form-check-label">Other</label>
+    </div>
+
+    <textarea id="cancelItemCustomReason" class="form-control mt-2 d-none"
+      placeholder="Enter your reason"></textarea>
+
+    <input type="hidden" id="orderId_cancel">
+    <input type="hidden" id="itemId_cancel">
+
+    <button class="btn btn-danger w-100 mt-3" onclick="CancelItem()">Submit Cancel</button>
+  </div>
+</div>
+
 
     <!-- RETURN ITEM OFFCANVAS -->
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="returnModal" aria-labelledby="returnModalLabel">
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="returnModalLabel">Return Item</h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
-      </div>
-      <div class="offcanvas-body">
-        <div class="mb-3">
-          <label for="returnReason" class="form-label">Reason</label>
-          <input type="text" class="form-control" id="returnReason" placeholder="Type your reason">
-          <input type="text" class="form-control" id="orderId_return" hidden>
-          <input type="text" class="form-control" id="itemId_return" hidden>
-        </div>
-        <button class="btn btn-warning w-100" id="submitReturn" onclick="ReturnItem()">Submit Return</button>
-      </div>
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="returnModal">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Return Item</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body">
+
+    <label class="fw-bold mb-2">Reason</label>
+
+    <div class="form-check">
+      <input class="form-check-input return-item-reason" type="radio" name="returnItemReason" value="Product damaged">
+      <label class="form-check-label">Product damaged</label>
     </div>
+
+    <div class="form-check">
+      <input class="form-check-input return-item-reason" type="radio" name="returnItemReason" value="Wrong item received">
+      <label class="form-check-label">Wrong item received</label>
+    </div>
+
+    <div class="form-check">
+      <input class="form-check-input return-item-reason" type="radio" name="returnItemReason" value="Quality not as expected">
+      <label class="form-check-label">Quality not as expected</label>
+    </div>
+
+    <div class="form-check">
+      <input class="form-check-input return-item-reason" type="radio" name="returnItemReason" value="Other">
+      <label class="form-check-label">Other</label>
+    </div>
+
+    <textarea id="returnItemCustomReason" class="form-control mt-2 d-none"
+      placeholder="Enter your reason"></textarea>
+
+    <input type="hidden" id="orderId_return">
+    <input type="hidden" id="itemId_return">
+
+    <button class="btn btn-warning w-100 mt-3" onclick="ReturnItem()">Submit Return</button>
+  </div>
+</div>
+
 
     <!-- CANCEL ORDER OFFCANVAS -->
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="cancelOrderModal" aria-labelledby="cancelOrderModalLabel">
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="cancelOrderModalLabel">Cancel Order</h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
-      </div>
-      <div class="offcanvas-body">
-        <div class="mb-3">
-          <label for="cancelOrderReason" class="form-label">Reason</label>
-          <input type="text" class="form-control" id="cancelOrderReason" placeholder="Type your reason">
-          <input type="text" class="form-control" id="orderId_cancelOrder" hidden>
-        </div>
-        <button class="btn btn-danger w-100" onclick="submitCancelOrder()">Submit Cancel</button>
-      </div>
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="cancelOrderModal">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Cancel Order</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body">
+
+    <label class="fw-bold mb-2">Reason</label>
+
+    <div class="form-check">
+      <input class="form-check-input cancel-order-reason" type="radio" name="cancelOrderReason" value="Ordered by mistake">
+      <label class="form-check-label">Ordered by mistake</label>
     </div>
 
-    <!-- RETURN ORDER OFFCANVAS -->
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="returnOrderModal" aria-labelledby="returnOrderModalLabel">
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="returnOrderModalLabel">Return Order</h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
-      </div>
-      <div class="offcanvas-body">
-        <div class="mb-3">
-          <label for="returnOrderReason" class="form-label">Reason</label>
-          <input type="text" class="form-control" id="returnOrderReason" placeholder="Type your reason">
-          <input type="text" class="form-control" id="orderId_returnOrder" hidden>
-        </div>
-        <button class="btn btn-warning w-100" onclick="submitReturnOrder()">Submit Return</button>
-      </div>
+    <div class="form-check">
+      <input class="form-check-input cancel-order-reason" type="radio" name="cancelOrderReason" value="Changed my mind">
+      <label class="form-check-label">Changed my mind</label>
     </div>
+
+    <div class="form-check">
+      <input class="form-check-input cancel-order-reason" type="radio" name="cancelOrderReason" value="Other">
+      <label class="form-check-label">Other</label>
+    </div>
+
+    <textarea id="cancelOrderCustomReason" class="form-control mt-2 d-none"
+      placeholder="Enter your reason"></textarea>
+
+    <input type="hidden" id="orderId_cancelOrder">
+
+    <button class="btn btn-danger w-100 mt-3" onclick="submitCancelOrder()">Submit Cancel</button>
+  </div>
+</div>
+
+
+    <!-- RETURN ORDER OFFCANVAS -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="returnOrderModal">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Return Order</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body">
+
+    <label class="fw-bold mb-2">Reason</label>
+
+    <div class="form-check">
+      <input class="form-check-input return-order-reason" type="radio" name="returnOrderReason" value="Items damaged">
+      <label class="form-check-label">Items damaged</label>
+    </div>
+
+    <div class="form-check">
+      <input class="form-check-input return-order-reason" type="radio" name="returnOrderReason" value="Not satisfied with quality">
+      <label class="form-check-label">Not satisfied with quality</label>
+    </div>
+
+    <div class="form-check">
+      <input class="form-check-input return-order-reason" type="radio" name="returnOrderReason" value="Other">
+      <label class="form-check-label">Other</label>
+    </div>
+
+    <textarea id="returnOrderCustomReason" class="form-control mt-2 d-none"
+      placeholder="Enter your reason"></textarea>
+
+    <input type="hidden" id="orderId_returnOrder">
+
+    <button class="btn btn-warning w-100 mt-3" onclick="submitReturnOrder()">Submit Return</button>
+  </div>
+</div>
+
 <%- include("../../views/partials/user/footer") %>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+
+      document.addEventListener('change', e => {
+  if (e.target.value === 'Other') {
+    const textarea = e.target
+      .closest('.offcanvas-body')
+      .querySelector('textarea');
+    textarea.classList.remove('d-none');
+  }
+});
+
       // Item modals
       function openCancelModal(orderId, itemId) {
         document.getElementById('orderId_cancel').value = orderId;
@@ -529,49 +625,87 @@
         document.getElementById('itemId_return').value = itemId;
       }
 
-      async function CancelItem() {
-        const cancelReason = document.getElementById('cancelReason').value;
-        const orderId = document.getElementById('orderId_cancel').value;
-        const itemId = document.getElementById('itemId_cancel').value;
-        try {
-          const response = await fetch("/order/cancel", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ itemId, orderId, cancelReason })
-          });
-          const result = await response.json();
-          if (result.success) {
-            Swal.fire({ icon: 'success', title: 'Cancel requested!', text: result.message, confirmButtonColor: '#198754' })
-              .then(() => window.location.reload());
-          } else {
-            Swal.fire({ icon: 'error', title: 'Failed', text: result.message, confirmButtonColor: '#dc3545' });
-          }
-        } catch (error) {
-          Swal.fire({ icon: 'error', title: 'Server Error', text: 'Something went wrong', confirmButtonColor: '#dc3545' });
-        }
-      }
 
-      async function ReturnItem() {
-        const returnReason = document.getElementById('returnReason').value;
-        const orderId = document.getElementById('orderId_return').value;
-        const itemId = document.getElementById('itemId_return').value;
-        try {
-          const response = await fetch("/order/returnItem", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ itemId, orderId, returnReason })
-          });
-          const result = await response.json();
-          if (result.success) {
-            Swal.fire({ icon: 'success', title: 'Return requested!', text: result.message, confirmButtonColor: '#198754' })
-              .then(() => window.location.reload());
-          } else {
-            Swal.fire({ icon: 'error', title: 'Failed', text: result.message, confirmButtonColor: '#dc3545' });
-          }
-        } catch (error) {
-          Swal.fire({ icon: 'error', title: 'Server Error', text: 'Something went wrong', confirmButtonColor: '#dc3545' });
-        }
-      }
+      function getReason({ radioName, customInputId }) {
+  const selected = document.querySelector(`input[name="${radioName}"]:checked`);
+
+  if (!selected) {
+    Swal.fire('Error', 'Please select a reason', 'error');
+    return null;
+  }
+
+  if (selected.value === 'Other') {
+    const customReason = document.getElementById(customInputId).value.trim();
+    if (!customReason) {
+      Swal.fire('Error', 'Please enter your reason', 'error');
+      return null;
+    }
+    return customReason;
+  }
+
+  return selected.value;
+}
+async function CancelItem() {
+  const orderId = document.getElementById('orderId_cancel').value;
+  const itemId = document.getElementById('itemId_cancel').value;
+
+  const cancelReason = getReason({
+    radioName: 'cancelItemReason',
+    customInputId: 'cancelItemCustomReason'
+  });
+
+  if (!cancelReason) return;
+
+  try {
+    const response = await fetch('/order/cancel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, itemId, cancelReason })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      Swal.fire('Success', result.message, 'success')
+        .then(() => window.location.reload());
+    } else {
+      Swal.fire('Failed', result.message, 'error');
+    }
+  } catch {
+    Swal.fire('Error', 'Server Error', 'error');
+  }
+}
+async function ReturnItem() {
+  const orderId = document.getElementById('orderId_return').value;
+  const itemId = document.getElementById('itemId_return').value;
+
+  const returnReason = getReason({
+    radioName: 'returnItemReason',
+    customInputId: 'returnItemCustomReason'
+  });
+
+  if (!returnReason) return;
+
+  try {
+    const response = await fetch('/order/returnItem', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, itemId, returnReason })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      Swal.fire('Success', result.message, 'success')
+        .then(() => window.location.reload());
+    } else {
+      Swal.fire('Failed', result.message, 'error');
+    }
+  } catch {
+    Swal.fire('Error', 'Server Error', 'error');
+  }
+}
+
 
       // Order modals
       function cancelOrder(orderId) {
@@ -586,49 +720,67 @@
         returnModal.show();
       }
 
-      async function submitCancelOrder() {
-        const orderId = document.getElementById('orderId_cancelOrder').value;
-        const reason = document.getElementById('cancelOrderReason').value;
+     async function submitCancelOrder() {
+  const orderId = document.getElementById('orderId_cancelOrder').value;
 
-        try {
-          const response = await fetch('/order/cancelOrder', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ orderId, reason })
-          });
-          const result = await response.json();
-          if (result.success) {
-            Swal.fire({ icon: 'success', title: 'Order Cancelled!', text: result.message, confirmButtonColor: '#198754' })
-              .then(() => window.location.reload());
-          } else {
-            Swal.fire({ icon: 'error', title: 'Failed', text: result.message, confirmButtonColor: '#dc3545' });
-          }
-        } catch (err) {
-          Swal.fire({ icon: 'error', title: 'Server Error', text: 'Something went wrong', confirmButtonColor: '#dc3545' });
-        }
-      }
+  const reason = getReason({
+    radioName: 'cancelOrderReason',
+    customInputId: 'cancelOrderCustomReason'
+  });
 
-      async function submitReturnOrder() {
-        const orderId = document.getElementById('orderId_returnOrder').value;
-        const reason = document.getElementById('returnOrderReason').value;
+  if (!reason) return;
 
-        try {
-          const response = await fetch('/order/returnOrder', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ orderId, reason })
-          });
-          const result = await response.json();
-          if (result.success) {
-            Swal.fire({ icon: 'success', title: 'Return Requested!', text: result.message, confirmButtonColor: '#198754' })
-              .then(() => window.location.reload());
-          } else {
-            Swal.fire({ icon: 'error', title: 'Failed', text: result.message, confirmButtonColor: '#dc3545' });
-          }
-        } catch (err) {
-          Swal.fire({ icon: 'error', title: 'Server Error', text: 'Something went wrong', confirmButtonColor: '#dc3545' });
-        }
-      }
+  try {
+    const response = await fetch('/order/cancelOrder', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, reason })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      Swal.fire('Success', result.message, 'success')
+        .then(() => window.location.reload());
+    } else {
+      Swal.fire('Failed', result.message, 'error');
+    }
+  } catch {
+    Swal.fire('Error', 'Server Error', 'error');
+  }
+}
+
+
+     async function submitReturnOrder() {
+  const orderId = document.getElementById('orderId_returnOrder').value;
+
+  const reason = getReason({
+    radioName: 'returnOrderReason',
+    customInputId: 'returnOrderCustomReason'
+  });
+
+  if (!reason) return;
+
+  try {
+    const response = await fetch('/order/returnOrder', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, reason })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      Swal.fire('Success', result.message, 'success')
+        .then(() => window.location.reload());
+    } else {
+      Swal.fire('Failed', result.message, 'error');
+    }
+  } catch {
+    Swal.fire('Error', 'Server Error', 'error');
+  }
+}
+
 
       function downloadInvoice(orderId) {
         window.open(`/order/invoice/${orderId}`, '_blank');

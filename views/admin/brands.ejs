@@ -206,10 +206,11 @@
                                                 </button>
                                                 <% } else { %>
                                                     <button class="btn btn-sm btn-outline-primary"
-                                                        data-bs-toggle="modal" data-bs-target="#addOfferModal"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#addOfferModal"
                                                         onclick="openAddOfferModal('<%= brand._id %>')">
                                                         Add Offer
-                                                    </button>
+                                                        </button>
                                                     <% } %>
                                         </td>
                                         <td class="action-icons">
@@ -276,61 +277,86 @@
             </div>
 
             <!-- ADD BRAND OFFER MODAL -->
-            <div class="modal fade" id="addOfferModal" tabindex="-1" aria-labelledby="addOfferModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-md">
-                    <div class="modal-content p-4 rounded-4 border-0">
-                        <form id="addOfferForm" onsubmit="addBrandOffer(event)" method="POST"
-                            action="/admin/addBrandOffer">
+<div class="modal fade" id="addOfferModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-content p-4 rounded-4 border-0">
 
-                            <div class="modal-header p-3 mb-3"
-                                style="background-color: #912f2f; border-radius: 0.5rem;">
-                                <h5 class="modal-title text-white fw-bold" id="addOfferModalLabel">Add Brand Offer</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
+      <form id="addOfferForm" onsubmit="addBrandOffer(event)">
 
-                            <input type="hidden" name="brandId" id="offerBrandId" value="">
+        <div class="modal-header p-3 mb-3"
+          style="background-color:#912f2f;border-radius:0.5rem;">
+          <h5 class="modal-title text-white fw-bold">
+            Select Offer
+          </h5>
+          <button type="button" class="btn-close btn-close-white"
+            data-bs-dismiss="modal"></button>
+        </div>
 
-                            <div class="modal-body">
-                                <div class="row g-3">
-                                    <div class="col-12">
-                                        <label for="offerPercentage" class="form-label fw-semibold">Offer Percentage
-                                            (%)</label>
-                                        <input type="number" name="offerPercentage" class="form-control rounded-3"
-                                            id="offerPercentage" placeholder="Enter percentage (e.g. 10)" />
-                                        <div id="offerError" class="error-msg text-danger"></div>
-                                    </div>
+        <small id="offerError" class="text-danger"></small>
 
-                                    <div class="col-12">
-                                        <label for="startDate" class="form-label fw-semibold">Start Date & Time</label>
-                                        <input type="datetime-local" name="startDate" class="form-control rounded-3"
-                                            id="startDate" />
-                                        <div id="dateError" class="error-msg text-danger"></div>
-                                    </div>
+        <!-- hidden brand -->
+        <input type="hidden" id="offerBrandId" name="brandId">
 
-                                    <div class="col-12">
-                                        <label for="endDate" class="form-label fw-semibold">End Date & Time</label>
-                                        <input type="datetime-local" name="endDate" class="form-control rounded-3"
-                                            id="endDate" />
-                                        <div id="dateError" class="error-msg text-danger"></div>
-                                    </div>
-                                </div>
-                            </div>
+        <div class="modal-body">
 
-                            <div class="modal-footer border-0 mt-3">
-                                <div class="d-flex justify-content-end gap-2">
-                                    <button type="reset"
-                                        class="btn btn-outline-secondary rounded-3 px-4">Cancel</button>
-                                    <button type="submit" class="btn"
-                                        style="background-color: #912f2f; color: white;">Save Offer</button>
-                                </div>
-                            </div>
+          <% if (offers.length === 0) { %>
+            <p class="text-center text-muted">No offers available</p>
+          <% } else { %>
 
-                        </form>
-                    </div>
-                </div>
+            <div class="list-group">
+
+              <% offers.forEach(offer => { %>
+                <label class="list-group-item d-flex justify-content-between align-items-center">
+  <div>
+    <input
+      class="form-check-input me-2"
+      type="radio"
+      name="offerId"
+      value="<%= offer._id %>"
+      
+    >
+    
+    <!-- OFFER NAME -->
+    <strong ><%= offer.offerName %></strong><br>
+    
+
+    <!-- DISCOUNT + DATE -->
+    <small class="text-muted">
+      <%= offer.discount %>% |
+      <%= new Date(offer.startDate).toLocaleDateString('en-GB') %> -
+      <%= new Date(offer.endDate).toLocaleDateString('en-GB') %>
+    </small>
+  </div>
+
+  <!-- BADGE -->
+  <span class="badge bg-success">
+    <%= offer.discount %>%
+  </span>
+</label>
+
+              <% }) %>
+
             </div>
+
+          <% } %>
+
+        </div>
+
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-secondary"
+            data-bs-dismiss="modal">Cancel</button>
+
+          <button type="submit"
+            class="btn"
+            style="background-color:#912f2f;color:white">
+            Apply Offer
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
 
             <!-- EDIT BRAND MODAL -->
             <div class="modal fade" id="editBrandModal" tabindex="-1" aria-labelledby="editBrandModalLabel"
@@ -478,82 +504,50 @@
         }
 
         async function addBrandOffer(e) {
-            e.preventDefault();
-            const form = document.getElementById('addOfferForm');
-            const formdata = new FormData(form);
-            const offerPercentage = formdata.get('offerPercentage');
-            const startDate = formdata.get('startDate');
-            const endDate = formdata.get('endDate');
-            const brandId = document.getElementById('offerBrandId').value;
+  e.preventDefault();
 
-            let hasError = false;
+  const brandId = document.getElementById('offerBrandId').value;
+  const offerId = document.querySelector('input[name="offerId"]:checked')?.value;
 
+  if (!offerId) {
+    document.getElementById('offerError').innerText='Select an offer'
+    return;
+  }
 
-            document.getElementById('offerError').textContent = "";
-            document.getElementById('dateError').textContent = "";
+  try {
+    const response = await fetch('/admin/addBrandOffer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ brandId, offerId })
+    });
 
-            if (!offerPercentage) {
-                document.getElementById('offerError').textContent = "Offer percentage is required";
-                hasError = true;
-            }
-            if (!startDate) {
-                document.getElementById('dateError').textContent = "Date is required";
-                hasError = true;
-            }
-            if (!endDate) {
-                document.getElementById('dateError').textContent = "Date is required";
-                hasError = true;
-            }
-            if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
-                document.getElementById('dateError').textContent = "Start date should be less than end date";
-                hasError = true;
-            }
-            if (offerPercentage && (offerPercentage < 0 || offerPercentage > 100)) {
-                document.getElementById('offerError').textContent = "Invalid offer Percentage";
-                hasError = true;
-            }
+    const result = await response.json();
 
-            if (hasError) return;
+    if (result.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: result.message,
+        confirmButtonColor: '#198754'
+      }).then(() => {
+        window.location.reload();
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: result.message
+      });
+    }
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Server Error',
+      text: 'Something went wrong'
+    });
+  }
+}
 
-            try {
-                const response = await fetch('/admin/addBrandOffer', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        brandId: brandId,
-                        offer: offerPercentage,
-                        startDate,
-                        endDate
-                    })
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: result.message,
-                        confirmButtonColor: '#198754'
-                    }).then(() => {
-                        window.location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: result.message,
-                        confirmButtonColor: '#dc3545'
-                    });
-                }
-            } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Server Error',
-                    text: "Something went wrong",
-                    confirmButtonColor: '#dc3545'
-                });
-            }
-        }
 
         function setEditmodal(id, brandName, logo) {
             document.getElementById('edit-brand-id').value = id

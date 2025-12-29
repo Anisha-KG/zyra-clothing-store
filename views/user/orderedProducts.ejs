@@ -313,24 +313,49 @@
 
     </div>
 
-    <!-- Cancel Modal -->
-    <div class="modal right fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content p-3">
-          <div class="modal-header">
-            <h5 class="modal-title" id="cancelModalLabel">Cancel Item</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+     <!-- CANCEL MODAL -->
+  <div class="modal right fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content p-3">
+        <div class="modal-header">
+          <h5 class="modal-title">Cancel Item</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <label class="form-label fw-bold">Reason for cancellation</label>
+
+          <div class="form-check">
+            <input class="form-check-input cancel-reason" type="radio" name="cancelReason" value="Ordered by mistake">
+            <label class="form-check-label">Ordered by mistake</label>
           </div>
-          <div class="modal-body">
-            <label for="cancelReason" class="form-label">Reason for cancellation:</label>
-            <textarea id="cancelReason" class="form-control" rows="4"></textarea>
-            <button class="btn btn-danger mt-3 w-100"
-              onclick="CancelItem('<%= order.orderId%>','<%= orderedItem._id%>')">Submit Cancellation</button>
+
+          <div class="form-check">
+            <input class="form-check-input cancel-reason" type="radio" name="cancelReason" value="Found better price elsewhere">
+            <label class="form-check-label">Found better price elsewhere</label>
           </div>
+
+          <div class="form-check">
+            <input class="form-check-input cancel-reason" type="radio" name="cancelReason" value="Delivery is taking too long">
+            <label class="form-check-label">Delivery is taking too long</label>
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input cancel-reason" type="radio" name="cancelReason" value="Other" id="otherReasonRadio">
+            <label class="form-check-label">Other</label>
+          </div>
+
+          <textarea id="customCancelReason" class="form-control mt-2 d-none" rows="3"
+            placeholder="Enter your reason"></textarea>
+
+          <button class="btn btn-danger mt-3 w-100"
+            onclick="CancelItem('<%= order.orderId %>','<%= orderedItem._id %>')">
+            Submit Cancellation
+          </button>
         </div>
       </div>
     </div>
-
+  </div>
     <!-- Return Modal -->
     <div class="modal right fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -351,48 +376,52 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      async function CancelItem(orderId, itemId) {
-        cancelReason = document.getElementById('cancelReason').value
-        try {
-          const response = await fetch("/order/cancel", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              itemId,
-              orderId,
-              cancelReason
-            })
-          })
-          const result = await response.json()
+      document.querySelectorAll('.cancel-reason').forEach(radio => {
+      radio.addEventListener('change', () => {
+        document.getElementById('customCancelReason').classList.toggle(
+          'd-none',
+          radio.value !== 'Other'
+        );
+      });
+    });
 
-          if (result.success) {
-            Swal.fire({
-              icon: 'success',
-              title: 'cancel requested!',
-              text: result.message,
-              confirmButtonColor: '#198754'
-            }).then(() => window.location.reload());
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Failed',
-              text: result.message,
-              confirmButtonColor: '#dc3545'
-            });
-          }
+    async function CancelItem(orderId, itemId) {
+      const selected = document.querySelector('input[name="cancelReason"]:checked');
+      let cancelReason = '';
 
+      if (!selected) {
+        return Swal.fire('Error', 'Please select a reason', 'error');
+      }
 
-        } catch (error) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Server Error',
-            text: 'Something went wrong',
-            confirmButtonColor: '#dc3545'
-          });
+      if (selected.value === 'Other') {
+        cancelReason = document.getElementById('customCancelReason').value.trim();
+        if (!cancelReason) {
+          return Swal.fire('Error', 'Please enter your reason', 'error');
+        }
+      } else {
+        cancelReason = selected.value;
+      }
+
+      try {
+        const response = await fetch("/order/cancel", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId, itemId, cancelReason })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          Swal.fire('Success', result.message, 'success')
+            .then(() => window.location.reload());
+        } else {
+          Swal.fire('Failed', result.message, 'error');
         }
 
-
+      } catch {
+        Swal.fire('Error', 'Server Error', 'error');
       }
+    }
 
 
       async function returnItem(orderId, itemId) {
