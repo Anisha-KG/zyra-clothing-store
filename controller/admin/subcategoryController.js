@@ -1,5 +1,6 @@
 const Subcategories = require('../../models/subcategorySchema')
 const Category = require('../../models/categprySchema')
+const Offer=require('../../models/offerSchema')
 
 const loadSubcategories = async (req, res) => {
   try {
@@ -8,7 +9,7 @@ const loadSubcategories = async (req, res) => {
     const page = req.query.page ? Number(req.query.page) : 1
     const limit = 4
 
-    const [category, subcategories, count] = await Promise.all([
+    const [category, subcategories, count,offers] = await Promise.all([
       Category.findById(categoryId),
       Subcategories.find({
         categoryId: categoryId,
@@ -22,7 +23,8 @@ const loadSubcategories = async (req, res) => {
         categoryId: categoryId,
         name: { $regex: ".*" + search + ".*", $options: 'i' }
         , isDeleted: false
-      }).countDocuments()
+      }).countDocuments(),
+      Offer.find({isDeleted:false})
     ])
 
     if (!category) {
@@ -34,7 +36,8 @@ const loadSubcategories = async (req, res) => {
       subcategories,
       currentPage: page,
       totalPages: Math.ceil(count / limit),
-      search
+      search,
+      offers
 
     })
 
@@ -78,31 +81,30 @@ const addSubcategory = async (req, res) => {
   }
 }
 
-const addSubcategoryOffer = async (req, res) => {
-  console.log('controller hit')
+const addSubcategoryOffer = async (req, res,next) => {
+  
   try {
-    const { subcategoryId, offerPercentage, startDate, endDate } = req.body
-    if (!offerPercentage || !startDate || !endDate) {
-      return res.json({ success: false, message: "All fields are required" })
-    }
-    if (new Date(startDate) > new Date(endDate)) {
-      return res.json({ success: false, message: "Invalid Date" })
-    }
-    if (isNaN(offerPercentage) || offerPercentage < 0 || offerPercentage > 100) {
-      return res.json({ success: false, message: "Offer Percentage should be between 0 and 100" })
-    }
+    const { subcategoryId, offerId } = req.body
 
-    const update = await Subcategories.findByIdAndUpdate(subcategoryId, { $set: { offer: offerPercentage, startDate: startDate, endDate: endDate } }, { new: true })
-    if (!update) {
-      return res.json({ success: false, message: "Unable to add offer" })
-    }
-    res.json({ success: true, message: 'Offer added successfully' })
+  const offer = await Offer.findById(offerId)
+  if (!offer) {
+    return res.json({ success:false, message:"Offer not found" })
+  }
+
+  await Subcategories.findByIdAndUpdate(subcategoryId, {
+    offer: offer.discount,
+    startDate: offer.startDate,
+    endDate: offer.endDate,
+    offerId: offer._id
+  })
+
+  res.json({ success:true, message:"Offer applied successfully" })
 
   } catch (error) {
-    console.log("error while adding subcategory offer:", error)
-    res.json({ success: false, message: "Server error" })
+   next(error)
   }
 }
+
 
 const removeOffer = async (req, res) => {
   try {

@@ -228,10 +228,74 @@
             <%= product.description || "No description available." %>
           </div>
           <div class="tab-pane fade" id="review">
-            <p>No reviews yet.</p>
-          </div>
-        </div>
+             <!-- Add Review Form -->
+  <div class="card p-3 mb-4 shadow-sm">
+  <h5 class="mb-3">Write a Review</h5>
+
+  <!-- Star Rating -->
+  <div class="mb-2">
+    <label class="form-label fw-bold">Your Rating:</label><br>
+
+    <div id="starRating">
+      <% for(let i = 1; i <= 5; i++) { %>
+        <i class="fa fa-star text-muted star"
+           data-value="<%= i %>"
+           style="cursor:pointer;"></i>
+      <% } %>
+    </div>
+
+    <input type="hidden" id="rating" value="0">
+    <small class="text-danger d-none" id="ratingError">Please select a rating</small>
+  </div>
+
+  <!-- Review Text -->
+  <div class="mb-3">
+    <label class="form-label fw-bold">Your Review:</label>
+    <textarea id="reviewText" class="form-control" rows="3"
+      placeholder="Share your experience..."></textarea>
+  </div>
+
+  <button class="btn btn-sm btn-dark" onclick="submitReview('<%= product._id %>')">
+    Submit Review
+  </button>
+</div>
+
+  <!-- Existing Reviews -->
+<h5 class="mb-3">Customer Reviews</h5>
+
+<% if (reviews && reviews.length > 0) { %>
+
+  <% reviews.forEach(review => { %>
+    <div class="border-bottom pb-3 mb-3">
+
+      <div class="d-flex justify-content-between">
+        <strong><%= review.user?.name || "User" %></strong>
+        <small class="text-muted">
+          <%= new Date(review.createdAt).toLocaleDateString() %>
+        </small>
       </div>
+
+      <!-- Star Rating -->
+      <div class="mb-1">
+        <% for (let i = 1; i <= 5; i++) { %>
+          <i class="fa fa-star <%= i <= review.rating ? 'text-warning' : 'text-muted' %>"></i>
+        <% } %>
+      </div>
+
+      <!-- Review Text -->
+      <p class="mb-0 small">
+        <%= review.reviewText || "No review text provided." %>
+      </p>
+
+    </div>
+  <% }) %>
+
+<% } else { %>
+
+  <p class="text-muted">No reviews yet. Be the first to review this product!</p>
+
+<% } %>
+
     </div>
 
     <!-- You May Also Like -->
@@ -445,6 +509,83 @@ zoomContainer.addEventListener('mousemove', (e) => {
 
 
     }
+
+
+
+
+  // Star rating logic
+  const stars = document.querySelectorAll(".star");
+  const ratingInput = document.getElementById("rating");
+
+  stars.forEach(star => {
+    star.addEventListener("click", () => {
+      const value = star.getAttribute("data-value");
+      ratingInput.value = value;
+
+      stars.forEach(s => {
+        s.classList.remove("text-warning");
+        s.classList.add("text-muted");
+      });
+
+      for (let i = 0; i < value; i++) {
+        stars[i].classList.add("text-warning");
+        stars[i].classList.remove("text-muted");
+      }
+    });
+  });
+
+  // Submit review
+  async function submitReview(productId) {
+    const rating = ratingInput.value;
+    const reviewText = document.getElementById("reviewText").value;
+
+    if (rating === "0") {
+      document.getElementById("ratingError").classList.remove("d-none");
+      return;
+    }
+
+    try {
+      const res = await fetch("/reviews/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          productId,
+          rating,
+          reviewText
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: data.message,
+                confirmButtonColor: '#198754'
+            })
+        location.reload();
+      } else {
+         Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: data.message,
+                confirmButtonColor: '#dc3545'
+            });
+      }
+    } catch (error) {
+      Swal.fire({
+            icon: 'error',
+            title: 'Server Error',
+            text: 'Something went wrong',
+            confirmButtonColor: '#dc3545'
+        });
+    }
+  }
+
+
   </script>
 </body>
 </html>

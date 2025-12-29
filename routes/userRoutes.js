@@ -51,6 +51,7 @@ router.post('/changePassword',forgotPasswordController.changePassword)
 router.get('/shop',shopPageController.shopPage)
 
 router.get('/product/:productId',auth.checkSession,shopPageController.productDetails)
+router.post('/reviews/add',auth.checkSession,shopPageController.addReview)
 
 
 router.post("/upload-profile",auth.checkSession,upload.single("profileImage"),uploadProfileImage.uploadProfileImage);

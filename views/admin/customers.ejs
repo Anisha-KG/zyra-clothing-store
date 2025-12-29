@@ -87,8 +87,10 @@
           <th>Email</th>
           <th>Customer ID</th>
           <th>Orders</th>
+          <!--
           <th>Balance</th>
           <th>Status</th>
+          -->
           <th>Actions</th>
         </tr>
       </thead>
@@ -115,8 +117,10 @@
 
             <td><%= user.email %></td>
             <td><%= user._id.toString().slice(-6).toUpperCase() %></td>
+            <!--
             <td><%= user.orderHistory ? user.orderHistory.length : 0 %></td>
             <td>₹<%= user.wallet ? user.wallet.toFixed(2) : '0.00' %></td>
+          -->
 
             <td>
               <% if (user.isBlocked) { %>

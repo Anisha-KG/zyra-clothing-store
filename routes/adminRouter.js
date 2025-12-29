@@ -16,11 +16,13 @@ const categoryUpload=require('../middleware/categoryMulter')
 const orderController=require('../controller/admin/ordersController')
 const couponController=require('../controller/admin/couponController')
 const salesReportController=require('../controller/admin/salesReportController')
+const offerMangementController=require('../controller/admin/offerManagement')
+const dashboardController=require('../controller/admin/dashboard')
 
 router.get('/pageerror',adminController.pageerror)
 router.get('/login',isAdminLogin,adminController.loadLogin)
 router.post('/login',adminController.login)
-router.get('/dashboard',adminAuth,adminController.loadDashboard)
+
 router.get('/adminlogout',adminController.logout)
 
 router.get('/customers',adminAuth,customersController.customerInfo)
@@ -97,5 +99,14 @@ router.delete('/coupon/deleteCoupon',adminAuth,couponController.deleteCoupon)
 router.get('/salesReport',adminAuth,salesReportController.getSalesReport)
 router.get('/sales-report/pdf',adminAuth,salesReportController.downloadSalesPdf)
 router.get('/sales-report/excel',adminAuth,salesReportController.downloadSalesExcel)
+
+
+router.get('/offerManagement',adminAuth,offerMangementController.getOfferManagementPage);
+router.post('/offerManagement',adminAuth, offerMangementController.addOffer);
+router.put('/offerManagement/:id',adminAuth, offerMangementController.editOffer);
+router.patch('/listOffer/:id',adminAuth, offerMangementController.restoreOffer);
+router.patch('/unlistOffer/:id',adminAuth, offerMangementController.deleteOffer);
+
+router.get('/dashboard',adminAuth,dashboardController.getAdminDashboard)
 
 module.exports=router
