@@ -126,7 +126,7 @@ const downloadSalesExcel = async (req, res,next) => {
         sheet.addRow({
             orderId: r.orderId,
             userName: r.user?.name || 'Unknown',
-            date: new Date(r.createdAt).toLocaleDateString('en-IN'), // only date
+            date: new Date(r.createdAt).toLocaleDateString('en-IN'),
             subTotal: r.subTotal || 0,
             discount: r.totalDiscount || 0,
             totalAmount: r.totalPayable || 0,

@@ -1,6 +1,7 @@
 const category = require('../../models/categprySchema')
 const message = require('../../Constants/messages')
 const httpStatus = require('../../Constants/httpStatuscode')
+const Offer=require('../../models/offerSchema')
 
 const categoryInfo = async (req, res) => {
   try {
@@ -16,20 +17,22 @@ const categoryInfo = async (req, res) => {
     let limit = 3
     let query = { name: { $regex: ".*" + search + ".*", $options: "i" } }
 
-    const [categoryData, totalCount] = await Promise.all([
+    const [categoryData, totalCount,offers] = await Promise.all([
       category.find(query)
         .sort({ createdAt: -1 })
         .limit(limit)
         .skip((page - 1) * limit)
       ,
-      category.countDocuments(query)
+      category.countDocuments(query),
+      Offer.find({isDeleted:false})
     ])
 
     res.render('category', {
       data: categoryData,
       currentPage: page,
       totalPages: Math.ceil(totalCount / limit),
-      search
+      search,
+      offers
     })
   } catch (error) {
     console.log('Error loading category details:', error)
@@ -71,33 +74,27 @@ const addCategory = async (req, res) => {
   }
 }
 
-const addCategoryOffer = async (req, res) => {
+const addCategoryOffer = async (req, res,next) => {
+  
   try {
-    const { categoryId, offerPercentage, startDate, endDate } = req.body
-    if (!offerPercentage || !startDate || !endDate) {
-      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: message.MESSAGE.ALL_FIELDS_REQUIRED })
-    }
+    const { categoryId, offerId } = req.body
 
-    const CategoryData = await category.findById(categoryId)
-    if (!CategoryData) {
-      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: message.CATEGORY_MESSAGE.CATEGORY_NOT_FOUND })
-    }
-    if (isNaN(offerPercentage) || offerPercentage < 0 || offerPercentage > 100) {
-      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: message.MESSAGE.INVALID_PERCENTAGE })
-    }
+  const offer = await Offer.findById(offerId)
+  if (!offer) {
+    return res.json({ success:false, message:"Offer not found" })
+  }
 
-    if (new Date(startDate) >= new Date(endDate)) {
-      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: message.MESSAGE.STARTDATE_ENDDATE_ERROR })
-    }
+  await category.findByIdAndUpdate(categoryId, {
+    categoryOffer: offer.discount,
+    startDate: offer.startDate,
+    endDate: offer.endDate,
+    offerId: offer._id
+  })
 
-    await category.updateOne(
-      { _id: categoryId },
-      { $set: { categoryOffer: offerPercentage, startDate: startDate, endDate: endDate } }
-    )
-    res.status(httpStatus.OK).json({ success: true, message: message.MESSAGE.OFFER_ADDED })
+  res.json({ success:true, message:"Offer applied successfully" })
+
   } catch (error) {
-    console.log('Error while adding category Offer', error)
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: message.MESSAGE.SERVER_ERROR })
+   next(error)
   }
 }
 

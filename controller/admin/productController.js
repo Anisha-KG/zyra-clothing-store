@@ -4,6 +4,7 @@ const Subcategory = require('../../models/subcategorySchema')
 const Category = require('../../models/categprySchema')
 const httpStatus = require('../../Constants/httpStatuscode')
 const mesages = require('../../Constants/messages')
+const Offer=require('../../models/offerSchema')
 
 const getProducts = async (req, res) => {
   try {
@@ -12,7 +13,7 @@ const getProducts = async (req, res) => {
     const limit = 8
     const query = { name: { $regex: ".*" + search + ".*", $options: 'i' } }
 
-    const [products, productCount] = await Promise.all([
+    const [products, productCount,offers] = await Promise.all([
       Products.find(query)
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
@@ -21,7 +22,8 @@ const getProducts = async (req, res) => {
         .populate('subcategory')
         .populate('brand')
         .lean(),//return plain JavaScript objects instead of full Mongoose documents.
-      Products.countDocuments(query)
+      Products.countDocuments(query),
+      Offer.find({isDeleted:false})
     ])
     const totalPages = Math.ceil(productCount / limit)
 
@@ -31,7 +33,8 @@ const getProducts = async (req, res) => {
       search,
       products,
       search,
-      limit
+      limit,
+      offers
 
     })
 
@@ -147,24 +150,28 @@ const deleteProduct = async (req, res) => {
   }
 }
 
-const addProductOffer = async (req, res) => {
-  try {
-    const { productId, offer, startDate, endDate } = req.body
-    if (isNaN(offer) || offer < 0 || offer > 100) {
-      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: 'Invalid Offer' })
-    }
-    if (new Date(startDate) > new Date(endDate)) {
-      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: 'Start date must be less than end date' })
-    }
 
-    const updated = await Products.findByIdAndUpdate(productId, { $set: { offer: offer, startDate: startDate, offerValidUntil: endDate } }, { new: true })
-    if (!updated) {
-      return res.status(httpStatus.NOT_FOUND).json({ success: false, message: 'Unable to add offer' })
-    }
-    res.status(httpStatus.OK).json({ success: true, message: 'Offer aded successfully' })
+const addProductOffer = async (req, res,next) => {
+  
+  try {
+    const { productId, offerId } = req.body
+
+  const offer = await Offer.findById(offerId)
+  if (!offer) {
+    return res.json({ success:false, message:"Offer not found" })
+  }
+
+  await Products.findByIdAndUpdate(productId, {
+    offer: offer.discount,
+    startDate: offer.startDate,
+    offerValidUntil: offer.endDate,
+    offerId: offer._id
+  })
+
+  res.json({ success:true, message:"Offer applied successfully" })
+
   } catch (error) {
-    console.log('Error whuile adding product offer:', error)
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Server Error' })
+   next(error)
   }
 }
 

@@ -323,63 +323,88 @@
                     </form>
                 </div>
             </div>
-            <!-- ADD CATEGORY OFFER MODAL -->
-            <div class="modal fade" id="addOfferModal" tabindex="-1" aria-labelledby="addOfferModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-md">
-                    <form id="addOfferForm" class="modal-content p-4 rounded-4 border-0" method="POST"
-                        action="/admin/addCategoryOffer">
+             <!-- ADD BRAND OFFER MODAL -->
+<div class="modal fade" id="addOfferModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-content p-4 rounded-4 border-0">
 
-                        <!-- Header -->
-                        <div class="modal-header p-3 mb-3" style="background-color: #912f2f; border-radius: 0.5rem;">
-                            <h5 class="modal-title text-white fw-bold" id="addOfferModalLabel">Add Category Offer</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                aria-label="Close"></button>
-                        </div>
+      <form id="addOfferForm" onsubmit="addCategoryOffer(event)">
 
-                        <!-- Body -->
-                        <div class="modal-body">
-                            <div class="row g-3">
+        <div class="modal-header p-3 mb-3"
+          style="background-color:#912f2f;border-radius:0.5rem;">
+          <h5 class="modal-title text-white fw-bold">
+            Select Offer
+          </h5>
+          <button type="button" class="btn-close btn-close-white"
+            data-bs-dismiss="modal"></button>
+        </div>
 
-                                <!-- Offer Percentage -->
-                                <div class="col-12">
-                                    <label for="offerPercentage" class="form-label fw-semibold">Offer Percentage
-                                        (%)</label>
-                                    <input type="number" name="offerPercentage" class="form-control rounded-3"
-                                        id="offerPercentage" placeholder="Enter percentage (e.g. 10)" />
-                                        <div id="offerError" class="error-msg text-danger"></div>
-                                </div>
+        <small id="offerError" class="text-danger"></small>
 
-                                <!-- Start Date & Time -->
-                                <div class="col-12">
-                                    <label for="startDate" class="form-label fw-semibold">Start Date & Time</label>
-                                    <input type="datetime-local" name="startDate" class="form-control rounded-3"
-                                        id="startDate" />
-                                        <div id="dateError" class="error-msg text-danger"></div>
-                                </div>
+        <!-- hidden brand -->
+        <input type="hidden" id="offerCategoryId" name="categoryId" >
 
-                                <!-- End Date & Time -->
-                                <div class="col-12">
-                                    <label for="endDate" class="form-label fw-semibold">End Date & Time</label>
-                                    <input type="datetime-local" name="endDate" class="form-control rounded-3"
-                                        id="endDate" />
-                                        <div id="date1Error" class="error-msg text-danger"></div>
-                                </div>
+        <div class="modal-body">
 
-                            </div>
-                        </div>
+          <% if (offers.length === 0) { %>
+            <p class="text-center text-muted">No offers available</p>
+          <% } else { %>
 
-                        <!-- Footer -->
-                        <div class="modal-footer border-0 mt-3">
-                            <div class="d-flex justify-content-end gap-2">
-                                <button type="reset" class="btn btn-outline-secondary rounded-3 px-4">Cancel</button>
-                                <button type="submit" class="btn" style="background-color: #912f2f; color: white;">Save
-                                    Offer</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+            <div class="list-group">
+
+              <% offers.forEach(offer => { %>
+                <label class="list-group-item d-flex justify-content-between align-items-center">
+  <div>
+    <input
+      class="form-check-input me-2"
+      type="radio"
+      name="offerId"
+      value="<%= offer._id %>"
+      
+    >
+    
+    <!-- OFFER NAME -->
+    <strong ><%= offer.offerName %></strong><br>
+    
+
+    <!-- DISCOUNT + DATE -->
+    <small class="text-muted">
+      <%= offer.discount %>% |
+      <%= new Date(offer.startDate).toLocaleDateString('en-GB') %> -
+      <%= new Date(offer.endDate).toLocaleDateString('en-GB') %>
+    </small>
+  </div>
+
+  <!-- BADGE -->
+  <span class="badge bg-success">
+    <%= offer.discount %>%
+  </span>
+</label>
+
+              <% }) %>
+
             </div>
+
+          <% } %>
+
+        </div>
+
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-secondary"
+            data-bs-dismiss="modal">Cancel</button>
+
+          <button type="submit"
+            class="btn"
+            style="background-color:#912f2f;color:white">
+            Apply Offer
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
             <!-- EDIT CATEGORY MODAL -->
             <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel"
                 aria-hidden="true">
@@ -554,88 +579,57 @@
         // Set category ID when opening the modal
         function openAddOfferModal(categoryId) {
             selectedCategoryId = categoryId;
+            document.getElementById('offerCategoryId').value=categoryId
             document.getElementById('offerPercentage').value = '';
             document.getElementById('startDate').value = '';
             document.getElementById('endDate').value = '';
         }
 
+ async function addCategoryOffer(e) {
+  e.preventDefault();
 
-        document.getElementById('addOfferForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
+  const categoryId= document.getElementById('offerCategoryId').value;
+  const offerId = document.querySelector('input[name="offerId"]:checked')?.value;
 
-            const offer = parseInt(document.getElementById('offerPercentage').value);
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
+  if (!offerId) {
+    document.getElementById('offerError').innerText='Select an offer'
+    return;
+  }
 
-           let hasError = false;
+  try {
+    const response = await fetch('/admin/addCategoryOffer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ categoryId, offerId })
+    });
 
+    const result = await response.json();
 
-            document.getElementById('offerError').textContent = "";
-            document.getElementById('dateError').textContent = "";
-            document.getElementById('date1Error').textContent = "";
+    if (result.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: result.message,
+        confirmButtonColor: '#198754'
+      }).then(() => {
+        window.location.reload();
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: result.message
+      });
+    }
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Server Error',
+      text: 'Something went wrong'
+    });
+  }
+}
 
-            if (!offer) {
-                document.getElementById('offerError').textContent = "Offer percentage is required";
-                hasError = true;
-            }
-            if (!startDate) {
-                document.getElementById('dateError').textContent = "Date is required";
-                hasError = true;
-            }
-            if (!endDate) {
-                document.getElementById('date1Error').textContent = "Date is required";
-                hasError = true;
-            }
-            if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
-                document.getElementById('dateError').textContent = "Start date should be less than end date";
-                hasError = true;
-            }
-            if (offer && (offer < 0 || offer > 100)) {
-                document.getElementById('offerError').textContent = "Invalid offer Percentage";
-                hasError = true;
-            }
-
-            if (hasError) return;
-
-            try {
-                const response = await fetch('/admin/addCategoryOffer', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        categoryId: selectedCategoryId,
-                        offerPercentage: offer,
-                        startDate,
-                        endDate
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Offer Added',
-                        text: result.message,
-                        confirmButtonColor: '#198754'
-                    }).then(() => window.location.reload());
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Failed',
-                        text: result.message,
-                        confirmButtonColor: '#dc3545'
-                    });
-                }
-
-            } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Something went wrong',
-                    text: 'Server error',
-                    confirmButtonColor: '#dc3545'
-                });
-            }
-        });
 
         // Deleting offer
         function removeOffer(categoryId) {

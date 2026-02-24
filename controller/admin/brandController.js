@@ -1,6 +1,7 @@
 const brands = require('../../models/brandsSchema')
 const messages=require('../../Constants/messages')
 const httpStatus=require('../../Constants/httpStatuscode')
+const Offer=require('../../models/offerSchema')
 
 const getBrands = async (req, res) => {
   try {
@@ -8,18 +9,22 @@ const getBrands = async (req, res) => {
     const page = req.query.page ? req.query.page : 1
     const limit = 4
     const query = { $or: [{ brandName: { $regex: ".*" + search + ".*", $options: "i" } }] }
-    const [brandData, totalcount] = await Promise.all([
+    const [brandData, totalcount,offers] = await Promise.all([
       brands.find(query)
         .sort({ createdAt: 1 })
         .skip(limit * (page - 1))
         .limit(limit),
-      brands.find(query).countDocuments()
+      brands.find(query).countDocuments(),
+      Offer.find({isDeleted:false})
     ])
+
+    
     res.render('brands', {
       data: brandData,
       currentPage: page,
       totalPages: Math.ceil(totalcount / limit),
-      search
+      search,
+      offers
     })
 
   } catch (error) {
@@ -62,24 +67,22 @@ const addBrand = async (req, res) => {
 const addBrandOffer = async (req, res) => {
   console.log('controller hit')
   try {
-    const { brandId, offer, startDate, endDate } = req.body
-    if (!offer || !startDate || !endDate) {
-      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.MESSAGE.ALL_FIELDS_REQUIRED})
-    }
+    const { brandId, offerId } = req.body
 
-    const brandData = await brands.findById(brandId)
-    if (!brandData) {
-      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.BRAND_MESSAGES.BRAND_NOT_FOUND})
-    }
-    if (isNaN(offer) || offer < 0 || offer > 100) {
-      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: messages.MESSAGE.INVALID_PERCENTAGE})
-    }
+  const offer = await Offer.findById(offerId)
+  if (!offer) {
+    return res.json({ success:false, message:"Offer not found" })
+  }
 
-    if (new Date(startDate) >= new Date(endDate)) {
-      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.MESSAGE.STARTDATE_ENDDATE_ERROR})
-    }
-    await brands.findByIdAndUpdate({ _id: brandId }, { $set: { brandOffer: offer, startDate: startDate, endDate: endDate } })
-    res.status(httpStatus.OK).json({ success: true, message: messages.MESSAGE.OFFER_ADDED})
+  await brands.findByIdAndUpdate(brandId, {
+    brandOffer: offer.discount,
+    startDate: offer.startDate,
+    endDate: offer.endDate,
+    offerId: offer._id
+  })
+
+  res.json({ success:true, message:"Offer applied successfully" })
+
   } catch (error) {
     console.log(error)
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message:messages.MESSAGE.SERVER_ERROR})

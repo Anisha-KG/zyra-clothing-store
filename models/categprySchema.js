@@ -42,6 +42,10 @@ const categorySchema = new Schema({
   endDate: {
     type: Date
   },
+  offerId:{
+    type: Schema.Types.ObjectId,
+      ref: 'Offer'
+  },
   isDeleted: {
     type: Boolean,
     default: false

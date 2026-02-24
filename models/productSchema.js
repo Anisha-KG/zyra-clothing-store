@@ -84,6 +84,10 @@ const productSchema = new Schema({
     type: Date,
     default:null
   },
+  offerId:{
+    type: Schema.Types.ObjectId,
+      ref: 'Offer'
+  },
   status: {
     type: String,
     enum: ['available', 'out_of_stock', 'discontinued'],

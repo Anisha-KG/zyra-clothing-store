@@ -36,6 +36,10 @@ const brandSchema = new Schema({
   isDeleted: {
     type: Boolean,
     default: false
+  },
+  offerId:{
+    type: Schema.Types.ObjectId,
+      ref: 'Offer'
   }
 
 });

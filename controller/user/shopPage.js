@@ -8,6 +8,7 @@ const mongoose=require('mongoose')
 const User=require('../../models/userScema')
 const Wishlist=require('../../models/wishlistSchema')
 const {calculateBestOffer}=require('../../helpers/calculatingBestOffer')
+const Review=require('../../models/review')
 
 const shopPage = async (req, res) => {
   try {
@@ -197,6 +198,14 @@ product.finalPriceDynamic = Math.round(product.price - discountAmount);
     const availableColors = [...new Set(variants.map(v => v.color))];
     const defaultVariant = variants[0] || null;
 
+
+    const reviews = await Review.find({
+  product: productId,
+  isActive: true
+})
+  .populate("user", "name")
+  .sort({ createdAt: -1 })
+  .lean();
     // Fetch similar products
     const likeProducts = await Product.find({
       category: product.category,
@@ -223,6 +232,7 @@ product.finalPriceDynamic = Math.round(product.price - discountAmount);
 
     res.render('productDetails', {
       product,
+       reviews,
       variants,
       defaultVariant,
       user,
@@ -237,8 +247,53 @@ product.finalPriceDynamic = Math.round(product.price - discountAmount);
 };
 
 
+const addReview=async(req,res,next)=>{
+   try {
+    const { productId, rating, reviewText } = req.body;
+    const userId = req.session.user;
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res.json({
+        success: false,
+        message: "Invalid rating"
+      });
+    }
+
+    const existingReview = await Review.findOne({
+      product: productId,
+      user: userId
+    });
+
+    if (existingReview) {
+      return res.json({
+        success: false,
+        message: "You have already reviewed this product"
+      });
+    }
+
+    const review = new Review({
+      product: productId,
+      user: userId,
+      rating,
+      reviewText
+    });
+
+    await review.save();
+
+    res.json({
+      success: true,
+      message: "Review added"
+    });
+
+  } catch (error) {
+   next(error)
+  }
+}
+
+
 module.exports = { shopPage,
-  productDetails
+  productDetails,
+  addReview
 
  };
 
