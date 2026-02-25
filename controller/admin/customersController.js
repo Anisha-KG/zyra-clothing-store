@@ -15,6 +15,7 @@ const customerInfo = async (req, res) => {
     let limit = 9
     const userData = await User.find({
       isAdmin: false,
+      
       $or: [
         { name: { $regex: ".*" + search + ".*" } },
         { email: { $regex: ".*" + search + ".*" } }
@@ -24,6 +25,8 @@ const customerInfo = async (req, res) => {
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .exec()
+
+      
 
     const count = await User.find({
       isAdmin: false,

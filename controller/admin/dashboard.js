@@ -91,48 +91,87 @@ const getAdminDashboard = async (req, res, next) => {
     ]);
 
    
-    const topCategories = await Order.aggregate([
-      { $unwind: "$orderedItems" },
-      {
-        $lookup: {
-          from: "products",
-          localField: "orderedItems.product",
-          foreignField: "_id",
-          as: "product"
-        }
-      },
-      { $unwind: "$product" },
-      {
-        $group: {
-          _id: "$product.category",
-          sold: { $sum: "$orderedItems.quantity" }
-        }
-      },
-      { $sort: { sold: -1 } },
-      { $limit: 3 }
-    ]);
+   const topCategories = await Order.aggregate([
+  { $unwind: "$orderedItems" },
+  {
+    $lookup: {
+      from: "products",
+      localField: "orderedItems.product",
+      foreignField: "_id",
+      as: "product"
+    }
+  },
+  { $unwind: "$product" },
+  {
+    $group: {
+      _id: "$product.category",
+      sold: { $sum: "$orderedItems.quantity" }
+    }
+  },
+  { $sort: { sold: -1 } },
+  { $limit: 3 },
 
-  
-    const topBrands = await Order.aggregate([
-      { $unwind: "$orderedItems" },
-      {
-        $lookup: {
-          from: "products",
-          localField: "orderedItems.product",
-          foreignField: "_id",
-          as: "product"
-        }
-      },
-      { $unwind: "$product" },
-      {
-        $group: {
-          _id: "$product.brand",
-          sold: { $sum: "$orderedItems.quantity" }
-        }
-      },
-      { $sort: { sold: -1 } },
-      { $limit: 3 }
-    ]);
+  {
+    $lookup: {
+      from: "categories",
+      localField: "_id",
+      foreignField: "_id",
+      as: "category"
+    }
+  },
+  { $unwind: "$category" },
+  {
+    $project: {
+      _id: 0,
+      categoryName: "$category.name",
+      sold: 1
+    }
+  }
+]);
+
+  const topBrands = await Order.aggregate([
+  { $unwind: "$orderedItems" },
+
+  {
+    $lookup: {
+      from: "products",
+      localField: "orderedItems.product",
+      foreignField: "_id",
+      as: "product"
+    }
+  },
+  { $unwind: "$product" },
+
+  {
+    $group: {
+      _id: "$product.brand",
+      sold: { $sum: "$orderedItems.quantity" }
+    }
+  },
+
+  { $sort: { sold: -1 } },
+  { $limit: 3 },
+
+ 
+  {
+    $lookup: {
+      from: "brands",
+      localField: "_id",
+      foreignField: "_id",
+      as: "brand"
+    }
+  },
+  { $unwind: "$brand" },
+
+  {
+    $project: {
+      _id: 0,
+      brandId: "$brand._id",
+      brandName: "$brand.brandName",
+      sold: 1
+    }
+  }
+]);
 
     res.render("adminDashboard", {
       totalCustomers,

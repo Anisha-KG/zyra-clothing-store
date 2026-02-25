@@ -2,6 +2,8 @@ const category = require('../../models/categprySchema')
 const message = require('../../Constants/messages')
 const httpStatus = require('../../Constants/httpStatuscode')
 const Offer=require('../../models/offerSchema')
+const Product=require('../../models/productSchema')
+const calculateBestOffer=require('../../helpers/calculatingBestOffer')
 
 const categoryInfo = async (req, res) => {
   try {
@@ -90,6 +92,18 @@ const addCategoryOffer = async (req, res,next) => {
     endDate: offer.endDate,
     offerId: offer._id
   })
+
+  const product=await Product.find({category:categoryId})
+
+  for(let p of product){
+    const bestOffer = await calculateBestOffer(product);
+   const discountAmount = (product.price * bestOffer) / 100;
+   product.finalPriceDynamic = Math.round(product.price - discountAmount);
+   
+
+   await product.save()
+  }
+    
 
   res.json({ success:true, message:"Offer applied successfully" })
 

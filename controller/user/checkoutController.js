@@ -39,9 +39,10 @@ const viewCheckoutPage = async (req, res, next) => {
       const variant=item.variantId
 
       const bestOffer = await calculateBestOffer(product);
-                  
+                  console.log(bestOffer)
       const discountAmount = (product.price * bestOffer) / 100;
       const finalPriceDynamic = Math.round(product.price - discountAmount);
+      console.log(finalPriceDynamic)
       let quantity = item.quantity;
       let price = finalPriceDynamic
       subtotal += quantity * price;

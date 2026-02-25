@@ -1,32 +1,19 @@
-const fs = require('fs');
+const winston = require('winston');
 const path = require('path');
-const { createLogger, transports, format } = require('winston');
 
-
-const logDir = path.join(__dirname, 'logs');
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir, { recursive: true });
-}
-
-
-const logger = createLogger({
-  level: 'info',
-  format: format.combine(
-    format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    format.errors({ stack: true }),
-    format.splat(),
-    format.json()
+const logger = winston.createLogger({
+  level: 'error', // only log errors
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
   ),
   transports: [
-
-    new transports.File({ filename: path.join(logDir, 'apiLogger.log') }),
-
-
-    new transports.File({ filename: path.join(logDir, 'errorLogger.log'), level: 'error' })
+    // Error logs will go into this file
+    new winston.transports.File({
+      filename: path.join(__dirname, '../logs/error.log'),
+      level: 'error'
+    })
   ]
 });
-
-
-
 
 module.exports = logger;

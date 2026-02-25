@@ -72,7 +72,7 @@ const addAmount=async(req,res,next)=>{
 
         const{amount}=req.body 
         if(!amount||amount<=0){
-            res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Invalid amount'})
+           return res.status(httpStatus.BAD_REQUEST).json({success:false,message:'Invalid amount'})
         }
 
         const options = {

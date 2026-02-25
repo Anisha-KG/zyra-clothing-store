@@ -353,8 +353,17 @@
               Subcategory
             </button>
             <ul class="dropdown-menu zyra-dropdown-menu" id="subcategoryMenu">
-              <!-- Subcategories will be dynamically added here -->
-            </ul>
+  <% subcategory.forEach(sub=> { %>
+    <li>
+      <a class="dropdown-item subcategory-item"
+         href="#"
+         data-id="<%= sub._id %>"
+         data-category="<%= sub.category %>">
+        <%= sub.name %>
+      </a>
+    </li>
+  <% }) %>
+</ul>
           </div>
 
           <!-- Brand Dropdown -->
@@ -372,21 +381,21 @@
           </div>
         </div>
 
-         <% let shownProducts = new Set(); %>
+        
         <div class="row g-4 mt-2">
-          <% variants.forEach(variant => {
-            const product = products.find(p => p._id.toString() === variant.product.toString());
-            if (!product) return;
+          <% products.forEach(product => {
 
-            if (shownProducts.has(product._id.toString())) return;
-            shownProducts.add(product._id.toString());
+    const variant = variants.find(
+      v => v.product.toString() === product._id.toString()
+    );
 
-            const isInWishlist = wishlistProducts.some(
-              wp => wp.productId.toString() === product._id.toString() &&
-                    wp.color === variant.color
-            );
-          %>
+    if (!variant) return;
 
+    const isInWishlist = wishlistProducts.some(
+      wp => wp.productId.toString() === product._id.toString() &&
+            wp.color === variant.color
+    );
+  %>
           <div class="col-6 col-md-4 col-lg-3">
               <div class="product-card position-relative p-2 border rounded">
 
@@ -457,6 +466,14 @@
 
   const productData = <%- JSON.stringify(products) %>;
     console.log(productData);
+
+    const allSubcategories = Array.from(
+  document.querySelectorAll('.subcategory-item')
+).map(item => ({
+  id: item.dataset.id,
+  name: item.textContent.trim(),
+  category: item.dataset.category
+}));
 
 
  // ---------------- GET SIDEBAR FILTERS ----------------
@@ -633,6 +650,90 @@ async function wishlistToggle(element, productId, color) {
         });
     }
 }
+
+// ---------------- CATEGORY SELECT ----------------
+document.querySelectorAll('.category-item').forEach(item => {
+  item.addEventListener('click', function (e) {
+    e.preventDefault();
+
+    const id = this.dataset.id;
+    const name = this.textContent.trim();
+
+    const categoryDropdown = document.getElementById('categoryDropdown');
+    const subcategoryDropdown = document.getElementById('subcategoryDropdown');
+    const subcategoryMenu = document.getElementById('subcategoryMenu');
+
+    // Set category
+    categoryDropdown.dataset.id = id;
+    categoryDropdown.textContent = name;
+
+    // Reset subcategory selection
+    subcategoryDropdown.dataset.id = '';
+    subcategoryDropdown.textContent = 'Subcategory';
+
+    // Clear subcategory menu
+    subcategoryMenu.innerHTML = '';
+
+    // Filter matching subcategories
+    const filtered = allSubcategories.filter(sub => {
+  return String(sub.category).trim() === String(id).trim();
+});
+
+    if (filtered.length === 0) {
+      subcategoryMenu.innerHTML =
+        `<li><span class="dropdown-item text-muted">No subcategories</span></li>`;
+      return;
+    }
+
+    // Rebuild dropdown
+    filtered.forEach(sub => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <a class="dropdown-item subcategory-item"
+           href="#"
+           data-id="${sub.id}">
+           ${sub.name}
+        </a>
+      `;
+      subcategoryMenu.appendChild(li);
+    });
+
+    // Reattach click listeners
+    attachSubcategoryListeners();
+  });
+});
+// ---------------- BRAND SELECT ----------------
+document.querySelectorAll('.brand-item').forEach(item => {
+  item.addEventListener('click', function (e) {
+    e.preventDefault();
+
+    const id = this.dataset.id;
+    const name = this.textContent.trim();
+
+    const dropdown = document.getElementById('brandDropdown');
+    dropdown.dataset.id = id;
+    dropdown.textContent = name;
+  });
+});
+
+
+function attachSubcategoryListeners() {
+  document.querySelectorAll('.subcategory-item').forEach(item => {
+    item.addEventListener('click', function (e) {
+      e.preventDefault();
+
+      const id = this.dataset.id;
+      const name = this.textContent.trim();
+
+      const dropdown = document.getElementById('subcategoryDropdown');
+      dropdown.dataset.id = id;
+      dropdown.textContent = name;
+    });
+  });
+}
+
+attachSubcategoryListeners();
+
 
 </script>
 

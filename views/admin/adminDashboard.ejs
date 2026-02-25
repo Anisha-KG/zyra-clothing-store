@@ -126,9 +126,9 @@
             <label class="form-label fw-semibold">Filter</label>
             <select name="filter" id="filter" class="form-select" onchange="toggleDateInputs()">
               <option value="daily" <%= filter === 'daily' ? 'selected' : '' %>>Day</option>
-              <option value="weekly" <%= filter === 'weekly' ? 'selected' : '' %>>Week</option>
-              <option value="monthly" <%= filter === 'monthly' ? 'selected' : '' %>>Month</option>
-              <option value="yearly" <%= filter === 'yearly' ? 'selected' : '' %>>Year</option>
+              <option value="weekly" <%= filter === 'weekly' ? 'selected' : '' %>>Weekly</option>
+              <option value="monthly" <%= filter === 'monthly' ? 'selected' : '' %>>Monthly</option>
+              <option value="yearly" <%= filter === 'yearly' ? 'selected' : '' %>>Yearly</option>
               <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom</option>
             </select>
           </div>
@@ -174,18 +174,21 @@
       <div class="row g-3">
 
         <div class="col-md-4">
-          <div class="card p-3 shadow-sm">
-            <h6 class="fw-bold mb-3">Top 3 Products</h6>
-            <div class="top-list">
-              <% topProducts.forEach(p => { %>
-                <div class="d-flex justify-content-between">
-                  <span><%= p.name %></span>
-                  <strong><%= p.sold %></strong>
-                </div>
-              <% }) %>
-            </div>
-          </div>
+  <div class="card p-3 shadow-sm">
+    <h6 class="fw-bold mb-3">Top 3 Products</h6>
+    <div class="top-list">
+      <% topProducts.forEach(p => { %>
+        <div class="d-flex justify-content-between">
+          <a href="/admin/product/<%= p._id %>/variants" 
+             class="text-decoration-none text-dark">
+             <%= p.name %>
+          </a>
+          <strong><%= p.sold %></strong>
         </div>
+      <% }) %>
+    </div>
+  </div>
+</div>
 
         <div class="col-md-4">
           <div class="card p-3 shadow-sm">
@@ -193,7 +196,7 @@
             <div class="top-list">
               <% topCategories.forEach(c => { %>
                 <div class="d-flex justify-content-between">
-                  <span><%= c._id %></span>
+                  <span><%= c.categoryName %></span>
                   <strong><%= c.sold %></strong>
                 </div>
               <% }) %>
@@ -207,7 +210,7 @@
             <div class="top-list">
               <% topBrands.forEach(b => { %>
                 <div class="d-flex justify-content-between">
-                  <span><%= b._id %></span>
+                  <span><%= b.brandName %></span>
                   <strong><%= b.sold %></strong>
                 </div>
               <% }) %>

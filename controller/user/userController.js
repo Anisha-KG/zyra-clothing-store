@@ -276,13 +276,7 @@ const logout = async (req, res) => {
 
 
 
-const loadHome = async (req, res) => {
-  try {
-    res.render('dummyhome');
-  } catch (error) {
-    res.redirect('/pageNotFound');
-  }
-};
+
 
 module.exports = {
   loadHomepage,
@@ -293,6 +287,5 @@ module.exports = {
   resend_otp,
   loadLogin,
   loginUser,
-  logout,
-  loadHome
+  logout
 };

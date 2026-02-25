@@ -3,7 +3,7 @@ const app=new express()
 const path=require('path')
 const multer=require('multer')
 const morgan=require('morgan')
-const logger=require('../Zyra/logger')
+const logger = require('./helpers/logger');
 const userRouter=require('./routes/userRoutes')
 const adminRouter=require('./routes/adminRouter')
 const passport = require('./config/passport');
@@ -40,6 +40,7 @@ app.use(morgan('combined', {
 app.use(countCartMiddleware)
 app.use('/',userRouter)
 app.use('/admin',adminRouter)
+
 
 
 app.use((err, req, res, next) => {
