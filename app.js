@@ -13,6 +13,7 @@ require('dotenv').config()
 const db=require('./config/db')
 const { json } = require('stream/consumers')
 db()
+require('./helpers/offerExpiryCron')
 
 app.set('views',[path.join(__dirname,'views/user'),path.join(__dirname,'views/admin')])
 app.set('view engine','ejs')
