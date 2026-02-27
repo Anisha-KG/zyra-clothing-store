@@ -8,8 +8,14 @@ const brandSchema = new Schema({
     trim: true,
   },
   brandLogo: {
+    url:{
     type: String, // Use String if you want only one image
     required: true,
+    },
+    public_id:{
+      type: String, // Use String if you want only one image
+    required: true,
+    }
   },
   isListed: {
     type: Boolean,

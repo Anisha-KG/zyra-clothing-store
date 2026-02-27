@@ -1,6 +1,9 @@
 const Subcategories = require('../../models/subcategorySchema')
 const Category = require('../../models/categprySchema')
 const Offer=require('../../models/offerSchema')
+const updateBestPrice=require('../../helpers/updateBestPrice')
+const Product=require('../../models/productSchema')
+const {cloudinary}=require('../../config/cloudinary')
 
 const loadSubcategories = async (req, res) => {
   try {
@@ -51,13 +54,17 @@ const addSubcategory = async (req, res) => {
 
   try {
     const { subcategoryName, description, categoryId } = req.body
-    const subcategoryImage = req.file ? req.file.filename : null
+    
     if (!subcategoryName || !description) {
       return res.json({ success: false, message: "Please fill all fields" })
     }
-    if (!subcategoryImage) {
-      return res.json({ success: false, message: "Upload Image" })
-    }
+    if (!req.file) {
+          return res.status(400).json({
+            success: false,
+            message: "Image is required"
+          });
+        }
+    
     const normalizedName = subcategoryName.trim().replace(/\s+/g, " ")
     const existing = await Subcategories.findOne({
       name: new RegExp(`^${normalizedName}$`, "i")
@@ -68,7 +75,10 @@ const addSubcategory = async (req, res) => {
 
     const subcatData = new Subcategories({
       name: subcategoryName,
-      image: subcategoryImage,
+      image: {
+        url:req.file.path,
+        public_id:req.file.filename
+      },
       description: description,
       categoryId: categoryId
     })
@@ -98,6 +108,10 @@ const addSubcategoryOffer = async (req, res,next) => {
     offerId: offer._id
   })
 
+  const product=await Product.find({subcategory:subcategoryId})
+    
+      await updateBestPrice(product)
+
   res.json({ success:true, message:"Offer applied successfully" })
 
   } catch (error) {
@@ -117,6 +131,10 @@ const removeOffer = async (req, res) => {
     if (!updated) {
       return res.json({ success: false, message: "Cannot remove offer" })
     }
+     const product=await Product.find({subcategory:id})
+    
+      await updateBestPrice(product)
+
     res.json({ success: true, message: 'Offer removed successfully' })
 
   } catch (error) {
@@ -136,6 +154,11 @@ const unlistSubcategory = async (req, res) => {
     if (!updated) {
       return res.json({ sucess: false, message: 'Cannot unlist subcategory' })
     }
+
+    const product=await Product.find({subcategory:subcategoryId})
+    
+      await updateBestPrice(product)
+    
     res.json({ success: true, message: 'Suvcategory unlisted successfully' })
   } catch (error) {
     console.log(error)
@@ -154,6 +177,10 @@ const listSubcategory = async (req, res) => {
     if (!updated) {
       return res.json({ sucess: false, message: 'Cannot list subcategory' })
     }
+
+    const product=await Product.find({subcategory:subcategoryId})
+    
+      await updateBestPrice(product)
     res.json({ success: true, message: 'Suvcategory listed successfully' })
   } catch (error) {
     console.log(error)
@@ -163,42 +190,116 @@ const listSubcategory = async (req, res) => {
 
 const deteleSubcategory = async (req, res) => {
   try {
-    const { subcategoryId } = req.body
+    const { subcategoryId } = req.body;
 
-    const result = await Subcategories.deleteOne({ _id: subcategoryId })// deleteOne returns { acknowledged: true, deletedCount: 1 }
-    if (result.deleteCount = 0) {
-      return res.json({ succes: false, message: 'Unable to delete subcategory' })
+    
+    const existing = await Subcategories.findById(subcategoryId);
+    if (!existing) {
+      return res.json({
+        success: false,
+        message: "Unable to delete subcategory"
+      });
     }
-    res.json({ success: true, message: 'subcategory deleted successfully' })
+
+   
+    const products = await Product.find({ subcategory: subcategoryId });
+
+  
+    await Product.updateMany(
+      { subcategory: subcategoryId },
+      { $unset: { subcategory: "" } }
+    );
+
+
+    await Subcategories.findByIdAndDelete(subcategoryId);
+
+   
+    await updateBestPrice(products);
+
+    res.json({
+      success: true,
+      message: "Subcategory deleted successfully"
+    });
 
   } catch (error) {
-    console.log(error)
-    res.json({ success: false, message: 'Server error' })
+    console.log(error);
+    res.json({
+      success: false,
+      message: "Server error"
+    });
   }
-}
+};
+const editSubcategory = async (req, res) => {
+  try {
+    const { subcategoryId, subcategoryName, description } = req.body;
 
-const editSubcategory=async(req,res)=>{
-  try{
-    const{subcategoryId,subcategoryName,description}=req.body
-    const update={
-      subcategoryName,
+    const existingSubcategory = await Subcategories.findById(subcategoryId);
+
+    if (!existingSubcategory) {
+      return res.status(404).json({
+        success: false,
+        message: "Subcategory not found"
+      });
+    }
+
+ 
+    const duplicate = await Subcategories.findOne({
+      name: new RegExp(`^${subcategoryName.trim()}$`, "i"),
+      _id: { $ne: subcategoryId }
+    });
+
+    if (duplicate) {
+      return res.status(400).json({
+        success: false,
+        message: "Subcategory already exists"
+      });
+    }
+
+    const update = {
+      name: subcategoryName,
       description
-    }
-    if(req.file){
-      update.image=req.file.filename
+    };
+
+
+    if (req.file) {
+
+
+      if (existingSubcategory.image?.public_id) {
+        await cloudinary.uploader.destroy(
+          existingSubcategory.image.public_id
+        );
+      }
+
+      update.image = {
+        url: req.file.path,
+        public_id: req.file.filename
+      };
     }
 
-    const updateData=await Subcategories.findByIdAndUpdate(subcategoryId,update,{new:true})
-    if(!updateData){
-      return res.json({success:false,message:'Cannnot edit subcategory'})
-    }
+    const updatedData = await Subcategories.findByIdAndUpdate(
+      subcategoryId,
+      { $set: update },
+      { new: true, runValidators: true }
+    );
 
-    res.json({success:true,mesage:'subcategory edited successfully'})
-  }catch(error){
-    console.log(error)
-    res.json({success:false,message:'server error'})
+ 
+    const products = await Product.find({ subcategory: subcategoryId });
+    await updateBestPrice(products);
+
+    res.status(200).json({
+      success: true,
+      message: "Subcategory edited successfully",
+      data: updatedData
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
   }
-}
+};
 
 module.exports={
   loadSubcategories,

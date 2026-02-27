@@ -3,7 +3,8 @@ const message = require('../../Constants/messages')
 const httpStatus = require('../../Constants/httpStatuscode')
 const Offer=require('../../models/offerSchema')
 const Product=require('../../models/productSchema')
-const calculateBestOffer=require('../../helpers/calculatingBestOffer')
+const updateBestPrice=require('../../helpers/updateBestPrice')
+const {cloudinary}=require('../../config/cloudinary')
 
 const categoryInfo = async (req, res) => {
   try {
@@ -46,12 +47,16 @@ const addCategory = async (req, res) => {
 
   try {
     const { categoryName, description } = req.body
-    const categoryImage = req.file ? req.file.filename : null
-    if (!categoryImage) {
-      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: message.CATEGORY_MESSAGE.UPLOAD_IMAGE_REQUIRED })
-    }
+    
     if (!categoryName || !description) {
-      return res.status(httpStatus.BAD_REQUEST).json({ sucess: false, message: message.MESSAGE.ALL_FIELDS_REQUIRED })
+      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: message.MESSAGE.ALL_FIELDS_REQUIRED })
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Image is required"
+      });
     }
 
     const normalizedName = categoryName.trim().replace(/\s+/g, " ")
@@ -65,7 +70,10 @@ const addCategory = async (req, res) => {
     const catData = new category({
       name: categoryName,
       description: description,
-      categoryImage: categoryImage
+      categoryImage: {
+        url:req.file.path,
+        public_id:req.file.filename
+      }
     })
 
     await catData.save()
@@ -95,14 +103,7 @@ const addCategoryOffer = async (req, res,next) => {
 
   const product=await Product.find({category:categoryId})
 
-  for(let p of product){
-    const bestOffer = await calculateBestOffer(product);
-   const discountAmount = (product.price * bestOffer) / 100;
-   product.finalPriceDynamic = Math.round(product.price - discountAmount);
-   
-
-   await product.save()
-  }
+  await updateBestPrice(product)
     
 
   res.json({ success:true, message:"Offer applied successfully" })
@@ -124,6 +125,10 @@ const removeCategoryOffer = async (req, res) => {
       { $set: { categoryOffer: 0, startDate: null, endDate: null } }
     )
 
+    const product=await Product.find({category:categoryId})
+
+  await updateBestPrice(product)
+
     res.status(httpStatus.OK).json({ success: true, message: message.MESSAGE.OFFER_REMOVED })
   } catch (error) {
     console.log("Error while deleting offer", error)
@@ -135,6 +140,9 @@ const unlistCategory = async (req, res) => {
   try {
     const { categoryId } = req.body
     await category.findByIdAndUpdate(categoryId, { isListed: false })
+    const product=await Product.find({category:categoryId})
+
+  await updateBestPrice(product)
     res.status(httpStatus.OK).json({ success: true, message: message.CATEGORY_MESSAGE.CATEGORY_UNLISTED })
   } catch (error) {
     console.log('Error while unlisting the category:', error)
@@ -146,37 +154,85 @@ const listCategory = async (req, res) => {
   try {
     const { categoryId } = req.body
     await category.findByIdAndUpdate(categoryId, { isListed: true })
+    const product=await Product.find({category:categoryId})
+
+  await updateBestPrice(product)
     res.status(httpStatus.OK).json({ success: true, message: message.CATEGORY_MESSAGE.CATEGORY_LISTED })
   } catch (error) {
     console.log('Error while listing the category:', error)
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: message.MESSAGE.SERVER_ERROR })
   }
 }
-
 const editCategory = async (req, res) => {
   try {
+    const categoryId = req.params.id;
+    const { categoryName, description } = req.body;
 
-    const { categoryName, description } = req.body
-    const categoryId = req.params.id
-    const updated = {
+    const existingCategory = await category.findById(categoryId);
+
+    if (!existingCategory) {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found"
+      });
+    }
+
+    
+    const duplicate = await category.findOne({
       name: categoryName,
-      description: description
+      _id: { $ne: categoryId }
+    });
+
+    if (duplicate) {
+      return res.status(400).json({
+        success: false,
+        message: "Category name already exists"
+      });
     }
+
+    const updatedData = {
+      name: categoryName,
+      description
+    };
+
+   
     if (req.file) {
-      updated.categoryImage = req.file.filename
+
+      
+      if (existingCategory.categoryImage?.public_id) {
+        await cloudinary.uploader.destroy(
+          existingCategory.categoryImage.public_id
+        );
+      }
+
+    
+      updatedData.categoryImage = {
+        url: req.file.path,
+        public_id: req.file.filename
+      };
     }
 
-    const update = await category.findByIdAndUpdate(categoryId, updated, { new: true })
-    if (!update) {
-      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: message.CATEGORY_MESSAGE.CATEGORY_EDIT_FAILED })
-    }
+    const updated = await category.findByIdAndUpdate(
+      categoryId,
+      { $set: updatedData },
+      { new: true, runValidators: true }
+    );
 
-    res.status(httpStatus.OK).json({ success: true, message: message.CATEGORY_MESSAGE.CATEGORY_EDITED })
+    res.status(200).json({
+      success: true,
+      message: "Category updated successfully",
+      data: updated
+    });
+
   } catch (error) {
-    console.log("Error while editing the category:", error)
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: message.MESSAGE.SERVER_ERROR })
+    console.log("Edit Category Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server Error"
+    });
   }
-}
+};
+
 
 const deleteCategory = async (req, res) => {
   try {
@@ -185,6 +241,9 @@ const deleteCategory = async (req, res) => {
     if (!deleted) {
       return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: message.CATEGORY_MESSAGE.CATEGORY_DELETE_FAILED })
     }
+    const product=await Product.find({category:categoryId})
+
+  await updateBestPrice(product)
     res.status(httpStatus.OK).json({ success: true, message: message.CATEGORY_MESSAGE.CATEGORY_DELETED })
   } catch (error) {
     console.log('Error while deleting the category')

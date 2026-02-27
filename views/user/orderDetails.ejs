@@ -192,7 +192,8 @@
             </div>
 
             <% order.orderedItems.forEach(item => { %>
-            <div class="order-item" onclick="window.location.href='/product/<%= item.product._id%>'">
+            <div class="order-item"
+  onclick="<%= item.product?._id ? `window.location.href='/product/${item.product._id}'` : '' %>">
               <img src="/uploads/variants/<%= item.variant?.images?.[0] || 'default.jpg' %>" class="product-img">
 
               <div class="flex-grow-1">

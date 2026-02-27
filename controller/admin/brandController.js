@@ -2,6 +2,9 @@ const brands = require('../../models/brandsSchema')
 const messages=require('../../Constants/messages')
 const httpStatus=require('../../Constants/httpStatuscode')
 const Offer=require('../../models/offerSchema')
+const Product=require('../../models/productSchema')
+const updateBestPrice=require('../../helpers/updateBestPrice')
+const {cloudinary}=require('../../config/cloudinary')
 
 const getBrands = async (req, res) => {
   try {
@@ -36,12 +39,12 @@ const getBrands = async (req, res) => {
 const addBrand = async (req, res) => {
   try {
     const { brandName } = req.body
-    const brandLogo = req.file ? req.file.filename : null
+    
 
     if (!brandName) {
       return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.BRAND_MESSAGES.ENTER_BRAND_NAME })
     }
-    if (!brandLogo) {
+    if (!req.file) {
       return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.BRAND_MESSAGES.UPLOAD_BRAND_LOGO})
     }
     const normalizedName = brandName.trim().replace(/\s+/g, " ")
@@ -53,7 +56,10 @@ const addBrand = async (req, res) => {
     }
     const newbrand = new brands({
       brandName: brandName,
-      brandLogo: brandLogo,
+      brandLogo: {
+        url:req.file.path,
+        public_id:req.file.filename
+      },
 
     })
     await newbrand.save()
@@ -81,6 +87,10 @@ const addBrandOffer = async (req, res) => {
     offerId: offer._id
   })
 
+  const product=await Product.find({brand:brandId})
+  
+    await updateBestPrice(product)
+
   res.json({ success:true, message:"Offer applied successfully" })
 
   } catch (error) {
@@ -94,8 +104,20 @@ const editBrand = async (req, res) => {
     const { brandName, brandId } = req.body
     const updateData = { brandName };
 
+    const existingBrand=await brands.findById(brandId)
+
     if (req.file) {
-      updateData.brandLogo = req.file.filename;
+      if (existingBrand.brandLogo?.public_id) {
+              await cloudinary.uploader.destroy(
+                existingBrand.brandLogo.public_id
+              );
+            }
+      
+          
+            updateData.brandLogo = {
+              url: req.file.path,
+              public_id: req.file.filename
+            };
     }
 
     const update = await brands.findByIdAndUpdate(brandId, { $set: updateData }, { new: true })
@@ -118,6 +140,10 @@ const unlistBrand = async (req, res) => {
     if (!updated) {
       return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.BRAND_MESSAGES.UNABLE_TO_UNLIST_BRAND})
     }
+    const product=await Product.find({brand:brandId})
+  
+    await updateBestPrice(product)
+
     res.status(httpStatus.OK).json({ success: true, message:messages.BRAND_MESSAGES.BRAND_UNLISTED})
   } catch (error) {
     console.log(error)
@@ -133,6 +159,10 @@ const listBrand = async (req, res) => {
     if (!updated) {
       return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.BRAND_MESSAGES.UNABLE_TO_LIST_BRAND})
     }
+    const product=await Product.find({brand:brandId})
+  
+    await updateBestPrice(product)
+
     res.status(httpStatus.OK).json({ success: true, message:messages.BRAND_MESSAGES.BRAND_LISTED})
   } catch (error) {
     console.log(error)
@@ -150,29 +180,57 @@ const removeOffer = async (req, res) => {
     if (!updated) {
       return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.MESSAGE.OFFER_NOTREMOVED})
     }
+    const product=await Product.find({brand:brandId})
+  
+    await updateBestPrice(product)
+
     res.status(httpStatus.OK).json({ success: true, message: messages.MESSAGE.OFFER_REMOVED})
   } catch (error) {
     console.log(error)
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message:messages.MESSAGE.SERVER_ERROR})
   }
 }
-
 const deleteBrand = async (req, res) => {
-
   try {
-    const { brandId } = req.body
+    const { brandId } = req.body;
 
-    const updated = await brands.deleteOne({ _id: brandId })
-    if (!updated) {
-      return res.status(httpStatus.BAD_REQUEST).json({ succes: false, message:messages.BRAND_MESSAGES.UNABLE_TO_DELETE_BRAND})
+    
+    const existingBrand = await brands.findById(brandId);
+    if (!existingBrand) {
+      return res.status(httpStatus.BAD_REQUEST).json({
+        success: false,
+        message: messages.BRAND_MESSAGES.UNABLE_TO_DELETE_BRAND
+      });
     }
-    res.status(httpStatus.OK).json({ success: true, message:messages.BRAND_MESSAGES.BRAND_DELETED})
+
+  
+    const products = await Product.find({ brand: brandId });
+
+    
+    await Product.updateMany(
+      { brand: brandId },
+      { $unset: { brand: "" } }
+    );
+
+    
+    await brands.findByIdAndDelete(brandId);
+
+   
+    await updateBestPrice(products);
+
+    res.status(httpStatus.OK).json({
+      success: true,
+      message: messages.BRAND_MESSAGES.BRAND_DELETED
+    });
 
   } catch (error) {
-    console.log(error)
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message:messages.MESSAGE.SERVER_ERROR})
+    console.log(error);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: messages.MESSAGE.SERVER_ERROR
+    });
   }
-}
+};
 module.exports = {
   getBrands,
   addBrand,

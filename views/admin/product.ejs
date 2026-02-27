@@ -162,6 +162,7 @@
             <th>Subcategory</th>
             <th>Regular Price</th>
             <th>Final Price</th>
+            <th>offer Price</th>
             <th>Material</th>
             <th>Status</th>
             <th>Offer</th>
@@ -187,6 +188,7 @@
                 <td><%= product.subcategory?.name || 'N/A' %></td>
                 <td>₹<%= product.price.toFixed(2) %></td>
                 <td>₹<%= product.finalPrice.toFixed(2) %></td>
+                <td>₹<%= product.finalPriceDynamic.toFixed(2) %></td>
                 <td><%= product.material %></td>
                 <td>
                   <% if (product.isBlocked) { %>

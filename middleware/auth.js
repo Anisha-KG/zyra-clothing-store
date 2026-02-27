@@ -55,7 +55,7 @@ const isLogin = async (req, res, next) => {
         return res.render('login', { message: 'Your account has been blocked by admin.' });
       }
 
-      return res.redirect('/home');
+      return res.redirect('/');
     }
 
     next();

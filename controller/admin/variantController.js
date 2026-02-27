@@ -44,11 +44,14 @@ const addVariant=async(req,res)=>{
     const{color,size,quantity,productId}=req.body
     const imageFields=['image1','image2','image3','image4']
     const images=[]
-    imageFields.map((file)=>{
-      if(req.files[file]){
-        images.push(req.files[file][0].filename)
-      }
-    })
+    imageFields.forEach((field) => {
+  if (req.files[field]) {
+    images.push({
+      url: req.files[field][0].path,        // Cloudinary URL
+      public_id: req.files[field][0].filename // Cloudinary public_id
+    });
+  }
+});
     console.log(color+" "+size+" "+quantity+" "+productId)
 
     if(!color||!size||!quantity||!productId){

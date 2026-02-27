@@ -85,7 +85,7 @@
                                 <%= category.name %>
                             </td>
                             <td>
-                                <img src="<%= subcategory.image ? '/uploads/subcategory/' + subcategory.image : 'https://via.placeholder.com/40' %>"
+                                <img src="<%= subcategory.image?subcategory.image.url : 'https://via.placeholder.com/40' %>"
                                     class="subcategory-img" width="40" height="40">
                             </td>
                             <td>
@@ -122,7 +122,12 @@
                                <td class="action-icons">
                                             <a href="#" title="Edit" data-bs-toggle="modal"
                                                 data-bs-target="#editSubcategoryModal"
-                                                onclick="setEditmodal('<%= subcategory._id%>','<%= subcategory.name%>','<%= subcategory.image%>', `<%= subcategory.description%>`)">
+                                                onclick="setEditmodal(
+  '<%= subcategory._id %>',
+  '<%= subcategory.name %>',
+  '<%= subcategory.image ? subcategory.image.url : '' %>',
+  `<%= subcategory.description ? subcategory.description.replace(/`/g, '\\`') : '' %>`
+)"
                                                 <i class="fas fa-edit text-primary"></i>
                                             </a>
                                             <a href="#" title="Delete" onclick="deleteSubcategory('<%= subcategory._id %>')">
@@ -192,7 +197,7 @@
 
 
 
-<!-- ADD BRAND OFFER MODAL -->
+<!-- ADD subcategory OFFER MODAL -->
 <div class="modal fade" id="addSubOfferModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-md">
     <div class="modal-content p-4 rounded-4 border-0">
@@ -210,7 +215,7 @@
 
         <small id="offerError" class="text-danger"></small>
 
-        <!-- hidden brand -->
+        <!-- hidden subcategory -->
         <input type="hidden" id="offerSubCategoryId" name="categoryId" >
 
         <div class="modal-body">
@@ -654,11 +659,19 @@
 }
 
         //edit subcategory
-        function setEditmodal(id, subcategoryName, image, description) {
-    document.getElementById('edit-subcategory-id').value = id
-    document.getElementById('edit-subcategory-name').value = subcategoryName
-    document.getElementById('edit-subcategory-description').value = description || ''
-    document.getElementById('existing-subcategory-image').src = '/uploads/subcategory/' + image
+       function setEditmodal(id, subcategoryName, imageUrl, description) {
+
+    document.getElementById('edit-subcategory-id').value = id;
+    document.getElementById('edit-subcategory-name').value = subcategoryName;
+    document.getElementById('edit-subcategory-description').value = description || '';
+
+    const imgElement = document.getElementById('existing-subcategory-image');
+
+    if (imageUrl && imageUrl !== '') {
+        imgElement.src = imageUrl;
+    } else {
+        imgElement.src = "https://via.placeholder.com/100";
+    }
 }
 
         async function editSubcategory(e) {

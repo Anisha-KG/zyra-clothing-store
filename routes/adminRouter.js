@@ -18,6 +18,9 @@ const couponController=require('../controller/admin/couponController')
 const salesReportController=require('../controller/admin/salesReportController')
 const offerMangementController=require('../controller/admin/offerManagement')
 const dashboardController=require('../controller/admin/dashboard')
+const { uploadVariantImages } = require("../middleware/cloudinarymulter");
+const { uploadCategoryImages,uploadSubcategoryImages,uploadBrandImages } = require("../middleware/cloudinarymulter");
+
 
 router.get('/pageerror',adminController.pageerror)
 router.get('/login',isAdminLogin,adminController.loadLogin)
@@ -30,31 +33,31 @@ router.post('/blockCustomer',adminAuth,customersController.customerBlocked)
 router.post('/unblockCustomer',adminAuth,customersController.customerUnblocked)
 
 router.get('/categories',adminAuth,categoryController.categoryInfo)
-router.post('/addcategory',adminAuth,categoryUpload.single('categoryImage'),categoryController.addCategory)
+router.post('/addcategory',adminAuth,uploadCategoryImages.single('categoryImage'),categoryController.addCategory)
 router.post('/addCategoryOffer',adminAuth,categoryController.addCategoryOffer)
 router.patch('/removeCategoryOffer',adminAuth,categoryController.removeCategoryOffer)
 router.patch('/unlistCategory',adminAuth,categoryController.unlistCategory)
 router.patch('/listCategory',adminAuth,categoryController.listCategory)
-router.patch('/editCategory/:id',adminAuth,categoryUpload.single('categoryImage'),categoryController.editCategory)
+router.patch('/editCategory/:id',adminAuth,uploadCategoryImages.single('categoryImage'),categoryController.editCategory)
 router.delete('/deleteCategory',adminAuth,categoryController.deleteCategory)
 
 router.get('/brands',adminAuth,brandController.getBrands)
-router.post('/addBrand',adminAuth,upload.single('brandLogo'),brandController.addBrand)
+router.post('/addBrand',adminAuth,uploadBrandImages.single('brandLogo'),brandController.addBrand)
 router.post('/addBrandOffer',adminAuth,brandController.addBrandOffer)
-router.patch('/editBrand',adminAuth,upload.single('brandLogo'),brandController.editBrand)
+router.patch('/editBrand',adminAuth,uploadBrandImages.single('brandLogo'),brandController.editBrand)
 router.patch('/unlistBrand',adminAuth,brandController.unlistBrand)
 router.patch('/listBrand',adminAuth,brandController.listBrand)
 router.patch('/removeOffer',adminAuth,brandController.removeOffer)
 router.delete('/deleteBrand',adminAuth,brandController.deleteBrand)
 
 router.get('/subcategories/:id',adminAuth,subcategoryController.loadSubcategories)
-router.post('/addSubcategory',adminAuth,subcategoryUpload.single('subcategoryImage'),subcategoryController.addSubcategory)
+router.post('/addSubcategory',adminAuth,uploadSubcategoryImages.single('subcategoryImage'),subcategoryController.addSubcategory)
 router.post('/addSubcategoryOffer',adminAuth,subcategoryController.addSubcategoryOffer)
 router.patch('/removesubcatOffer',adminAuth,subcategoryController.removeOffer)
 router.patch('/unlistSubcategory',adminAuth,subcategoryController.unlistSubcategory)
 router.patch('/listSubcategory',adminAuth,subcategoryController.listSubcategory)
 router.delete('/deleteSubcategory',adminAuth,subcategoryController.deteleSubcategory)
-router.patch('/editSubcategory',adminAuth,subcategoryUpload.single('subcategoryImage'),subcategoryController.editSubcategory)
+router.patch('/editSubcategory',adminAuth,uploadSubcategoryImages.single('subcategoryImage'),subcategoryController.editSubcategory)
 
 router.get('/products',adminAuth,productController.getProducts)
 router.get('/addProduct',adminAuth,productController.getaddProduct)
@@ -68,18 +71,29 @@ router.get('/edit-product/:productId',adminAuth,product_editController.geteditPr
 router.patch('/editproduct',adminAuth,product_editController.editProduct)
 
 router.get('/product/:productId/variants',adminAuth,variantController.getVariant)
-router.post('/addVariant',adminAuth,upload.fields([
-  { name: 'image1', maxCount: 1 },
-  { name: 'image2', maxCount: 1 },
-  { name: 'image3', maxCount: 1 },
-  { name: 'image4', maxCount: 1 }
-]),variantController.addVariant)
-router.patch('/editVariant',adminAuth,upload.fields([
-  { name: 'image1', maxCount: 1 },
-  { name: 'image2', maxCount: 1 },
-  { name: 'image3', maxCount: 1 },
-  { name: 'image4', maxCount: 1 }
-]),variantController.editVariant)
+router.post(
+  '/addVariant',
+  adminAuth,
+  uploadVariantImages.fields([
+    { name: 'image1', maxCount: 1 },
+    { name: 'image2', maxCount: 1 },
+    { name: 'image3', maxCount: 1 },
+    { name: 'image4', maxCount: 1 }
+  ]),
+  variantController.addVariant
+);
+
+router.patch(
+  '/editVariant',
+  adminAuth,
+  uploadVariantImages.fields([
+    { name: 'image1', maxCount: 1 },
+    { name: 'image2', maxCount: 1 },
+    { name: 'image3', maxCount: 1 },
+    { name: 'image4', maxCount: 1 }
+  ]),
+  variantController.editVariant
+);
 router.patch('/listVariant',adminAuth,variantController.listVariant)
 router.patch('/unlistVariant',adminAuth,variantController.unlistVariant)
 router.get('/orders',adminAuth,orderController.listOrders)

@@ -5,7 +5,6 @@ const Variant=require('../../models/variantSchema')
 const Address=require('../../models/addressSchema')
 const Coupons=require('../../models/couponSchema')
 const httpStatus=require('../../Constants/httpStatuscode')
-const {calculateBestOffer}=require('../../helpers/calculatingBestOffer')
 require('dotenv').config()
 
 
@@ -38,13 +37,8 @@ const viewCheckoutPage = async (req, res, next) => {
       const product=item.productId
       const variant=item.variantId
 
-      const bestOffer = await calculateBestOffer(product);
-                  console.log(bestOffer)
-      const discountAmount = (product.price * bestOffer) / 100;
-      const finalPriceDynamic = Math.round(product.price - discountAmount);
-      console.log(finalPriceDynamic)
       let quantity = item.quantity;
-      let price = finalPriceDynamic
+      let price = product.finalPriceDynamic
       subtotal += quantity * price;
 
       cartItems.push({
@@ -109,12 +103,9 @@ const selectPayment=async(req,res,next)=>{
       const product=item.productId
       const variant=item.variantId
 
-      const bestOffer = await calculateBestOffer(product);
-                  
-      const discountAmount = (product.price * bestOffer) / 100;
-      const finalPriceDynamic = Math.round(product.price - discountAmount);
+      
       let quantity = item.quantity;
-      let price = finalPriceDynamic
+      let price = product.finalPriceDynamic
       subtotal += quantity * price;
 
       cartItems.push({
@@ -173,16 +164,13 @@ const getconfirmationPage = async (req, res, next) => {
       const variant=item.variantId
 
       
-      const bestOffer = await calculateBestOffer(product);
-                  
-      const discountAmount = (product.price * bestOffer) / 100;
-      const finalPriceDynamic = Math.round(product.price - discountAmount);
+      
 
       
-  item.price = finalPriceDynamic;      
+  item.price = product.finalPriceDynamic;      
   item.mrp = product.price;
       let quantity = item.quantity;
-      let price = finalPriceDynamic
+      let price = product.finalPriceDynamic
       const mrp = item.productId.price
       const priceDifference = mrp - price
       totalMRP += mrp * quantity

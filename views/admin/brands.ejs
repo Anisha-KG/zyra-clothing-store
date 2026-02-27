@@ -172,7 +172,7 @@
                                         <%= brand.brandName%>
                                     </td>
                                     <td>
-                                        <img src="<%= brand.brandLogo ? '/uploads/brands/' + brand.brandLogo : 'https://via.placeholder.com/40' %>"
+                                        <img src="<%= brand.brandLogo ? brand.brandLogo.url  : 'https://via.placeholder.com/40' %>"
                                             class="brand-img" width="40" height="40">
                                     </td>
                                     <td class="action-icons">
@@ -216,7 +216,11 @@
                                         <td class="action-icons">
                                             <a href="#" title="Edit" data-bs-toggle="modal"
                                                 data-bs-target="#editBrandModal"
-                                                onclick="setEditmodal('<%= brand._id%>','<%= brand.brandName%>','<%= brand.brandLogo%>')">
+                                                onclick="setEditmodal(
+  '<%= brand._id %>',
+  '<%= brand.brandName %>',
+  '<%= brand.brandLogo ? brand.brandLogo.url : '' %>'
+)"
                                                 <i class="fas fa-edit text-brown"></i>
                                             </a>
                                             <a href="#" title="Delete" onclick="deleteBrand('<%= brand._id %>')">
@@ -549,12 +553,19 @@
 }
 
 
-        function setEditmodal(id, brandName, logo) {
-            document.getElementById('edit-brand-id').value = id
-            document.getElementById('edit-brand-name').value = brandName
-            document.getElementById('existing-brand-image').src = '/uploads/brands/' + logo;
-        }
+       function setEditmodal(id, brandName, logoUrl) {
+    document.getElementById('edit-brand-id').value = id;
+    document.getElementById('edit-brand-name').value = brandName;
 
+    const img = document.getElementById('existing-brand-image');
+
+    if (logoUrl) {
+        img.src = logoUrl;
+        img.style.display = "block";
+    } else {
+        img.src = "https://via.placeholder.com/100";
+    }
+}
         async function editBrand(e) {
             e.preventDefault();
             const form = document.getElementById('editBrandForm')

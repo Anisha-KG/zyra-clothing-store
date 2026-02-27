@@ -211,8 +211,7 @@
                                 <%= category.name%>
                             </td>
                             <td>
-                                <img src="<%= category.categoryImage ? '/uploads/categories/' + category.categoryImage : 'https://via.placeholder.com/40' %>"
-                                    class="category-img" width="40" height="40">
+                                <img src="<%= category.categoryImage.url %>" class="category-img" width="40" height="40">
                             </td>
                             <td>
                                 <%= category.description%>
@@ -254,12 +253,15 @@
                                 </td>
                                 <td class="action-icons">
 
-                                    <a href="#" title="Edit" data-bs-toggle="modal" data-bs-target="#editCategoryModal"
-    data-id="<%= category._id %>"
-    data-name="<%= category.name %>"
-    data-description="<%= category.description %>"
-    data-image="<%= category.categoryImage ? '/uploads/categories/' + category.categoryImage : 'https://via.placeholder.com/100' %>">
-    <i class="fas fa-edit text-brown"></i>
+                                   <a href="#"
+   title="Edit"
+   data-bs-toggle="modal"
+   data-bs-target="#editCategoryModal"
+   data-id="<%= category._id %>"
+   data-name="<%= category.name %>"
+   data-description="<%= category.description %>"
+   data-image="<%= category.categoryImage?.url || 'https://via.placeholder.com/100' %>">
+   <i class="fas fa-edit text-brown"></i>
 </a>
                                     <a href="#" title="Delete" onclick="deleteCategory('<%= category._id %>')">
                                         <i class="fas fa-trash text-danger"></i>
@@ -406,72 +408,99 @@
 </div>
 
             <!-- EDIT CATEGORY MODAL -->
-            <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-md">
-                    <form id="editCategoryForm" class="modal-content p-4 rounded-4 border-0"
-                        enctype="multipart/form-data" method="POST" action="#">
-                        <!-- Hidden ID -->
-                        <input type="hidden" id="edit-category-id" name="categoryId" />
+<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
 
-                        <!-- Header -->
-                        <div class="modal-header p-3 mb-3" style="background-color: #912f2f; border-radius: 0.5rem;">
-                            <h5 class="modal-title text-white fw-bold" id="editCategoryModalLabel">Edit Category</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                aria-label="Close"></button>
-                        </div>
+        <form id="editCategoryForm"
+              class="modal-content p-4 rounded-4 border-0"
+              enctype="multipart/form-data"
+              method="POST">
 
-                        <!-- Body -->
-                        <div class="modal-body">
-                            <div class="row g-3">
-                                <!-- Category Name -->
-                                <div class="col-12">
-                                    <label for="edit-category-name" class="form-label fw-semibold">Category Name</label>
-                                    <input type="text" name="categoryName" class="form-control rounded-3"
-                                        id="edit-category-name" />
-                                    <div id="editNameError" class="error-msg"></div>
-                                </div>
+            <!-- Hidden ID -->
+            <input type="hidden" id="edit-category-id" name="categoryId" />
 
-                                <!-- Description -->
-                                <div class="col-12">
-                                    <label for="edit-category-description"
-                                        class="form-label fw-semibold">Description</label>
-                                    <textarea name="description" class="form-control rounded-3"
-                                        id="edit-category-description" rows="3"></textarea>
-                                    <div id="editDescriptionError" class="error-msg"></div>
-                                </div>
+            <!-- Header -->
+            <div class="modal-header p-3 mb-3"
+                 style="background-color:#912f2f;border-radius:0.5rem;">
+                <h5 class="modal-title text-white fw-bold">
+                    Edit Category
+                </h5>
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
 
-                                <!-- Existing Image -->
-                                <div class="col-12">
-                                    <label class="form-label fw-semibold">Current Image</label><br />
-                                    <img id="existing-category-image" src="" alt="Category Image"
-                                        style="width: 100px; height: 100px; object-fit: cover; border-radius: 6px" />
-                                </div>
+            <!-- Body -->
+            <div class="modal-body">
+                <div class="row g-3">
 
-                                <!-- Upload New Image -->
-                                <div class="col-12">
-                                    <label for="edit-category-image-upload" class="form-label fw-semibold">Change Image
-                                        (optional)</label>
-                                    <input type="file" name="categoryImage" id="edit-category-image-upload"
-                                        class="form-control rounded-3" accept="image/png, image/jpeg" />
-                                    <div id="editImageError" class="error-msg"></div>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- Category Name -->
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">
+                            Category Name
+                        </label>
+                        <input type="text"
+                               name="categoryName"
+                               id="edit-category-name"
+                               class="form-control rounded-3" />
+                    </div>
 
-                        <!-- Footer -->
-                        <div class="modal-footer border-0 mt-3">
-                            <div class="d-flex justify-content-end gap-2">
-                                <button type="button" class="btn btn-outline-secondary rounded-3 px-4"
-                                    data-bs-dismiss="modal">Cancel</button>
-                                <button type="submit" class="btn"
-                                    style="background-color: #912f2f; color: white;">Update Category</button>
-                            </div>
-                        </div>
-                    </form>
+                    <!-- Description -->
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">
+                            Description
+                        </label>
+                        <textarea name="description"
+                                  id="edit-category-description"
+                                  class="form-control rounded-3"
+                                  rows="3"></textarea>
+                    </div>
+
+                    <!-- Current Image -->
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">
+                            Current Image
+                        </label><br />
+                        <img id="existing-category-image"
+                             src=""
+                             style="width:100px;height:100px;
+                             object-fit:cover;border-radius:6px" />
+                    </div>
+
+                    <!-- New Image -->
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">
+                            Change Image (optional)
+                        </label>
+                        <input type="file"
+                               name="categoryImage"
+                               class="form-control rounded-3"
+                               accept="image/png, image/jpeg" />
+                    </div>
+
                 </div>
             </div>
 
+            <!-- Footer -->
+            <div class="modal-footer border-0 mt-3">
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+                <button type="submit"
+                        class="btn"
+                        style="background-color:#912f2f;color:white;">
+                    Update Category
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
 
 
 
@@ -778,21 +807,24 @@
         //edit category
         const editCategoryModal = document.getElementById('editCategoryModal');
 
-        editCategoryModal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget; // Link that triggered the modal
+editCategoryModal.addEventListener('show.bs.modal', function (event) {
 
-            // Extract values from data-* attributes
-            const categoryId = button.getAttribute('data-id');
-            const categoryName = button.getAttribute('data-name');
-            const categoryDescription = button.getAttribute('data-description');
-            const categoryImage = button.getAttribute('data-image');
+    const button = event.relatedTarget;
 
-            // Fill modal fields
-            document.getElementById('edit-category-id').value = categoryId;
-            document.getElementById('edit-category-name').value = categoryName;
-            document.getElementById('edit-category-description').value = categoryDescription;
-            document.getElementById('existing-category-image').src = categoryImage;
-        });
+    const categoryId = button.getAttribute('data-id');
+    const categoryName = button.getAttribute('data-name');
+    const categoryDescription = button.getAttribute('data-description');
+    const categoryImage = button.getAttribute('data-image');
+
+    // Fill values
+    document.getElementById('edit-category-id').value = categoryId;
+    document.getElementById('edit-category-name').value = categoryName;
+    document.getElementById('edit-category-description').value = categoryDescription;
+
+    // Set image
+    document.getElementById('existing-category-image').src = categoryImage;
+
+});
 
         document.getElementById('editCategoryForm').addEventListener('submit', async function (e) {
             e.preventDefault();

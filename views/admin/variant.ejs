@@ -185,12 +185,12 @@
                     <td>
   <% if (variant.images && variant.images.length > 0) { %>
     <img
-      src="/uploads/variants/<%= variant.images[0] %>"
+      src="<%= variant.images[0].url %>"
       alt="variant image"
       class="img-thumbnail"
       width="70" height="70"
       style="object-fit: cover; border-radius: 8px; cursor: pointer;"
-      onclick="openImageModal('/uploads/variants/<%= variant.images[0] %>')"
+     onclick="openImageModal('<%= variant.images[0].url %>')"
     />
   <% } else { %>
     <img src="/placeholder.svg" alt="No image" width="70" height="70" class="img-thumbnail" />
@@ -586,7 +586,7 @@ function cropImage(index, isEdit = false) {
       const previewContainer = preview.closest('.preview-container');
 
       if (variant.images && variant.images[i - 1]) {
-        preview.src = `/uploads/variants/${variant.images[i - 1]}`;
+  preview.src = variant.images[i - 1].url;
         croppedInput.value = '';
         previewContainer.style.display = 'block';
         cropBtn.style.display = 'inline-block';

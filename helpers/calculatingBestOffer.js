@@ -60,6 +60,5 @@ async function calculateBestOffer(product) {
     return Math.max(...offers);
 }
 
-module.exports = {
+module.exports = 
     calculateBestOffer
-};

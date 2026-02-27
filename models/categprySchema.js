@@ -21,9 +21,14 @@ const categorySchema = new Schema({
   // },
 
   categoryImage: {
-    type: String,
-    required: true, // ensures image is uploaded
-    trim: true
+    url: {
+      type: String,
+      required: true
+    },
+    public_id: {
+      type: String,
+      required: true
+    }
   },
   //subcategories: [subcategorySchema],
   isListed: {

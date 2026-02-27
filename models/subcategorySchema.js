@@ -14,9 +14,14 @@ const subcategorySchema = new Schema({
     trim: true
   },
   image: {
-    type: String, // store filename or full image path
-    required: true,
-    trim: true
+    url:{
+      type: String,
+      required: true
+    },
+    public_id:{
+      type: String,
+      required: true
+    }
   },
   offer: {
     type: Number, // percentage (e.g., 10 for 10% off)
