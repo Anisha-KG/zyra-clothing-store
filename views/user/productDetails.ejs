@@ -131,86 +131,121 @@
     </nav>
 
     <div class="row align-items-start">
-      <!-- LEFT SIDE: PRODUCT GALLERY -->
-      <div class="col-lg-6 col-md-12 mb-4">
-        <% let images = (defaultVariant && defaultVariant.images && defaultVariant.images.length > 0)
-              ? defaultVariant.images
-              : []; %>
+  <!-- LEFT SIDE: PRODUCT GALLERY -->
+  <div class="col-lg-6 col-md-12 mb-4">
 
-        <% if (images.length > 0) { %>
-        <div class="d-flex">
-          <!-- Thumbnails -->
-          <div class="me-3" id="thumbnailContainer">
-            <% images.forEach((img, index) => { %>
-              <div class="thumbnail mb-2">
-                <img src="/uploads/variants/<%= img %>" data-index="<%= index %>"
-                     class="<%= index === 0 ? 'selected-thumb' : '' %>">
-              </div>
-            <% }) %>
+    <% let images = (defaultVariant && defaultVariant.images && defaultVariant.images.length > 0)
+          ? defaultVariant.images
+          : []; %>
+
+    <% if (images.length > 0) { %>
+    <div class="d-flex">
+
+      <!-- Thumbnails -->
+      <div class="me-3" id="thumbnailContainer">
+        <% images.forEach((img, index) => { %>
+          <div class="thumbnail mb-2">
+            <img src="<%= img.url %>" 
+                 data-index="<%= index %>"
+                 class="<%= index === 0 ? 'selected-thumb' : '' %>">
           </div>
-
-          <!-- Main Image + Arrows -->
-          <div class="flex-grow-1 main-image-container zoom-container">
-  <img src="/uploads/variants/<%= images[0] %>" id="mainImage" class="main-image zoom-image shadow">
-  <span class="arrow-btn arrow-left" id="prevImg">‹</span>
-  <span class="arrow-btn arrow-right" id="nextImg">›</span>
-</div>
-        </div>
-        <% } else { %>
-          <p>No images available</p>
-        <% } %>
+        <% }) %>
       </div>
 
-      <!-- RIGHT SIDE: Product Details -->
-      <div class="col-lg-6 col-md-12">
-        <h2 class="mb-2"><%= product.name %></h2>
-        <h5 class="text-decoration-line-through text-muted">₹<%= product.price %></h5>
-        <h4 class="text-dark fw-bold" id="offerPrice">₹<%= product.finalPriceDynamic%></h4>
-        <% if (product.bestOffer && product.bestOffer > 0) { %>
-          <span class="badge bg-danger me-2 ">
-            <%= product.bestOffer %>% OFF
+      <!-- Main Image + Arrows -->
+      <div class="flex-grow-1 main-image-container zoom-container">
+        <img src="<%= images[0].url %>" 
+             id="mainImage" 
+             class="main-image zoom-image shadow">
+        <span class="arrow-btn arrow-left" id="prevImg">‹</span>
+        <span class="arrow-btn arrow-right" id="nextImg">›</span>
+      </div>
+
+    </div>
+    <% } else { %>
+      <p>No images available</p>
+    <% } %>
+
+  </div>
+
+  <!-- RIGHT SIDE: Product Details -->
+  <div class="col-lg-6 col-md-12">
+
+    <h2 class="mb-2"><%= product.name %></h2>
+
+    <h5 class="text-decoration-line-through text-muted">
+      ₹<%= product.price %>
+    </h5>
+
+    <h4 class="text-dark fw-bold" id="offerPrice">
+      ₹<%= product.finalPriceDynamic %>
+    </h4>
+
+    <% if (product.bestOffer && product.bestOffer > 0) { %>
+      <span class="badge bg-danger me-2">
+        <%= product.bestOffer %>% OFF
+      </span>
+    <% } %>
+
+    <!-- Size Selection -->
+    <div class="my-3">
+      <label class="form-label fw-bold">Select a size:</label>
+      <div id="sizeOptions">
+        <% availableSizes.forEach(size => { %>
+          <button class="btn btn-outline-dark btn-sm me-2 mb-2 size-btn"
+                  data-size="<%= size %>">
+            <%= size %>
+          </button>
+        <% }) %>
+      </div>
+      <p id="sizeError" class="text-danger small"></p>
+    </div>
+
+    <!-- Color Selection -->
+    <div class="my-3">
+      <label class="form-label fw-bold">Color:</label>
+      <div id="colorOptions">
+        <% availableColors.forEach(color => { %>
+          <span class="color-swatch"
+                style="background-color:<%= color %>;"
+                data-color="<%= color %>">
           </span>
-        <% } %>
+        <% }) %>
+      </div>
+      <p id="ColorError" class="text-danger small"></p>
+    </div>
 
-        <!-- Size Selection -->
-        <div class="my-3">
-          <label class="form-label fw-bold">Select a size:</label>
-          <div id="sizeOptions">
-            <% availableSizes.forEach(size => { %>
-              <button class="btn btn-outline-dark btn-sm me-2 mb-2 size-btn" data-size="<%= size %>"><%= size %></button>
-            <% }) %>
-          </div>
-          <p id="sizeError" class="text-danger small"></p>
-        </div>
-
-        <!-- Color Selection -->
-        <div class="my-3">
-          <label class="form-label fw-bold">Color:</label>
-          <div id="colorOptions">
-            <% availableColors.forEach(color => { %>
-              <span class="color-swatch" style="background-color:<%= color %>;" data-color="<%= color %>"></span>
-            <% }) %>
-          </div>
-          <p id="ColorError" class="text-danger small"></p>
-        </div>
-
-        <!-- Quantity -->
-        <div class="my-3">
-          <label class="form-label fw-bold">Quantity:</label>
-          <div class="d-flex align-items-center" style="max-width: 140px;">
-            <button class="btn btn-outline-dark btn-sm" id="qtyMinus">−</button>
-            <input type="number" id="quantity" class="form-control mx-2 text-center" value="1" min="1" max="5" style="width: 60px;">
-            <button class="btn btn-outline-dark btn-sm" id="qtyPlus">+</button>
-          </div>
-        </div>
-
-        <!-- Buttons -->
-        <div class="my-4">
-          <button class="btn btn-zyra btn-wishlist me-3" onclick="addToWishlist('<%= product._id%>')">Add to Wishlist </button>
-          <button class="btn btn-zyra btn-cart" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
-        </div>
+    <!-- Quantity -->
+    <div class="my-3">
+      <label class="form-label fw-bold">Quantity:</label>
+      <div class="d-flex align-items-center" style="max-width: 140px;">
+        <button class="btn btn-outline-dark btn-sm" id="qtyMinus">−</button>
+        <input type="number"
+               id="quantity"
+               class="form-control mx-2 text-center"
+               value="1"
+               min="1"
+               max="5"
+               style="width: 60px;">
+        <button class="btn btn-outline-dark btn-sm" id="qtyPlus">+</button>
       </div>
     </div>
+
+    <!-- Buttons -->
+    <div class="my-4">
+      <button class="btn btn-zyra btn-wishlist me-3"
+              onclick="addToWishlist('<%= product._id %>')">
+        Add to Wishlist
+      </button>
+
+      <button class="btn btn-zyra btn-cart"
+              onclick="addToCart('<%= product._id %>')">
+        Add to Cart
+      </button>
+    </div>
+
+  </div>
+</div>
 
     <!-- Description & Review -->
     <div class="row mt-4">
@@ -307,7 +342,7 @@
             <div class="col-6 col-md-3">
               <div class="product-card-like text-center p-3">
                 <% if (product.variantImage) { %>
-                  <img src="/uploads/variants/<%= product.variantImage %>" class="img-fluid rounded mb-2">
+                  <img src="<%= product.variantImage.url %>" class="img-fluid rounded mb-2">
                 <% } else { %>
                   <img src="https://via.placeholder.com/200x250" class="img-fluid rounded mb-2">
                 <% } %>
@@ -348,11 +383,14 @@ zoomContainer.addEventListener('mousemove', (e) => {
 
     // Image navigation
     function updateImage() {
-      mainImage.src = `/uploads/variants/${images[currentIndex]}`;
-      document.querySelectorAll(".thumbnail img").forEach((img, i) => {
-        img.classList.toggle("selected-thumb", i === currentIndex);
-      });
-    }
+  if (!images[currentIndex]) return;
+
+  mainImage.src = images[currentIndex].url;
+
+  document.querySelectorAll(".thumbnail img").forEach((img, i) => {
+    img.classList.toggle("selected-thumb", i === currentIndex);
+  });
+}
     document.getElementById("nextImg").onclick = () => { currentIndex = (currentIndex + 1) % images.length; updateImage(); };
     document.getElementById("prevImg").onclick = () => { currentIndex = (currentIndex - 1 + images.length) % images.length; updateImage(); };
     document.querySelectorAll(".thumbnail img").forEach(img => {
@@ -397,29 +435,38 @@ zoomContainer.addEventListener('mousemove', (e) => {
       if (variant) {
         // Update main image
         if (variant.images && variant.images.length > 0) {
-          mainImage.src = `/uploads/variants/${variant.images[0]}`;
-          currentIndex = 0;
 
-          // Update thumbnails
-          const thumbContainer = document.getElementById('thumbnailContainer');
-          thumbContainer.innerHTML = '';
-          variant.images.forEach((img, index) => {
-            const thumbDiv = document.createElement('div');
-            thumbDiv.className = 'thumbnail mb-2';
-            const thumbImg = document.createElement('img');
-            thumbImg.src = `/uploads/variants/${img}`;
-            thumbImg.dataset.index = index;
-            if (index === 0) thumbImg.classList.add('selected-thumb');
-            thumbImg.addEventListener('click', () => {
-              currentIndex = index;
-              mainImage.src = `/uploads/variants/${variant.images[index]}`;
-              document.querySelectorAll('.thumbnail img').forEach(t => t.classList.remove('selected-thumb'));
-              thumbImg.classList.add('selected-thumb');
-            });
-            thumbDiv.appendChild(thumbImg);
-            thumbContainer.appendChild(thumbDiv);
-          });
-        }
+  currentIndex = 0;
+  mainImage.src = variant.images[0].url;
+
+  const thumbContainer = document.getElementById('thumbnailContainer');
+  thumbContainer.innerHTML = '';
+
+  variant.images.forEach((imgObj, index) => {
+
+    const thumbDiv = document.createElement('div');
+    thumbDiv.className = 'thumbnail mb-2';
+
+    const thumbImg = document.createElement('img');
+    thumbImg.src = imgObj.url;   // ✅ FIXED
+    thumbImg.dataset.index = index;
+
+    if (index === 0) thumbImg.classList.add('selected-thumb');
+
+    thumbImg.addEventListener('click', () => {
+      currentIndex = index;
+      mainImage.src = variant.images[index].url;  // ✅ FIXED
+
+      document.querySelectorAll('.thumbnail img')
+        .forEach(t => t.classList.remove('selected-thumb'));
+
+      thumbImg.classList.add('selected-thumb');
+    });
+
+    thumbDiv.appendChild(thumbImg);
+    thumbContainer.appendChild(thumbDiv);
+  });
+}
 
         // Update price
         document.getElementById('offerPrice').textContent = "₹" + (variant.price || basePrice);

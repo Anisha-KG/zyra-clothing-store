@@ -14,352 +14,187 @@
   <%- include("../../views/partials/user/header") %>
 
   <style>
-
-
-    body {
-      background-color: #fdf6f0;
-    }
-
-    .wishlist-card {
-      border: none;
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      transition: 0.3s ease;
-    }
-
-    .wishlist-card:hover {
-      box-shadow: 0 4px 16px rgba(0,0,0,0.10);
-    }
-
-    .wishlist-img {
-      width: 100%;
-      height: 300px;
-      object-fit: cover;
-      border-bottom: 1px solid #eee;
-    }
-
+    body { background-color: #fdf6f0; }
+    .wishlist-card { border:none; background:white; border-radius:8px; transition:0.3s; }
+    .wishlist-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.1); }
+    .wishlist-img { width:100%; height:300px; object-fit:cover; }
     .remove-icon {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: white;
-      border-radius: 50%;
-      width: 26px;
-      height: 26px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid #ddd;
-      cursor: pointer;
-      z-index: 20;
-      font-size: 12px;
+      position:absolute; top:8px; right:8px;
+      background:white; border-radius:50%;
+      width:26px; height:26px;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; z-index:20;
     }
-
-    .product-title {
-      font-size: 15px;
-      font-weight: 500;
-      min-height: 34px;
-      line-height: 17px;
-      overflow: hidden;
-    }
-
-    .price-section {
-      font-size: 16px;
-      font-weight: 600;
-    }
-
-    .old-price {
-      text-decoration: line-through;
-      font-size: 12px;
-      color: #777;
-      margin-left: 4px;
-    }
-
-    .discount {
-      font-size: 12px;
-      color: #ff3f6c;
-      margin-left: 4px;
-    }
-
-    .move-btn {
-      width: 100%;
-      border: 1px solid #912f2f;
-      color: #912f2f;
-      font-weight: 600;
-      border-radius: 3px;
-      padding: 6px;
-      font-size: 13px;
-    }
-
-    .move-btn:hover {
-      background: #912f2f;
-      color: white;
-    }
-
-    /* Profile button styling */
-    .profile-btn {
-      border: 1px solid #912f2f;
-      color: #912f2f;
-      font-weight: 600;
-      border-radius: 3px;
-      padding: 6px 12px;
-      transition: 0.2s;
-    }
-
-    .profile-btn:hover {
-      background-color: #912f2f;
-      color: white;
-    }
-
     .size-btn {
-  width: 38px;
-  height: 38px;
-  border: 1px solid #ccc;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 13px;
-  background: white;
-  transition: 0.2s;
+      width:38px; height:38px;
+      border:1px solid #ccc;
+      border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer;
+    }
+    .size-btn.selected {
+      background:#912f2f; color:white; border-color:#912f2f;
+    }
+    .offer-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #ff3f6c;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 4px;
+  z-index: 10;
+}
+
+.size-btn {
+  width:38px;
+  height:38px;
+  border:1px solid #ccc;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:0.2s;
 }
 
 .size-btn:hover {
-  border-color: #912f2f;
-  color: #912f2f;
+  border-color:#912f2f;
 }
-
-.size-btn.selected {
-  background: #912f2f;
-  color: white;
-  border-color: #912f2f;
-  font-weight: 600;
-}
-
   </style>
 </head>
+
 <body>
 
 <div class="container py-4">
 
-  <!-- Header: Profile button left, Wishlist + item count right -->
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <button class="profile-btn" onclick="window.location.href='/profile'">Profile</button>
-
-    <div class="text-end">
-      <h6 class="fw-bold mb-0">My Wishlist <span class="text-secondary small">(<%= totalItems %> items)</span></h6>
-    </div>
+    <button class="btn btn-outline-danger" onclick="location.href='/profile'">Profile</button>
+    <h6 class="fw-bold">My Wishlist (<%= totalItems %> items)</h6>
   </div>
 
   <div class="row g-3">
 
   <% if (items && items.length > 0) { %>
-
     <% items.forEach(item => { %>
 
       <div class="col-6 col-md-4 col-lg-3">
-
         <div class="wishlist-card position-relative"
-            style="cursor:pointer;"
-            onclick="window.location.href='/product/<%= item.productId %>'">
+             onclick="location.href='/product/<%= item.productId %>'">
 
-          <!-- Remove Icon -->
+              <% if (item.bestOffer && item.bestOffer > 0) { %>
+    <div class="offer-badge">
+      <%= item.bestOffer %>% OFF
+    </div>
+  <% } %>
+
           <span class="remove-icon"
-                onclick='event.stopPropagation(); removeWishlist("<%= item.productId %>", "<%= item.color %>")'>
-            <i class="fa-solid fa-xmark"></i>
+                onclick="event.stopPropagation(); removeWishlist('<%= item.productId %>', '<%= item.color %>')">
+            ✕
           </span>
 
-          <!-- Product Image -->
-          <img 
-            src="/uploads/variants/<%= item.variant.images[0] %>" 
-            alt="product image"
-            class="wishlist-img"
-          >
+          <img src="<%= item.variant.images[0].url %>" class="wishlist-img">
 
           <div class="p-2">
+            <div><%= item.name %></div>
 
-            <!-- Product Title -->
-            <div class="product-title">
-              <%= item.name %>
-            </div>
+            <!-- UNIQUE COLOR INPUT -->
+            <input type="hidden"
+                   id="color-<%= item.productId %>"
+                   value="<%= item.color %>">
 
-            <input value="<%= item.color%>" id="color" hidden>
+            <div class="fw-bold">Rs.<%= item.prize %></div>
 
-            <!-- Price Section -->
-            <div class="d-flex justify-content-between align-items-center mt-1">
-              <span class="price-section">Rs.<%= item.prize %></span>
+            <!-- SIZE BOX -->
+            <div id="sizeBox-<%= item.productId %>" 
+     class="d-flex gap-2 mt-2 flex-wrap"
+     style="display:none">
 
-              <% if (item.mrp) { %>
-                <span class="old-price">Rs.<%= item.mrp %></span>
-              <% } %>
-            </div>
+  <% item.availableSizes.forEach(size => { %>
+    <div class="size-btn"
+         id="sizeBtn-<%= item.productId %>-<%= size %>"
+         onclick="event.stopPropagation(); selectSize('<%= item.productId %>', '<%= size %>')">
+      <%= size %>
+    </div>
+  <% }) %>
 
-<!-- Size selector (hidden initially) -->
-<div class="size-box mt-2" id="sizeBox-<%= item.productId %>" style="display:none;">
-  <label class="fw-semibold small mb-1">Select Size</label>
-
-  <div class="d-flex gap-2 flex-wrap">
-    <% item.availableSizes.forEach(size => { %>
-      <div class="size-btn"
-           data-size="<%= size %>"
-           onclick="event.stopPropagation();selectSize('<%= item.productId %>', '<%= size %>')"
-           id="sizeBtn-<%= item.productId %>-<%= size %>">
-        <%= size %>
-      </div>
-    <% }) %>
-  </div>
-
-  <!-- Hidden field to store selected size -->
   <input type="hidden" id="selectedSize-<%= item.productId %>">
 </div>
 
-            <!-- Move to Bag -->
-            <button class="btn move-btn mt-2"
-  onclick="event.stopPropagation(); handleMoveToCart('<%= item.productId %>')">
-  MOVE TO CART
-</button>
-
+            <button class="btn btn-outline-danger w-100 mt-2"
+                    onclick="event.stopPropagation(); handleMoveToCart('<%= item.productId %>')">
+              MOVE TO CART
+            </button>
           </div>
         </div>
-
       </div>
 
     <% }) %>
-
   <% } else { %>
-
-    <div class="text-center text-muted">
-      <h6>No items in wishlist</h6>
-    </div>
-
+    <div class="text-center text-muted">No items in wishlist</div>
   <% } %>
 
+  </div>
 </div>
 
-
-</div>
-  <%- include("../../views/partials/user/footer") %>
-</body>
-</html>
-
+<%- include("../../views/partials/user/footer") %>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- ✅ EJS DATA INSIDE SCRIPT -->
 <script>
+  const wishlistItems = <%- JSON.stringify(items || []) %>;
+  console.log("Wishlist items from EJS:", wishlistItems);
 
   function selectSize(productId, size) {
-
-  // Set hidden input value
-  document.getElementById(`selectedSize-${productId}`).value = size;
-
-  // Remove "selected" class from all size buttons
-  const allSizeBtns = document.querySelectorAll(`#sizeBox-${productId} .size-btn`);
-  allSizeBtns.forEach(btn => btn.classList.remove("selected"));
-
-  // Add "selected" class to clicked button
-  const selectedBtn = document.getElementById(`sizeBtn-${productId}-${size}`);
-  if (selectedBtn) selectedBtn.classList.add("selected");
-}
-
-function handleMoveToCart(productId) {
-
-  const box = document.getElementById(`sizeBox-${productId}`);
-  const selectedSize = document.getElementById(`selectedSize-${productId}`).value;
-
-  // Step 1 — First click: show sizes
-  if (box.style.display === "none") {
-    box.style.display = "block";
-    return;
+    document.getElementById(`selectedSize-${productId}`).value = size;
+    document.querySelectorAll(`#sizeBox-${productId} .size-btn`)
+      .forEach(btn => btn.classList.remove("selected"));
+    document.getElementById(`sizeBtn-${productId}-${size}`).classList.add("selected");
   }
 
-  // Step 2 — Must select size
-  if (!selectedSize) {
-    Swal.fire({
-      icon: "warning",
-      title: "Select a size",
-      text: "Please choose a size before adding to cart."
+  function handleMoveToCart(productId) {
+    const box = document.getElementById(`sizeBox-${productId}`);
+    const size = document.getElementById(`selectedSize-${productId}`).value;
+
+    if (box.style.display === "none") {
+      box.style.display = "block";
+      return;
+    }
+
+    if (!size) {
+      Swal.fire("Select a size first");
+      return;
+    }
+
+    moveToCart(productId, size);
+  }
+
+  async function moveToCart(id, size) {
+    const color = document.getElementById(`color-${id}`).value;
+
+    const res = await fetch('/cart/addProduct', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ productId:id, size, color, quantity:1 })
     });
-    return;
+
+    const result = await res.json();
+    Swal.fire(result.message).then(()=>location.reload());
   }
 
-  // Step 3 — Proceed to cart
-  moveToCart(productId, selectedSize);
-}
-  
-
-  async function moveToCart(id,selectedSize) {
-
-    const color=document.getElementById('color').value
-      
- const quantity=1
-      try {
-        const response = await fetch('/cart/addProduct', {
-          method: "POST",
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId: id, size: selectedSize, color: color, quantity })
-        });
-        const result = await response.json();
-        if (result.success) {
-          Swal.fire({ icon: 'success', title: 'Success!', text: result.message }).then(() => { window.location.reload(); });
-        } else {
-          Swal.fire({ icon: 'error', title: 'Error', text: result.message });
-        }
-      } catch (error) {
-        Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong' });
-      }
-    }
-
-
-    
-    async function removeWishlist(productId,color){
-        
-      
-      try{
-        const response=await fetch(`/wishlist/toggle`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({productId,color})
-      })
-
-      const result=await response.json()
-
-      if (result.success) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: result.message,
-                confirmButtonColor: '#198754'
-            })
-        }else if(result.removed){
-          Swal.fire({
-                icon: 'warning',
-                title: 'Removed!',
-                text: result.message,
-                confirmButtonColor: '#dc3545'
-            }).then(()=>window.location.reload())
-        }
-        
-        else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: result.message,
-                confirmButtonColor: '#dc3545'
-            });
-        }
-      }catch(error){
-        Swal.fire({
-            icon: 'error',
-            title: 'Server Error',
-            text: 'Something went wrong',
-            confirmButtonColor: '#dc3545'
-        });
-      }
-
-
-    }
+  async function removeWishlist(productId, color) {
+    await fetch('/wishlist/toggle', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({productId, color})
+    });
+    location.reload();
+  }
 </script>
 
 </body>
 </html>
+

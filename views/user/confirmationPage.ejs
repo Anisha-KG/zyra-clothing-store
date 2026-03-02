@@ -126,7 +126,7 @@
        <% cartItems.forEach(item => { %>
   <div class="product-row">
     <img 
-      src="/uploads/variants/<%= item.variant.images?.length ? item.variant.images[0] : 'placeholder.png' %>" 
+      src="<%= item.variant.images?.length ? item.variant.images[0].url : 'placeholder.png' %>" 
       alt="Product Image"
     >
 

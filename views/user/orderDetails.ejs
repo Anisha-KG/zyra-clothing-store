@@ -194,7 +194,7 @@
             <% order.orderedItems.forEach(item => { %>
             <div class="order-item"
   onclick="<%= item.product?._id ? `window.location.href='/product/${item.product._id}'` : '' %>">
-              <img src="/uploads/variants/<%= item.variant?.images?.[0] || 'default.jpg' %>" class="product-img">
+              <img src="<%= item.variant?.images?.[0].url|| 'default.jpg' %>" class="product-img">
 
               <div class="flex-grow-1">
                 <div class="item-title fw-bold"><%= item.productName %></div>
@@ -365,7 +365,7 @@
                           <h6 class="fw-bold">Order Items • <%= order.orderedItems.length %> products</h6>
                           <% order.orderedItems.forEach(item=> { %>
                           <div class="d-flex align-items-center mb-2">
-                            <img src="/uploads/variants/<%= item.variant?.images?.[0] || 'default.jpg' %>" width="60"
+                            <img src="<%= item.variant?.images?.[0].url || 'default.jpg' %>" width="60"
                               class="me-3">
                             <div>
                               <div><strong><%= item.productName %></strong></div>

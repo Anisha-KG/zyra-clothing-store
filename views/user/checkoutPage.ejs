@@ -144,7 +144,7 @@ body {
 
   <div class="d-flex mb-3">
     <img 
-      src="/uploads/variants/<%= item.variant.images?.length ? item.variant.images[0] : '' %>" 
+      src="<%= item.variant.images?.length ? item.variant.images[0].url: '' %>" 
       class="product-img" 
     />
 

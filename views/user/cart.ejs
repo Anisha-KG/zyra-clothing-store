@@ -134,9 +134,14 @@
 
             <!-- IMAGE -->
             <div style="position: relative;">
-              <img src="/uploads/variants/<%= item.variant.images?.length ? item.variant.images[0] : '' %>"
-                width="120" height="120"
-                class="rounded <%= item.isOutOfStock ? 'blur-img' : '' %>" />
+             <img 
+  src="<%= item.variant.images && item.variant.images.length > 0 
+        ? item.variant.images[0].url 
+        : '/images/default-product.png' %>"
+  width="120"
+  height="120"
+  class="rounded <%= item.isOutOfStock ? 'blur-img' : '' %>" 
+/>
 
               <% if(item.isOutOfStock) { %>
                 <div class="out-of-stock-label">OUT OF STOCK</div>

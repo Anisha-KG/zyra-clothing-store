@@ -24,7 +24,7 @@ const productSchema = new Schema({
   },
   finalPriceDynamic: {
     type: Number,
-    required: true,
+    required: false,
   },
   baseFinalPrice: {type: Number},
   discount: {

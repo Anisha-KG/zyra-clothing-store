@@ -29,40 +29,38 @@ const getWishlist = async (req, res, next) => {
 
         // FIXED LOOP
         for (let entry of wishlist.products) {
-            let product = entry.productId;
-            if(product.isBlocked) continue
+    let product = entry.productId;
 
-            
+    if (!product) continue;          // product deleted
+    if (product.isBlocked) continue; // product blocked
 
+    const color = entry.color;
 
-            const color = entry.color;
+    const variant = await Variant.findOne({
+        product: product._id,
+        color: color
+    });
 
-            const variant = await Variant.findOne({
-                product: product._id,
-                color: color
-            });
+    if (!variant) continue;
 
-            const variants = await Variant.find({
-                product: product._id,
-                color: color
-            });
+    const variants = await Variant.find({
+        product: product._id,
+        color: color
+    });
 
-            const availableSizes = variants.map(v => v.size);
+    const availableSizes = variants.map(v => v.size);
 
-            if (!variant) continue;
-
-            items.push({
-                productId: product._id,
-                name: product.name,
-                color: color,
-                prize: product.finalPriceDynamic,
-                bestOffer:product.bestOffer,
-                mrp: product.price,
-                variant,
-                availableSizes
-            });
-        }
-
+    items.push({
+        productId: product._id,
+        name: product.name,
+        color: color,
+        prize: product.finalPriceDynamic||product.finalPrice,
+        bestOffer: product.bestOffer,
+        mrp: product.price,
+        variant,
+        availableSizes
+    });
+}
         return res.render('wishlist', {
             user,
             items,

@@ -408,7 +408,7 @@
 
                 <a href="/product/<%= product._id %>" class="text-decoration-none text-dark">
                   <img
-                    src="<%= variant.images?.[0] ? '/uploads/variants/' + variant.images[0] : '/uploads/default.png' %>"
+                    src="<%= variant.images?.[0] ? variant.images[0].url: '/uploads/default.png' %>"
                     alt="<%= product.name %>" class="img-fluid">
                     
 

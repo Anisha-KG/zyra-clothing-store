@@ -204,10 +204,14 @@
                     ); 
                   %>
                   <% if (matchingVariant && matchingVariant.images && matchingVariant.images.length > 0) { %>
-                    <img src="/uploads/variants/<%= matchingVariant.images[0] %>" class="card-img-top" alt="<%= product.name %>">
-                  <% } else { %>
-                    <img src="/images/placeholder.jpg" class="card-img-top" alt="No image">
-                  <% } %>
+  <img src="<%= matchingVariant.images[0].url %>" 
+       class="card-img-top" 
+       alt="<%= product.name %>">
+<% } else { %>
+  <img src="/images/placeholder.jpg" 
+       class="card-img-top" 
+       alt="No image">
+<% } %>
                   <div class="card-body text-center">
                     <p class="product-name fw-light mb-1"><%= product.name %></p>
                     <p class="product-price text-muted mb-0">₹<%= product.finalPrice %></p>
@@ -307,7 +311,9 @@
                     ); 
                   %>
                   <% if (matchingVariant && matchingVariant.images && matchingVariant.images.length > 0) { %>
-                    <img src="/uploads/variants/<%= matchingVariant.images[0] %>" class="card-img-top" alt="<%= product.name %>">
+                    <img src="<%= matchingVariant.images[0].url %>" 
+       class="card-img-top" 
+       alt="<%= product.name %>">
                   <% } else { %>
                     <img src="/images/placeholder.jpg" class="card-img-top" alt="No image">
                   <% } %>

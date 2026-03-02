@@ -167,10 +167,10 @@ const getconfirmationPage = async (req, res, next) => {
       
 
       
-  item.price = product.finalPriceDynamic;      
+  item.price = product.finalPriceDynamic||product.finalPrice     
   item.mrp = product.price;
       let quantity = item.quantity;
-      let price = product.finalPriceDynamic
+      let price = product.finalPriceDynamic||product.finalPrice
       const mrp = item.productId.price
       const priceDifference = mrp - price
       totalMRP += mrp * quantity

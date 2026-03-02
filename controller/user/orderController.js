@@ -9,6 +9,7 @@ const Orders = require('../../models/orderSchema')
 const Wallet=require('../../models/wallet')
 const razorpay=require('razorpay')
 const Coupons=require('../../models/couponSchema')
+
 require('dotenv').config()
 
 require('dotenv').config()
@@ -314,6 +315,282 @@ const placeOrder = async (req, res, next) => {
         next(error)
     }
 }
+
+
+const mongoose = require("mongoose");
+
+const newone = async (req, res, next) => {
+  const session = await mongoose.startSession();
+
+  try {
+    const userId = req.session.user;
+    const addressId = req.session.addressId;
+    const paymentMethod = req.session.paymentMethod;
+    const couponCode = req.session.couponCode || null;
+    const couponDiscount = req.session.couponDiscount || 0;
+
+    if (!userId || !addressId || !paymentMethod) {
+      session.endSession();
+      return res.status(400).json({
+        success: false,
+        message: "Required details missing",
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    
+    let coupon = null;
+    let normaliseCode = null;
+
+    if (couponCode && couponDiscount) {
+      normaliseCode = couponCode.toUpperCase();
+
+      coupon = await Coupons.findOne({
+        code: normaliseCode,
+        status: true,
+      });
+
+      if (!coupon) {
+        coupon = user.referralCoupons.find(
+          (c) => c.couponCode.toUpperCase() === normaliseCode
+        );
+        if (coupon) {
+          coupon.isReferral = true;
+        }
+      }
+
+      if (!coupon) {
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: "Coupon expired or not available",
+        });
+      }
+    }
+
+    const cart = await Cart.findOne({ userId })
+      .populate("items.productId")
+      .populate("items.variantId");
+
+    if (!cart || cart.items.length === 0) {
+      session.endSession();
+      return res.status(400).json({
+        success: false,
+        message: "Cart not available",
+      });
+    }
+
+    const addressDoc = await Address.findOne({ userId });
+    const selectedAddress = addressDoc?.address.find(
+      (addr) => addr._id.toString() === addressId.toString()
+    );
+
+    if (!selectedAddress) {
+      session.endSession();
+      return res.status(400).json({
+        success: false,
+        message: "Address not found",
+      });
+    }
+
+    const formattedAddress = `
+${selectedAddress.name}
+${selectedAddress.addressName}
+${selectedAddress.city}, ${selectedAddress.state} - ${selectedAddress.pincode}
+Phone: ${selectedAddress.phone}
+`.trim();
+
+    const orderedProducts = cart.items.map((item) => ({
+      product: item.productId._id,
+      variant: item.variantId._id,
+      productName: item.productId.name,
+      MRPprice: item.productId.price,
+      finalPrice: item.price,
+      quantity: item.quantity,
+      itemsTotal: item.quantity * item.price,
+      status: "Pending",
+    }));
+
+    const summary = await calculatetotalSummary(cart, couponDiscount);
+    const deliveryCharge = summary.total > 1000 ? 0 : 60;
+    const totalPayable = summary.total + deliveryCharge;
+
+    // =========================
+    // RAZORPAY (NO TRANSACTION)
+    // =========================
+    if (paymentMethod === "razorpay") {
+      const newOrder = new Order({
+        userId,
+        orderedItems: orderedProducts,
+        taxRate: summary.taxRate,
+        taxAmount: summary.taxAmount,
+        subTotal: summary.subTotal,
+        deliveryCharge,
+        couponDiscount,
+        totalPayable,
+        address: formattedAddress,
+        paymentMethod,
+        invoiceDate: new Date(),
+        paymentStatus: "Pending",
+      });
+
+      await newOrder.save();
+
+      const razorpayOrder = await generateRazorpayOrder(
+        newOrder.orderId,
+        totalPayable
+      );
+
+      newOrder.razorpayorderId = razorpayOrder.id;
+      await newOrder.save();
+
+      session.endSession();
+
+      return res.status(200).json({
+        success: true,
+        paymentType: "razorpay",
+        redirectUrl: `/onlinePayment?orderId=${newOrder.orderId}`,
+      });
+    }
+
+   
+    await session.startTransaction();
+
+    try {
+      
+      if (paymentMethod === "wallet") {
+        const wallet = await Wallet.findOne({ userId }).session(session);
+
+        if (!wallet) throw new Error("Wallet not found");
+        if (wallet.balance < totalPayable)
+          throw new Error("Insufficient wallet balance");
+
+        wallet.balance -= totalPayable;
+
+        wallet.walletTransactions.push({
+          date: new Date(),
+          amount: totalPayable,
+          description: "Order payment",
+          type: "Debit",
+          status: "Completed",
+        });
+
+        await wallet.save({ session });
+      }
+
+      
+      for (let item of cart.items) {
+        const updatedVariant = await Variant.findOneAndUpdate(
+          {
+            _id: item.variantId._id,
+            quantity: { $gte: item.quantity },
+          },
+          { $inc: { quantity: -item.quantity } },
+          { new: true, session }
+        );
+
+        if (!updatedVariant) {
+          throw new Error("Product out of stock");
+        }
+      }
+
+      
+      if (couponCode && couponDiscount) {
+        if (coupon.isReferral) {
+          await User.findOneAndUpdate(
+            {
+              _id: userId,
+              "referralCoupons.couponCode": normaliseCode,
+            },
+            {
+              $set: { "referralCoupons.$.isUsed": true },
+            },
+            { session }
+          );
+        } else {
+          const userExist = coupon.usedUsers.find(
+            (u) => u.userId.toString() === userId.toString()
+          );
+
+          if (userExist) {
+            userExist.count++;
+          } else {
+            coupon.usedUsers.push({
+              userId,
+              count: 1,
+            });
+          }
+
+          coupon.usedCount++;
+
+          if (
+            coupon.usageLimit !== null &&
+            coupon.usedCount >= coupon.usageLimit
+          ) {
+            coupon.status = false;
+          }
+
+          await coupon.save({ session });
+        }
+      }
+
+      
+      orderedProducts.forEach((item) => (item.status = "Confirmed"));
+
+      const newOrder = new Order({
+        userId,
+        orderedItems: orderedProducts,
+        taxRate: summary.taxRate,
+        taxAmount: summary.taxAmount,
+        subTotal: summary.subTotal,
+        deliveryCharge,
+        couponDiscount,
+        totalPayable,
+        address: formattedAddress,
+        paymentMethod,
+        invoiceDate: new Date(),
+        paymentStatus:
+          paymentMethod === "wallet" ? "Completed" : "Pending",
+      });
+
+      await newOrder.save({ session });
+
+      
+      await Cart.updateOne(
+        { userId },
+        { $set: { items: [] } },
+        { session }
+      );
+
+      await session.commitTransaction();
+      session.endSession();
+
+      delete req.session.addressId;
+      delete req.session.paymentMethod;
+      delete req.session.couponCode;
+      delete req.session.couponDiscount;
+
+      return res.status(200).json({
+        success: true,
+        message: "Order placed successfully",
+      });
+
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+  } catch (error) {
+    session.endSession();
+    next(error);
+  }
+};
 
 const orderSuccessfull = async (req, res, next) => {
     try {

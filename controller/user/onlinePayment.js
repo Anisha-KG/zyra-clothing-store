@@ -7,6 +7,7 @@ const User = require('../../models/userScema')
 const {razorpayInstance,generateRazorpayOrder}=require('../../helpers/razorpayInstance')
 const crypto = require('crypto');
 require('dotenv').config()
+const mongoose=require('mongoose')
 
 
 
@@ -27,7 +28,7 @@ const onlinePayment = async (req, res, next) => {
         next(error)
     }
 }
-const verifyRazorpayPayment = async (req, res, next) => {
+const oldone = async (req, res, next) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
         console.log(orderId)
@@ -84,6 +85,128 @@ const verifyRazorpayPayment = async (req, res, next) => {
         next(error);
     }
 };
+
+const verifyRazorpayPayment = async (req, res, next) => {
+   
+    const session=await mongoose.startSession()
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
+        console.log(orderId)
+
+        const order = await Order.findOne({ orderId });
+        if (!order) {
+            return res.status(httpstatus.BAD_REQUEST).json({ success: false, redirectURL: `/onlinepayment/orderfailed?message=cannot find order` });
+        }
+        
+
+        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+            order.orderedItems.forEach(item => item.status = 'Failed');
+            order.paymentStatus = 'Failed';
+            await order.save();
+            return res.status(httpstatus.BAD_REQUEST).json({ success: false, redirectURL: `/onlinepayment/orderfailed?orderId=${orderId}` });
+        }
+
+        
+        const hash = crypto
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(razorpay_order_id + "|" + razorpay_payment_id)
+            .digest("hex");
+
+           
+
+        if (hash !== razorpay_signature) {
+            order.orderedItems.forEach(item => item.status = 'Failed');
+            order.paymentStatus = 'Failed';
+            await order.save();
+            return res.status(httpstatus.BAD_REQUEST).json({ success: false, redirectURL: `/onlinepayment/orderfailed?orderId=${orderId}` });
+        }
+
+      
+        const paymentDetails = await razorpayInstance.payments.fetch(razorpay_payment_id);
+
+        if (paymentDetails.status !== 'captured') {
+            order.orderedItems.forEach(item => item.status = 'Failed');
+            order.paymentStatus = 'Failed';
+            await order.save();
+            return res.status(httpstatus.BAD_REQUEST).json({ success: false, redirectURL: `/onlinepayment/orderfailed?orderId=${orderId}` });
+        }
+
+       
+
+         session.startTransaction()
+        try{
+            console.log('transaction started')
+
+
+            if (order.paymentStatus === "Completed") {
+                await session.abortTransaction();
+                session.endSession();
+
+                return res.status(200).json({
+                    success: true,
+                    message: "Already processed",
+                });
+                }
+
+             for (let item of order.orderedItems) {
+        const updatedVariant = await Variant.findOneAndUpdate(
+          {
+            _id: item.variant,
+            quantity: { $gte: item.quantity },
+          },
+          { $inc: { quantity: -item.quantity } },
+          { new: true, session }
+        );
+
+        if (!updatedVariant) {
+          throw new Error("Product out of stock");
+        }
+      }
+
+            // Payment successful
+        order.orderedItems.forEach(item => item.status = 'Confirmed');
+        order.paymentStatus = 'Completed';
+        await order.save({session});
+
+        
+        
+        // Clear cart
+        await Cart.updateOne({ userId: order.userId }, { $set: { items: [] } },{session});
+
+        await session.commitTransaction();
+      session.endSession();
+
+      delete req.session.addressId;
+      delete req.session.paymentMethod;
+      delete req.session.couponCode;
+      delete req.session.couponDiscount;
+
+       return res.status(httpstatus.OK).json({ success: true, redirectURL: '/orderSuccessfull' });
+
+
+
+        }catch(error){
+            await session.abortTransaction();
+      session.endSession();
+
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+        }
+
+        
+
+        
+    } catch (error) {
+        session.endSession();
+    next(error);
+  }
+    
+};
+
+
+
 
 
 const getFailurePage = async (req, res, next) => {

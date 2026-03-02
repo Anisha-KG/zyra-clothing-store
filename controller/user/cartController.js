@@ -125,7 +125,7 @@ const viewCart = async (req, res, next) => {
 }
 
 
-const addToCart=async(req,res,next)=>{
+const old=async(req,res,next)=>{
     try{
 
         const userId=req.session.user 
@@ -232,6 +232,133 @@ const addToCart=async(req,res,next)=>{
         next(error)
     }
 }
+
+const addToCart = async (req, res, next) => {
+  try {
+
+    const userId = req.session.user;
+    if (!userId) {
+      return res.status(httpStatus.UNAUTHORIZED)
+        .json({ success: false, message: "You are not logged in" });
+    }
+
+    const { productId, size, color } = req.body;
+    const quantity = Number(req.body.quantity);
+
+    if (!productId || !size || !color || !quantity) {
+      return res.status(httpStatus.BAD_REQUEST)
+        .json({ success: false, message: "Product, size, color and quantity are required" });
+    }
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(httpStatus.NOT_FOUND)
+        .json({ success: false, message: "Product not found" });
+    }
+
+    if (product.isBlocked) {
+      return res.status(httpStatus.BAD_REQUEST)
+        .json({ success: false, message: "This product is currently unavailable" });
+    }
+
+    // 🔥 SAFE PRICE CALCULATION (IMPORTANT)
+    const finalPrice =
+      product.finalPriceDynamic ||
+      product.finalPrice ||
+      product.price;
+
+    if (!finalPrice || isNaN(finalPrice)) {
+      return res.status(httpStatus.BAD_REQUEST)
+        .json({ success: false, message: "Invalid product price" });
+    }
+
+    const category = await Category.findById(product.category);
+    if (!category || !category.isListed) {
+      return res.status(httpStatus.BAD_REQUEST)
+        .json({ success: false, message: "Product category unavailable" });
+    }
+
+    const subcategory = await Subcategory.findById(product.subcategory);
+    if (!subcategory || !subcategory.isListed) {
+      return res.status(httpStatus.BAD_REQUEST)
+        .json({ success: false, message: "Product subcategory unavailable" });
+    }
+
+    const variant = await Variant.findOne({ product: productId, size, color });
+
+    if (!variant || !variant.isListed) {
+      return res.status(httpStatus.NOT_FOUND)
+        .json({ success: false, message: "Selected size & color unavailable" });
+    }
+
+    if (quantity > variant.quantity) {
+      return res.status(httpStatus.BAD_REQUEST)
+        .json({ success: false, message: "Insufficient stock" });
+    }
+
+    let cart = await Cart.findOne({ userId });
+    if (!cart) {
+      cart = new Cart({ userId, items: [] });
+    }
+
+    const existingItem = cart.items.find(item =>
+      item.productId.toString() === productId &&
+      item.size === size &&
+      item.color === color
+    );
+
+    if (existingItem) {
+
+      const newQty = existingItem.quantity + quantity;
+
+      if (newQty > 5) {
+        return res.status(httpStatus.BAD_REQUEST)
+          .json({ success: false, message: "Maximum 5 items allowed" });
+      }
+
+      if (newQty > variant.quantity) {
+        return res.status(httpStatus.BAD_REQUEST)
+          .json({ success: false, message: "Insufficient stock" });
+      }
+
+      existingItem.quantity = newQty;
+      existingItem.price = finalPrice; // 🔥 ensure price always updated
+      existingItem.itemsTotal = finalPrice * newQty;
+
+    } else {
+
+      cart.items.push({
+        productId,
+        variantId: variant._id,
+        size,
+        color,
+        MRPprice: product.price,
+        price: finalPrice,
+        quantity: Math.min(quantity, 5),
+        itemsTotal: finalPrice * Math.min(quantity, 5)
+      });
+
+    }
+
+    await cart.save();
+
+    // Remove from wishlist after adding
+    await Wishlist.findOneAndUpdate(
+      { userId },
+      {
+        $pull: {
+          products: { productId, color }
+        }
+      }
+    );
+
+    return res.status(httpStatus.OK)
+      .json({ success: true, message: "Product added to cart successfully" });
+
+  } catch (error) {
+    next(error);
+  }
+};
 
 
 const increment = async (req, res, next) => {
