@@ -42,7 +42,7 @@ app.use(morgan('combined', {
 app.use(countCartMiddleware)
 app.use('/',userRouter)
 app.use('/admin',adminRouter)
-
+console.log(__dirname);
 
 
 app.use((err, req, res, next) => {
