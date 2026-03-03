@@ -1,5 +1,6 @@
 const express=require('express')
 const app=new express()
+app.set('trust proxy', 1);
 const path=require('path')
 const multer=require('multer')
 const morgan=require('morgan')
@@ -58,6 +59,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(process.env.PORT,()=>{
+app.listen(process.env.PORT,'0.0.0.0',()=>{
   console.log('server started')
+  console.log("MONGO_URL:", process.env.MONGO_URL)
 })
