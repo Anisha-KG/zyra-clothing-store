@@ -78,9 +78,11 @@ const viewCart = async (req, res, next) => {
 
             }
 
-            const price = product.finalPriceDynamic 
+            const price = product.finalPriceDynamic || product.finalPrice
             const itemsTotal = item.quantity * price
             subTotal = subTotal + itemsTotal
+
+            console.log(price)
 
             cartItems.push({
                 _id: item._id,
