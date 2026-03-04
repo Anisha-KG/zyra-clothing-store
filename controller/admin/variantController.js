@@ -3,7 +3,7 @@ const Variant=require('../../models/variantSchema')
 const httpstatus=require('../../Constants/httpStatuscode')
 const path=require('path')
 const fs=require('fs')
-const cloudinary=require('../../config/cloudinary')
+const {cloudinary}=require('../../config/cloudinary')
 
 const getVariant=async(req,res)=>{
   try{
