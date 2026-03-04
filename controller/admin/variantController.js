@@ -76,7 +76,7 @@ const addVariant=async(req,res)=>{
   }
 }
 
-const editVariant=async(req,res)=>{
+const oldone=async(req,res)=>{
   try {
     const { variantId, color, size, quantity } = req.body;
 
@@ -140,6 +140,97 @@ const editVariant=async(req,res)=>{
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 }
+
+const editVariant = async (req, res) => {
+  try {
+    const variantId = req.params.id;
+    const { color, size, quantity } = req.body;
+
+    const existingVariant = await Variant.findById(variantId);
+
+    if (!existingVariant) {
+      return res.status(404).json({
+        success: false,
+        message: "Variant not found"
+      });
+    }
+
+    // Optional duplicate check (same color + size under same product)
+    const duplicate = await Variant.findOne({
+      _id: { $ne: variantId },
+      product: existingVariant.product,
+      color,
+      size
+    });
+
+    if (duplicate) {
+      return res.status(400).json({
+        success: false,
+        message: "Variant with same color and size already exists"
+      });
+    }
+
+    const updatedData = {
+      color,
+      size,
+      quantity
+    };
+
+    // ==============================
+    // HANDLE 4 IMAGES
+    // ==============================
+
+    let updatedImages = existingVariant.images || [];
+
+    // Ensure 4 slots exist
+    while (updatedImages.length < 4) {
+      updatedImages.push(null);
+    }
+
+    for (let i = 1; i <= 4; i++) {
+      const fieldName = `image${i}`;
+
+      if (req.files?.[fieldName]?.[0]) {
+
+        // Delete old image from Cloudinary
+        if (updatedImages[i - 1]?.public_id) {
+          await cloudinary.uploader.destroy(
+            updatedImages[i - 1].public_id
+          );
+        }
+
+        // Save new image
+        updatedImages[i - 1] = {
+          url: req.files[fieldName][0].path,
+          public_id: req.files[fieldName][0].filename
+        };
+      }
+    }
+
+    updatedData.images = updatedImages;
+
+    const updatedVariant = await Variant.findByIdAndUpdate(
+      variantId,
+      { $set: updatedData },
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Variant updated successfully",
+      data: updatedVariant
+    });
+
+  } catch (error) {
+    console.log("Edit Variant Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server Error"
+    });
+  }
+};
+
+
 
 const listVariant=async(req,res)=>{
   try{
