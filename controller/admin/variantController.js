@@ -141,14 +141,18 @@ const oldone=async(req,res)=>{
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 }
-const editVariant = async (req, res,next) => {
+const editVariant = async (req, res, next) => {
   try {
     const { variantId, color, size, quantity } = req.body;
+
+    // =============================
+    // VALIDATION
+    // =============================
 
     if (!variantId) {
       return res.status(httpstatus.BAD_REQUEST).json({
         success: false,
-        message: "Variant ID is required"
+        message: "Variant ID is required",
       });
     }
 
@@ -157,30 +161,33 @@ const editVariant = async (req, res,next) => {
     if (!existingVariant) {
       return res.status(httpstatus.NOT_FOUND).json({
         success: false,
-        message: "Variant not found"
+        message: "Variant not found",
       });
     }
 
-    // Validate required fields
-    if (!color || !size || !quantity) {
+    // Allow quantity = 0
+    if (!color || !size || quantity === undefined) {
       return res.status(httpstatus.BAD_REQUEST).json({
         success: false,
-        message: "All fields are required"
+        message: "All fields are required",
       });
     }
 
-    // Optional: prevent duplicate variant (same product + color + size)
+    // =============================
+    // DUPLICATE CHECK
+    // =============================
+
     const duplicate = await Variant.findOne({
       _id: { $ne: variantId },
       product: existingVariant.product,
       color,
-      size
+      size,
     });
 
     if (duplicate) {
       return res.status(httpstatus.BAD_REQUEST).json({
         success: false,
-        message: "Variant already exists with same color and size"
+        message: "Variant already exists with same color and size",
       });
     }
 
@@ -188,30 +195,33 @@ const editVariant = async (req, res,next) => {
     // HANDLE IMAGES
     // =============================
 
-    const imageFields = ['image1', 'image2', 'image3', 'image4'];
+    const imageFields = ["image1", "image2", "image3", "image4"];
 
     let updatedImages = existingVariant.images || [];
 
-    // Ensure 4 positions exist
+    // Ensure 4 slots
     while (updatedImages.length < 4) {
       updatedImages.push(null);
     }
 
-    imageFields.forEach((field, index) => {
-      if (req.files?.[field]) {
+    for (let i = 0; i < imageFields.length; i++) {
+      const field = imageFields[i];
 
-        // Delete old image from Cloudinary
-        if (updatedImages[index]?.public_id) {
-          cloudinary.uploader.destroy(updatedImages[index].public_id);
+      if (req.files?.[field]?.[0]) {
+        // 🔥 Delete old image from Cloudinary
+        if (updatedImages[i]?.public_id) {
+          await cloudinary.uploader.destroy(
+            updatedImages[i].public_id
+          );
         }
 
-        // Add new image
-        updatedImages[index] = {
+        // Save new image
+        updatedImages[i] = {
           url: req.files[field][0].path,
-          public_id: req.files[field][0].filename
+          public_id: req.files[field][0].filename,
         };
       }
-    });
+    }
 
     // =============================
     // UPDATE VARIANT
@@ -224,14 +234,15 @@ const editVariant = async (req, res,next) => {
 
     await existingVariant.save();
 
-    res.status(httpstatus.OK).json({
+    return res.status(httpstatus.OK).json({
       success: true,
       message: "Variant updated successfully",
-      data: existingVariant
+      data: existingVariant,
     });
 
   } catch (error) {
-   next(error)
+    console.error("Edit Variant Error:", error);
+    next(error);
   }
 };
 
