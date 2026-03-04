@@ -140,7 +140,7 @@ const oldone=async(req,res)=>{
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 }
-const editVariant = async (req, res) => {
+const editVariant = async (req, res,next) => {
   try {
     const { variantId, color, size, quantity } = req.body;
 
@@ -230,11 +230,7 @@ const editVariant = async (req, res) => {
     });
 
   } catch (error) {
-    console.log("Error while editing variant:", error);
-    res.status(httpstatus.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: "Something went wrong"
-    });
+   next(error)
   }
 };
 
