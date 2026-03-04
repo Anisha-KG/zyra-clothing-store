@@ -409,6 +409,8 @@ Phone: ${selectedAddress.phone}
       finalPrice: item.price,
       quantity: item.quantity,
       itemsTotal: item.quantity * item.price,
+      color: item.color,
+      size: item.size,
       status: "Pending",
     }));
 
