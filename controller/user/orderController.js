@@ -40,7 +40,7 @@ const generateRazorpayOrder = async (orderId, amount) => {
 };
 
 
-const new = async (req, res, next) => {
+const newone = async (req, res, next) => {
     try {
 
         const userId=req.session.user
