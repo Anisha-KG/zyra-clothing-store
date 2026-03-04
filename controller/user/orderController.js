@@ -40,7 +40,7 @@ const generateRazorpayOrder = async (orderId, amount) => {
 };
 
 
-const placeOrder = async (req, res, next) => {
+const new = async (req, res, next) => {
     try {
 
         const userId=req.session.user
@@ -319,7 +319,7 @@ const placeOrder = async (req, res, next) => {
 
 const mongoose = require("mongoose");
 
-const newone = async (req, res, next) => {
+const placeOrder = async (req, res, next) => {
   const session = await mongoose.startSession();
 
   try {
