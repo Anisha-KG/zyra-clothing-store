@@ -140,22 +140,35 @@ const oldone=async(req,res)=>{
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 }
-
 const editVariant = async (req, res) => {
   try {
-    const variantId = req.params.id;
-    const { color, size, quantity } = req.body;
+    const { variantId, color, size, quantity } = req.body;
+
+    if (!variantId) {
+      return res.status(httpstatus.BAD_REQUEST).json({
+        success: false,
+        message: "Variant ID is required"
+      });
+    }
 
     const existingVariant = await Variant.findById(variantId);
 
     if (!existingVariant) {
-      return res.status(404).json({
+      return res.status(httpstatus.NOT_FOUND).json({
         success: false,
         message: "Variant not found"
       });
     }
 
-    // Optional duplicate check (same color + size under same product)
+    // Validate required fields
+    if (!color || !size || !quantity) {
+      return res.status(httpstatus.BAD_REQUEST).json({
+        success: false,
+        message: "All fields are required"
+      });
+    }
+
+    // Optional: prevent duplicate variant (same product + color + size)
     const duplicate = await Variant.findOne({
       _id: { $ne: variantId },
       product: existingVariant.product,
@@ -164,72 +177,66 @@ const editVariant = async (req, res) => {
     });
 
     if (duplicate) {
-      return res.status(400).json({
+      return res.status(httpstatus.BAD_REQUEST).json({
         success: false,
-        message: "Variant with same color and size already exists"
+        message: "Variant already exists with same color and size"
       });
     }
 
-    const updatedData = {
-      color,
-      size,
-      quantity
-    };
+    // =============================
+    // HANDLE IMAGES
+    // =============================
 
-    // ==============================
-    // HANDLE 4 IMAGES
-    // ==============================
+    const imageFields = ['image1', 'image2', 'image3', 'image4'];
 
     let updatedImages = existingVariant.images || [];
 
-    // Ensure 4 slots exist
+    // Ensure 4 positions exist
     while (updatedImages.length < 4) {
       updatedImages.push(null);
     }
 
-    for (let i = 1; i <= 4; i++) {
-      const fieldName = `image${i}`;
-
-      if (req.files?.[fieldName]?.[0]) {
+    imageFields.forEach((field, index) => {
+      if (req.files?.[field]) {
 
         // Delete old image from Cloudinary
-        if (updatedImages[i - 1]?.public_id) {
-          await cloudinary.uploader.destroy(
-            updatedImages[i - 1].public_id
-          );
+        if (updatedImages[index]?.public_id) {
+          cloudinary.uploader.destroy(updatedImages[index].public_id);
         }
 
-        // Save new image
-        updatedImages[i - 1] = {
-          url: req.files[fieldName][0].path,
-          public_id: req.files[fieldName][0].filename
+        // Add new image
+        updatedImages[index] = {
+          url: req.files[field][0].path,
+          public_id: req.files[field][0].filename
         };
       }
-    }
+    });
 
-    updatedData.images = updatedImages;
+    // =============================
+    // UPDATE VARIANT
+    // =============================
 
-    const updatedVariant = await Variant.findByIdAndUpdate(
-      variantId,
-      { $set: updatedData },
-      { new: true, runValidators: true }
-    );
+    existingVariant.color = color;
+    existingVariant.size = size;
+    existingVariant.quantity = quantity;
+    existingVariant.images = updatedImages;
 
-    res.status(200).json({
+    await existingVariant.save();
+
+    res.status(httpstatus.OK).json({
       success: true,
       message: "Variant updated successfully",
-      data: updatedVariant
+      data: existingVariant
     });
 
   } catch (error) {
-    console.log("Edit Variant Error:", error);
-    res.status(500).json({
+    console.log("Error while editing variant:", error);
+    res.status(httpstatus.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Server Error"
+      message: "Something went wrong"
     });
   }
 };
-
 
 
 const listVariant=async(req,res)=>{
