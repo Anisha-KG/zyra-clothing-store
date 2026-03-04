@@ -498,6 +498,7 @@ Phone: ${selectedAddress.phone}
     message: "Out of stock"
   });
       }
+    }
 
       
       if (couponCode && couponDiscount) {
