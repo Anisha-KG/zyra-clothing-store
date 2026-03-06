@@ -69,7 +69,9 @@ const shopPage = async (req, res) => {
     if (colorArr.length) variantQuery.color = { $in: colorArr };
 
     const filteredVariants = await Variant.find(variantQuery).lean();
-    const productIdsFromVariants = filteredVariants.map(v => v.product);
+    const productIdsFromVariants = [
+  ...new Set(filteredVariants.map(v => v.product.toString()))
+];
 
 
     let productQuery = { isBlocked: false };
@@ -118,7 +120,7 @@ const shopPage = async (req, res) => {
       });
     }
 
-    const totalProducts = await Product.countDocuments(productQuery);
+    const totalProducts = await Product.find(productQuery).countDocuments();
     const totalPages = Math.ceil(totalProducts / limit);
 
     const products = await productQueryBuilder
