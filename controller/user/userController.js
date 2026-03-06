@@ -72,23 +72,22 @@ function generateOtp() {
 
 async function sendVarificationMail(email, otp) {
   try {
+
     const transporter = nodemailer.createTransport({
-      service: "gmail",
-      port: 587,
-      secure: false,
-      requireTLS: true,
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.NODEMAILER_GMAIL,
-        pass: process.env.NODEMAILER_PASSWORD,
-      },
-      tls: { rejectUnauthorized: false }
+        pass: process.env.NODEMAILER_PASSWORD
+      }
     });
 
     await transporter.sendMail({
-      from: process.env.NODEMAILER_GMAIL,
+      from: `"Your App" <${process.env.NODEMAILER_GMAIL}>`,
       to: email,
       subject: "Verify your account",
-      html: `<b>Your OTP is: ${otp}</b>`,
+      html: `<h2>Your OTP is: ${otp}</h2>`
     });
 
     return true;
