@@ -1,171 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zyra Cart Page</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Zyra Cart Page</title>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-  <style>
-body {
-  background: #f3e2da;
-  font-family: Arial, sans-serif;
+<style>
+
+body{
+  background:#f3e2da;
+  font-family:Arial,sans-serif;
 }
 
-.cart-container {
-  padding: 40px 0;
+.cart-container{
+  padding:40px 0;
+}
+
+/* CART ITEMS BOX */
+
+.cart-items-box{
+  background:white;
+  border-radius:12px;
+  padding:20px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.05);
 }
 
 /* PRODUCT CARD */
 
-.product-card {
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 20px;
-  border: 1px solid #e5e5e5;
-  position: relative;
-  display: flex;
-  align-items: center;
+.product-card{
+  display:flex;
+  gap:20px;
+  align-items:center;
+  padding:18px 10px;
+  border-bottom:1px solid #eee;
+  position:relative;
 }
 
-/* Product details */
-
-.product-card h6 {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 4px;
+.product-card:last-child{
+  border-bottom:none;
 }
 
-.product-card .flex-grow-1 {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+.product-card img{
+  width:120px;
+  height:120px;
+  object-fit:cover;
 }
 
-/* PRICE ROW */
+/* PRODUCT DETAILS */
 
-.price-row {
-  display: flex;
-  align-items: center;
-  margin-top: 6px;
+.product-details h6{
+  font-size:16px;
+  font-weight:600;
+  margin-bottom:4px;
 }
 
-.discount-badge {
-  background: #e53935;
-  color: white;
-  font-size: 12px;
-  padding: 3px 7px;
-  border-radius: 4px;
-  font-weight: 600;
+.product-details p{
+  margin:0;
+  font-size:14px;
+}
+
+/* PRICE */
+
+.product-price{
+  font-weight:bold;
+  margin-top:6px;
 }
 
 /* QUANTITY */
 
-.qty-box {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  position: absolute;
-  right: 60px;
-  top: 50%;
-  transform: translateY(-50%);
+.qty-box{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:8px;
 }
 
-.qty-btn {
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  border: 1px solid #777;
-  background: white;
-  cursor: pointer;
-  font-size: 16px;
+.qty-btn{
+  width:30px;
+  height:30px;
+  border:1px solid #ccc;
+  background:white;
+  border-radius:6px;
+  font-size:16px;
 }
 
-.qty-btn:disabled {
-  background: #ddd;
-  cursor: not-allowed;
-  opacity: 0.6;
+.qty-number{
+  min-width:20px;
+  text-align:center;
 }
 
-.qty-number {
-  min-width: 20px;
-  text-align: center;
+.qty-btn:disabled{
+  background:#ddd;
+  cursor:not-allowed;
 }
 
-/* DELETE BUTTON */
+/* REMOVE BUTTON */
 
-.remove-btn,
-.product-card .text-danger {
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  border: none;
-  background: none;
-  font-size: 18px;
-  color: #888;
+.remove-btn{
+  position:absolute;
+  right:0;
+  top:50%;
+  transform:translateY(-50%);
+  border:none;
+  background:none;
+  font-size:18px;
+  color:#777;
 }
 
-.remove-btn:hover {
-  color: black;
+.remove-btn:hover{
+  color:black;
 }
 
 /* BLUR IMAGE */
 
-.blur-img {
-  filter: blur(3px);
-  opacity: 0.6;
+.blur-img{
+  filter:blur(3px);
+  opacity:0.6;
 }
 
-/* OUT OF STOCK LABEL */
+/* OUT OF STOCK */
 
-.out-of-stock-label {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(199, 154, 141, 0.9);
-  color: white;
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-weight: bold;
-  font-size: 15px;
-  white-space: nowrap;
+.out-of-stock-label{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:rgba(199,154,141,0.9);
+  color:white;
+  padding:6px 14px;
+  border-radius:6px;
+  font-weight:bold;
+  font-size:14px;
 }
 
 /* ORDER SUMMARY */
 
-.order-summary {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  border: 3px solid #b9d5ff;
+.order-summary{
+  background:white;
+  border-radius:12px;
+  padding:22px;
+  border:2px solid #b9d5ff;
 }
 
-.summary-title {
-  font-weight: bold;
-  font-size: 18px;
-  margin-bottom: 10px;
-  text-align: center;
+.summary-title{
+  font-weight:600;
+  font-size:18px;
+  margin-bottom:12px;
+  text-align:center;
 }
 
-.total-box {
-  background: #f7f7f7;
-  padding: 15px;
-  border-radius: 10px;
-  margin-top: 15px;
+.total-box{
+  background:#f7f7f7;
+  padding:14px;
+  border-radius:8px;
+  margin-top:12px;
 }
 
-.continue-btn {
-  width: 100%;
-  background: black;
-  color: white;
-  padding: 10px;
-  border-radius: 8px;
+.continue-btn{
+  width:100%;
+  background:black;
+  color:white;
+  padding:10px;
+  border-radius:8px;
+  margin-top:12px;
 }
-  </style>
+
+/* RESPONSIVE */
+
+@media(max-width:768px){
+
+.product-card{
+flex-direction:column;
+align-items:flex-start;
+}
+
+.remove-btn{
+position:static;
+margin-top:10px;
+}
+
+.product-card img{
+width:100%;
+height:auto;
+}
+
+}
+
+</style>
 </head>
 
 <body>
@@ -175,141 +198,166 @@ body {
 <h2 class="text-center mt-4">YOUR CART</h2>
 
 <% if (cartError) { %>
-  <div class="alert alert-danger text-center w-50 mx-auto mt-3" id="cartErrorBox">
-    <%= cartError %>
-  </div>
-  <script>
-    setTimeout(() => {
-      const box = document.getElementById("cartErrorBox");
-      if (box) box.style.display = "none";
-    }, 3000);
-  </script>
+<div class="alert alert-danger text-center w-50 mx-auto mt-3" id="cartErrorBox">
+<%= cartError %>
+</div>
+
+<script>
+setTimeout(()=>{
+const box=document.getElementById("cartErrorBox")
+if(box) box.style.display="none"
+},3000)
+</script>
 <% } %>
-<div class="product-card d-flex gap-3 align-items-center">
 
-  <!-- IMAGE -->
-  <div style="position: relative;">
-    <img 
-      src="<%= item.variant.images && item.variant.images.length > 0 
-        ? item.variant.images[0].url 
-        : '/images/default-product.png' %>"
-      width="90"
-      height="90"
-      class="rounded <%= item.isOutOfStock ? 'blur-img' : '' %>"
-    />
+<div class="container cart-container">
+<div class="row g-4">
 
-    <% if(item.isOutOfStock) { %>
-      <div class="out-of-stock-label">OUT OF STOCK</div>
-    <% } %>
-  </div>
+<!-- CART ITEMS -->
 
-  <!-- PRODUCT DETAILS -->
-  <div class="flex-grow-1">
+<div class="col-lg-8">
 
-    <h6 class="mb-1"><%= item.product.name %></h6>
+<div class="cart-items-box">
 
-    <p class="text-muted small mb-1">
-      <%= item.variant.color %> — Quantity: <%= item.variant.size %>
-    </p>
+<% if (!cartItems || cartItems.length === 0) { %>
 
-    <div class="price-row">
+<h4 class="text-center mt-3">Your cart is empty</h4>
 
-      <span class="fw-bold">₹<%= item.price %></span>
+<% } else { %>
 
-      <% if(item.originalPrice){ %>
-      <span class="text-muted text-decoration-line-through ms-2">
-        ₹<%= item.originalPrice %>
-      </span>
-      <% } %>
+<% cartItems.forEach(item => { %>
 
-      <% if(item.discount){ %>
-      <span class="discount-badge ms-2">
-        <%= item.discount %>% OFF
-      </span>
-      <% } %>
+<div class="product-card">
 
-    </div>
+<!-- IMAGE -->
 
-  </div>
+<div style="position:relative">
 
-  <!-- QUANTITY -->
-  <div class="qty-box">
+<img
+src="<%= item.variant.images && item.variant.images.length > 0 
+? item.variant.images[0].url 
+: '/images/default-product.png' %>"
+class="rounded <%= item.isOutOfStock ? 'blur-img' : '' %>"
+>
 
-    <button class="qty-btn"
-      onclick="decrement('<%= item._id %>')"
-      <%= item.isOutOfStock ? 'disabled' : '' %> >
-      −
-    </button>
-
-    <span class="qty-number" id="qty-<%= item._id %>"><%= item.quantity %></span>
-
-    <button class="qty-btn"
-      onclick="increment('<%= item._id %>')"
-      <%= item.isOutOfStock ? 'disabled' : '' %> >
-      +
-    </button>
-
-  </div>
-
-  <!-- REMOVE -->
-  <button class="remove-btn"
-    onclick="deleteItem('<%= item._id %>')">
-    ✕
-  </button>
+<% if(item.isOutOfStock){ %>
+<div class="out-of-stock-label">OUT OF STOCK</div>
+<% } %>
 
 </div>
 
-    <!-- ORDER SUMMARY -->
-    <div class="col-lg-4">
-      <div class="order-summary">
-        <p class="summary-title">Order Summary</p>
+<!-- DETAILS -->
 
-        <% if (cartItems && cartItems.length > 0) { %>
+<div class="product-details flex-grow-1">
 
-          <% cartItems.forEach(item => { %>
-            <div class="d-flex justify-content-between mb-1" id="summary-item-<%= item._id %>">
-              <div class="d-flex gap-0">
-                <span id="summary-qty-price-<%= item._id %>"><%= item.quantity %> ×</span>
-                <span>₹<%= item.price %></span>
-              </div>
+<h6><%= item.product.name %></h6>
 
-              <span id="summary-itemTotal-<%= item._id %>">
-                ₹<%= item.itemsTotal %>
-              </span>
-            </div>
-          <% }) %>
+<p class="text-muted"><%= item.variant.color %></p>
 
-          <hr/>
+<p class="text-muted">Size: <%= item.variant.size %></p>
 
-          <div class="d-flex justify-content-between">
-            <span>Subtotal</span>
-            <strong id="subTotal">₹<%= subTotal || 0 %></strong>
-          </div>
+<p class="product-price">₹<%= item.price %></p>
 
-          <div class="d-flex justify-content-between">
-            <span>Delivery Charges</span>
-            <span class="text-success">Free</span>
-          </div>
+<!-- QUANTITY -->
 
-          <div class="d-flex justify-content-between">
-            <span>Tax (18%)</span>
-            <strong id="tax">₹<%= tax || 0 %></strong>
-          </div>
+<div class="qty-box">
 
-          <div class="total-box d-flex justify-content-between">
-            <strong>Total</strong>
-            <strong id="total">₹<%= total || 0 %></strong>
-          </div>
+<button class="qty-btn"
+onclick="decrement('<%= item._id %>')"
+<%= item.isOutOfStock ? 'disabled' : '' %>>
+−
+</button>
 
-          <button class="continue-btn mt-3" onclick="window.location.href='/checkout';">
-            Continue
-          </button>
-        <% } %>
+<span class="qty-number" id="qty-<%= item._id %>"><%= item.quantity %></span>
 
-      </div>
-    </div>
+<button class="qty-btn"
+onclick="increment('<%= item._id %>')"
+<%= item.isOutOfStock ? 'disabled' : '' %>>
++
+</button>
 
-  </div>
+</div>
+
+</div>
+
+<!-- DELETE -->
+
+<button class="remove-btn"
+onclick="deleteItem('<%= item._id %>')">
+<i class="bi bi-trash"></i>
+</button>
+
+</div>
+
+<% }) %>
+
+<% } %>
+
+</div>
+
+</div>
+
+<!-- ORDER SUMMARY -->
+
+<div class="col-lg-4">
+
+<div class="order-summary">
+
+<p class="summary-title">Order Summary</p>
+
+<% if (cartItems && cartItems.length > 0) { %>
+
+<% cartItems.forEach(item => { %>
+
+<div class="d-flex justify-content-between mb-1" id="summary-item-<%= item._id %>">
+
+<div>
+<span id="summary-qty-price-<%= item._id %>"><%= item.quantity %> ×</span>
+<span>₹<%= item.price %></span>
+</div>
+
+<span id="summary-itemTotal-<%= item._id %>">
+₹<%= item.itemsTotal %>
+</span>
+
+</div>
+
+<% }) %>
+
+<hr/>
+
+<div class="d-flex justify-content-between">
+<span>Subtotal</span>
+<strong id="subTotal">₹<%= subTotal || 0 %></strong>
+</div>
+
+<div class="d-flex justify-content-between">
+<span>Delivery Charges</span>
+<span class="text-success">Free</span>
+</div>
+
+<div class="d-flex justify-content-between">
+<span>Tax (18%)</span>
+<strong id="tax">₹<%= tax || 0 %></strong>
+</div>
+
+<div class="total-box d-flex justify-content-between">
+<strong>Total</strong>
+<strong id="total">₹<%= total || 0 %></strong>
+</div>
+
+<button class="continue-btn"
+onclick="window.location.href='/checkout';">
+Continue
+</button>
+
+<% } %>
+
+</div>
+
+</div>
+
+</div>
 </div>
 
 
