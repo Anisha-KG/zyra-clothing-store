@@ -13,6 +13,39 @@
       font-family: Arial, sans-serif;
     }
 
+    .product-card {
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 20px;
+  position: relative;
+  display: flex;
+  align-items: center; /* vertical center */
+}
+
+/* Make content row layout */
+.product-card .flex-grow-1 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Move quantity controls to right side */
+.qty-box {
+  position: absolute;
+  right: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Delete icon on far right */
+.product-card .text-danger {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
     .cart-container { padding: 40px 0; }
 
     .product-card {
