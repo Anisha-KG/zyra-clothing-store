@@ -8,130 +8,163 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
 
   <style>
-    body {
-      background: #f3e2da;
-      font-family: Arial, sans-serif;
-    }
-
-    .product-card {
-  background: white;
-  border-radius: 12px;
-  padding: 15px;
-  margin-bottom: 20px;
-  position: relative;
-  display: flex;
-  align-items: center; /* vertical center */
+body {
+  background: #f3e2da;
+  font-family: Arial, sans-serif;
 }
 
-/* Make content row layout */
+.cart-container {
+  padding: 40px 0;
+}
+
+/* PRODUCT CARD */
+
+.product-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid #e5e5e5;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Product details */
+
+.product-card h6 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
 .product-card .flex-grow-1 {
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-/* Move quantity controls to right side */
+/* PRICE ROW */
+
+.price-row {
+  display: flex;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.discount-badge {
+  background: #e53935;
+  color: white;
+  font-size: 12px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* QUANTITY */
+
 .qty-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   position: absolute;
   right: 60px;
   top: 50%;
   transform: translateY(-50%);
 }
 
-/* Delete icon on far right */
+.qty-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid #777;
+  background: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.qty-btn:disabled {
+  background: #ddd;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.qty-number {
+  min-width: 20px;
+  text-align: center;
+}
+
+/* DELETE BUTTON */
+
+.remove-btn,
 .product-card .text-danger {
   position: absolute;
   right: 20px;
   top: 50%;
   transform: translateY(-50%);
+  border: none;
+  background: none;
+  font-size: 18px;
+  color: #888;
 }
 
-    .cart-container { padding: 40px 0; }
+.remove-btn:hover {
+  color: black;
+}
 
-    .product-card {
-      background: white;
-      border-radius: 12px;
-      padding: 15px;
-      margin-bottom: 20px;
-      position: relative;
-    }
+/* BLUR IMAGE */
 
-    /* BLUR EFFECT */
-    .blur-img {
-      filter: blur(3px);
-      opacity: 0.6;
-    }
+.blur-img {
+  filter: blur(3px);
+  opacity: 0.6;
+}
 
-    /* OUT OF STOCK LABEL */
 /* OUT OF STOCK LABEL */
+
 .out-of-stock-label {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(199, 154, 141, 0.9); /* Zyra color */
+  background: rgba(199, 154, 141, 0.9);
   color: white;
   padding: 6px 14px;
   border-radius: 6px;
   font-weight: bold;
   font-size: 15px;
-  white-space: nowrap; /* FORCE single line */
+  white-space: nowrap;
 }
 
-    .order-summary {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      border: 3px solid #b9d5ff;
-    }
+/* ORDER SUMMARY */
 
-    .qty-box {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 8px;
-    }
+.order-summary {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 3px solid #b9d5ff;
+}
 
-    .qty-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 5px;
-      border: 1px solid #777;
-      background: white;
-      cursor: pointer;
-      font-size: 16px;
-      padding: 0;
-    }
+.summary-title {
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 10px;
+  text-align: center;
+}
 
-    .qty-btn:disabled {
-      background: #ddd;
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
+.total-box {
+  background: #f7f7f7;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 15px;
+}
 
-    .qty-number { min-width: 22px; text-align: center; }
-
-    .continue-btn {
-      width: 100%;
-      background: black;
-      color: white;
-      padding: 10px;
-      border-radius: 8px;
-    }
-
-    .total-box {
-      background: #f7f7f7;
-      padding: 15px;
-      border-radius: 10px;
-      margin-top: 15px;
-    }
-
-    .summary-title {
-      font-weight: bold;
-      font-size: 18px;
-      margin-bottom: 10px;
-      text-align: center;
-    }
+.continue-btn {
+  width: 100%;
+  background: black;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+}
   </style>
 </head>
 
@@ -152,71 +185,79 @@
     }, 3000);
   </script>
 <% } %>
+<div class="product-card d-flex gap-3 align-items-center">
 
-<div class="container cart-container">
-  <div class="row g-4">
-
-    <!-- CART ITEMS -->
-    <div class="col-lg-8">
-      <% if (!cartItems || cartItems.length === 0) { %>
-        <h4 class="text-center mt-5">Your cart is empty</h4>
-      <% } else { %>
-
-        <% cartItems.forEach(item => { %>
-          <div class="product-card d-flex gap-3">
-
-            <!-- IMAGE -->
-            <div style="position: relative;">
-             <img 
-  src="<%= item.variant.images && item.variant.images.length > 0 
+  <!-- IMAGE -->
+  <div style="position: relative;">
+    <img 
+      src="<%= item.variant.images && item.variant.images.length > 0 
         ? item.variant.images[0].url 
         : '/images/default-product.png' %>"
-  width="120"
-  height="120"
-  class="rounded <%= item.isOutOfStock ? 'blur-img' : '' %>" 
-/>
+      width="90"
+      height="90"
+      class="rounded <%= item.isOutOfStock ? 'blur-img' : '' %>"
+    />
 
-              <% if(item.isOutOfStock) { %>
-                <div class="out-of-stock-label">OUT OF STOCK</div>
-              <% } %>
-            </div>
+    <% if(item.isOutOfStock) { %>
+      <div class="out-of-stock-label">OUT OF STOCK</div>
+    <% } %>
+  </div>
 
-            <div class="flex-grow-1">
+  <!-- PRODUCT DETAILS -->
+  <div class="flex-grow-1">
 
-              <h6><%= item.product.name %></h6>
-              <p class="text-muted m-0"><%= item.variant.color %></p>
-              <p class="text-muted m-0">Size: <%= item.variant.size %></p>
+    <h6 class="mb-1"><%= item.product.name %></h6>
 
-              <p class="fw-bold mt-2">₹<%= item.price %></p>
+    <p class="text-muted small mb-1">
+      <%= item.variant.color %> — Quantity: <%= item.variant.size %>
+    </p>
 
-              <!-- Quantity Buttons -->
-              <div class="qty-box">
-                <button class="qty-btn"
-                        onclick="decrement('<%= item._id %>')"
-                        <%= item.isOutOfStock ? 'disabled' : '' %> >
-                  −
-                </button>
+    <div class="price-row">
 
-                <span class="qty-number" id="qty-<%= item._id %>"><%= item.quantity %></span>
+      <span class="fw-bold">₹<%= item.price %></span>
 
-                <button class="qty-btn"
-                        onclick="increment('<%= item._id %>')"
-                        <%= item.isOutOfStock ? 'disabled' : '' %> >
-                  +
-                </button>
-              </div>
-
-              <button class="btn btn-sm text-danger border-0"
-                      onclick="deleteItem('<%= item._id %>')">
-                <i class="bi bi-trash" style="font-size:18px;"></i>
-              </button>
-
-            </div>
-          </div>
-        <% }) %>
-
+      <% if(item.originalPrice){ %>
+      <span class="text-muted text-decoration-line-through ms-2">
+        ₹<%= item.originalPrice %>
+      </span>
       <% } %>
+
+      <% if(item.discount){ %>
+      <span class="discount-badge ms-2">
+        <%= item.discount %>% OFF
+      </span>
+      <% } %>
+
     </div>
+
+  </div>
+
+  <!-- QUANTITY -->
+  <div class="qty-box">
+
+    <button class="qty-btn"
+      onclick="decrement('<%= item._id %>')"
+      <%= item.isOutOfStock ? 'disabled' : '' %> >
+      −
+    </button>
+
+    <span class="qty-number" id="qty-<%= item._id %>"><%= item.quantity %></span>
+
+    <button class="qty-btn"
+      onclick="increment('<%= item._id %>')"
+      <%= item.isOutOfStock ? 'disabled' : '' %> >
+      +
+    </button>
+
+  </div>
+
+  <!-- REMOVE -->
+  <button class="remove-btn"
+    onclick="deleteItem('<%= item._id %>')">
+    ✕
+  </button>
+
+</div>
 
     <!-- ORDER SUMMARY -->
     <div class="col-lg-4">
