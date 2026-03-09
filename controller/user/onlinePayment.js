@@ -86,7 +86,7 @@ const oldone = async (req, res, next) => {
     }
 };
 
-const oldone2 = async (req, res, next) => {
+const verifyRazorpayPayment = async (req, res, next) => {
    
     const session=await mongoose.startSession()
     try {
@@ -205,7 +205,7 @@ const oldone2 = async (req, res, next) => {
     
 };
 
-const verifyRazorpayPayment = async (req, res, next) => {
+const oldone2 = async (req, res, next) => {
   let session;
 
   try {
