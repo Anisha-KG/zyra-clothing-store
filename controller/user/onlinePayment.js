@@ -231,15 +231,23 @@ const verifyRazorpayPayment = async (req, res, next) => {
 
     // Check if required values exist
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      order.orderedItems.forEach((item) => (item.status = "Failed"));
-      order.paymentStatus = "Failed";
-      await order.save();
 
-      return res.status(400).json({
-        success: false,
-        redirectURL: `/onlinepayment/orderfailed?orderId=${orderId}`,
-      });
-    }
+  if (order.paymentStatus === "Completed") {
+    return res.status(200).json({
+      success: true,
+      redirectURL: "/orderSuccessfull"
+    });
+  }
+
+  order.orderedItems.forEach((item) => (item.status = "Failed"));
+  order.paymentStatus = "Failed";
+  await order.save();
+
+  return res.status(400).json({
+    success: false,
+    redirectURL: `/onlinepayment/orderfailed?orderId=${orderId}`
+  });
+}
 
     // Razorpay signature verification
     const generatedSignature = crypto
