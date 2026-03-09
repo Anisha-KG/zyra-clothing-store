@@ -27,6 +27,9 @@
     background-color: #f8f5f3;
     color: #1b1919;
   }
+  .product-card{
+  cursor: pointer;
+}
 
   /* Section Titles */
   h2.section-title {
@@ -197,7 +200,7 @@
           <div class="row">
             <% chunk.forEach(product => { %>
               <div class="col-6 col-sm-4 col-lg-3 mb-3">
-                <div class="card product-card shadow-sm border-0 h-100">
+                <div class="card product-card shadow-sm border-0 h-100 " onclick="window.location.href='/product/<%= product._id%>'">
                   <% 
                     const matchingVariant = productVariant.find(v => 
                       v.product && v.product._id.toString() === product._id.toString()
@@ -304,7 +307,7 @@
           <div class="row">
             <% chunk.forEach(product => { %>
               <div class="col-6 col-sm-4 col-lg-3 mb-3">
-                <div class="card product-card shadow-sm border-0 h-100">
+                <div class="card product-card shadow-sm border-0 h-100"  onclick="window.location.href='/product/<%= product._id %>'">
                   <% 
                     const matchingVariant = productVariant.find(v => 
                       v.product && v.product._id.toString() === product._id.toString()
