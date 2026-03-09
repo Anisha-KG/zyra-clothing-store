@@ -450,10 +450,10 @@ Phone: ${selectedAddress.phone}
       session.endSession();
 
       return res.status(200).json({
-        success: true,
-        paymentType: "razorpay",
-        redirectUrl: `/onlinePayment?orderId=${newOrder.orderId}`,
-      });
+  success: true,
+  paymentType: "razorpay",
+  redirectUrl: `/onlinePayment?orderId=${newOrder.orderId}&razorpayorderId=${razorpayOrder.id}`
+});
     }
 
    
