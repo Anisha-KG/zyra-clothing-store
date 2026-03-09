@@ -60,19 +60,22 @@
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
   <script>
-    console.log("Sending orderId to backend:", "<%= orderId %>");
+let paymentCompleted = false;
+
 document.getElementById("payBtn").onclick = function () {
 
   const options = {
-    key: "<%= razorpayKey_id %>",   // Razorpay Key ID
-    amount: "<%= amount %>" * 100,  // Razorpay expects paise
+    key: "<%= razorpayKey_id %>",
+    amount: <%= amount * 100 %>, 
     currency: "INR",
     name: "Zyra",
     description: "Order Payment",
-    order_id: "<%= razorpayorderId %>",   // Razorpay generated orderId
+    order_id: "<%= razorpayorderId %>",
 
     handler: function (response) {
-      // Payment success → verify on backend
+
+      paymentCompleted = true;
+
       fetch("/payment/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -85,18 +88,17 @@ document.getElementById("payBtn").onclick = function () {
       })
       .then(res => res.json())
       .then(data => {
-        console.log("Redirect URL from backend:", data.redirectURL);
-    if (data.redirectURL) {
-        window.location.href = data.redirectURL;
-    }  else {
-        console.error("Redirect URL missing!", data);
-    }
+        if (data.redirectURL) {
+          window.location.href = data.redirectURL;
+        }
       });
     },
 
     modal: {
       ondismiss: function () {
-        // User closed popup → mark payment as failed
+
+        if (paymentCompleted) return;
+
         fetch("/payment/verify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -119,8 +121,10 @@ document.getElementById("payBtn").onclick = function () {
 
   const rzp = new Razorpay(options);
 
-  // Razorpay failed payment event
   rzp.on("payment.failed", function (response) {
+
+    paymentCompleted = true;
+
     fetch("/payment/verify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -135,12 +139,12 @@ document.getElementById("payBtn").onclick = function () {
     .then(data => {
       window.location.href = data.redirectURL;
     });
+
   });
 
   rzp.open();
 };
-  </script>
-
+</script>
 </body>
 </html>
 
