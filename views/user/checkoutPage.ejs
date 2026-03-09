@@ -142,7 +142,7 @@ body {
       <div class="section-box">
 <% cartItems.forEach(item => { %>
 
-  <div class="d-flex mb-3">
+  <div class="d-flex mb-3"  onclick="window.location.href='/product/<%= product._id %>'">
     <img 
       src="<%= item.variant.images?.length ? item.variant.images[0].url: '' %>" 
       class="product-img" 

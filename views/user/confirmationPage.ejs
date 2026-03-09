@@ -120,11 +120,11 @@
 
     <!-- RIGHT SIDE: Order Items -->
     <div class="col-lg-6 mb-3">
-      <div class="section-box">
+      <div class="section-box" >
         <h5 class="fw-bold mb-3">Order Items • <%= cartItems.length %> products</h5>
 
        <% cartItems.forEach(item => { %>
-  <div class="product-row">
+  <div class="product-row"  onclick="window.location.href='/product/<%= product._id %>'">
     <img 
       src="<%= item.variant.images?.length ? item.variant.images[0].url : 'placeholder.png' %>" 
       alt="Product Image"
