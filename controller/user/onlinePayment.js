@@ -133,7 +133,7 @@ const verifyRazorpayPayment = async (req, res, next) => {
 
        
 
-         session.startTransaction()
+         await session.startTransaction()
         try{
             console.log('transaction started')
 
