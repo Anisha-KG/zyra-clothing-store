@@ -60,13 +60,13 @@
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
   <script>
-let paymentCompleted = false;
+let paymentProcessed = false;
 
 document.getElementById("payBtn").onclick = function () {
 
   const options = {
     key: "<%= razorpayKey_id %>",
-    amount: <%= amount * 100 %>, 
+    amount: <%= amount * 100 %>,
     currency: "INR",
     name: "Zyra",
     description: "Order Payment",
@@ -74,11 +74,14 @@ document.getElementById("payBtn").onclick = function () {
 
     handler: function (response) {
 
-      paymentCompleted = true;
+      if (paymentProcessed) return;
+      paymentProcessed = true;
 
       fetch("/payment/verify", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({
           razorpay_order_id: response.razorpay_order_id,
           razorpay_payment_id: response.razorpay_payment_id,
@@ -91,17 +94,24 @@ document.getElementById("payBtn").onclick = function () {
         if (data.redirectURL) {
           window.location.href = data.redirectURL;
         }
+      })
+      .catch(() => {
+        window.location.href = "/onlinepayment/orderfailed?orderId=<%= orderId %>";
       });
     },
 
     modal: {
       ondismiss: function () {
 
-        if (paymentCompleted) return;
+        if (paymentProcessed) return;
+
+        paymentProcessed = true;
 
         fetch("/payment/verify", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json"
+          },
           body: JSON.stringify({
             razorpay_order_id: null,
             razorpay_payment_id: null,
@@ -111,23 +121,34 @@ document.getElementById("payBtn").onclick = function () {
         })
         .then(res => res.json())
         .then(data => {
-          window.location.href = data.redirectURL;
+          if (data.redirectURL) {
+            window.location.href = data.redirectURL;
+          }
+        })
+        .catch(() => {
+          window.location.href = "/onlinepayment/orderfailed?orderId=<%= orderId %>";
         });
       }
     },
 
-    theme: { color: "#000000" }
+    theme: {
+      color: "#000000"
+    }
   };
 
   const rzp = new Razorpay(options);
 
   rzp.on("payment.failed", function (response) {
 
-    paymentCompleted = true;
+    if (paymentProcessed) return;
+
+    paymentProcessed = true;
 
     fetch("/payment/verify", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         razorpay_order_id: response.error.metadata.order_id,
         razorpay_payment_id: response.error.metadata.payment_id,
@@ -137,7 +158,12 @@ document.getElementById("payBtn").onclick = function () {
     })
     .then(res => res.json())
     .then(data => {
-      window.location.href = data.redirectURL;
+      if (data.redirectURL) {
+        window.location.href = data.redirectURL;
+      }
+    })
+    .catch(() => {
+      window.location.href = "/onlinepayment/orderfailed?orderId=<%= orderId %>";
     });
 
   });
