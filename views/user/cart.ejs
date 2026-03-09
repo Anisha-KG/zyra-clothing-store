@@ -254,11 +254,11 @@ if(box) box.style.display="none"
 
 <% cartItems.forEach(item => { %>
 
-<div class="product-card"  onclick="window.location.href='/product/<%= item._id %>'">
+<div class="product-card"  >
 
 <!-- IMAGE -->
 
-<div style="position:relative">
+<div style="position:relative" onclick="window.location.href='/product/<%= item._id %>'">
 
 <img
 src="<%= item.variant.images && item.variant.images.length > 0 
