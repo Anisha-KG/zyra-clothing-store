@@ -19,12 +19,21 @@ async function calculateBestOffer(product) {
    
     const category = await Category.findById(product.category);
 
+    console.log("CATEGORY:", category);
+
+if (category) {
+    console.log("Offer:", category.categoryOffer);
+    console.log("Start:", category.startDate);
+    console.log("End:", category.endDate);
+}
+
     if (
         category &&
         category.categoryOffer &&
         category.startDate <= new Date() &&
         category.endDate >= new Date()
     ) {
+         console.log("Category offer added");
         offers.push(category.categoryOffer);
     }
 
