@@ -492,12 +492,7 @@ Phone: ${selectedAddress.phone}
           { new: true, session }
         );
 
-        if (!updatedVariant) {
-  return res.status(400).json({
-    success: false,
-    message: "Out of stock"
-  });
-      }
+        if (!updatedVariant) throw new Error("Out of Stock");
     }
 
       

@@ -216,9 +216,7 @@ const verifyRazorpayPayment = async (req, res, next) => {
       orderId,
     } = req.body;
 
-    console.log("Order ID:", orderId);
-    console.log("Razorpay Order:", razorpay_order_id);
-    console.log("Payment ID:", razorpay_payment_id);
+   
 
     const order = await Order.findOne({ orderId });
 
@@ -274,7 +272,7 @@ const verifyRazorpayPayment = async (req, res, next) => {
       razorpay_payment_id
     );
 
-    console.log("Payment Status:", paymentDetails.status);
+
 
     if (
       paymentDetails.status !== "captured" &&
@@ -289,7 +287,7 @@ const verifyRazorpayPayment = async (req, res, next) => {
         redirectURL: `/onlinepayment/orderfailed?orderId=${orderId}`,
       });
     }
-console.log("session starting");
+
     await session.startTransaction();
 
     try {
@@ -303,7 +301,7 @@ console.log("session starting");
           message: "Payment already processed",
         });
       }
-console.log("Reduce stock");
+
       // Reduce stock
       for (let item of order.orderedItems) {
         const updatedVariant = await Variant.findOneAndUpdate(
@@ -316,16 +314,19 @@ console.log("Reduce stock");
         );
 
         if (!updatedVariant) {
-          throw new Error("Product out of stock");
-        }
+  return res.status(400).json({
+    success: false,
+    message: "Out of stock"
+  });
       }
-console.log("Update order status");
+      }
+
       // Update order status
       order.orderedItems.forEach((item) => (item.status = "Confirmed"));
       order.paymentStatus = "Completed";
 
       await order.save({ session });
-console.log("Clear cart");
+
       // Clear cart
       await Cart.updateOne(
         { userId: order.userId },
@@ -335,7 +336,7 @@ console.log("Clear cart");
 
       await session.commitTransaction();
       session.endSession();
-console.log("lear checkout session");
+
       // Clear checkout session
       delete req.session.addressId;
       delete req.session.paymentMethod;
