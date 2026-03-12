@@ -167,6 +167,9 @@ const addProductOffer = async (req, res,next) => {
     offerValidUntil: offer.endDate,
     offerId: offer._id
   })
+  const product=await Product.findById(productId)
+
+  await updateBestPrice(product)
 
   res.json({ success:true, message:"Offer applied successfully" })
 
