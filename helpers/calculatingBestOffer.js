@@ -55,7 +55,8 @@ async function calculateBestOffer(product) {
     
     if (offers.length === 0) return 0;
 
-    
+    console.log("All Offers:", offers);
+    console.log("Best Offer:", Math.max(...offers));
     
     return Math.max(...offers);
 }
