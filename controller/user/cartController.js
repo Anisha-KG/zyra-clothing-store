@@ -99,7 +99,7 @@ const viewCart = async (req, res, next) => {
             await cart.save()
         }
 
-        const tax = Math.round(subTotal * 0.18)
+        const tax = Math.round(subTotal * process.env.TAX_RATE)
         const total = subTotal + tax
         const cartCount = cart.items.reduce((acc, item) => {
             return acc += item.quantity
@@ -492,7 +492,7 @@ async function calculatetotalSummary(cart){
          subTotal+=price*item.quantity
     }
 
-    const tax=Math.round(subTotal*0.02)
+    const tax=Math.round(subTotal*process.env.TAX_RATE)
     const total=subTotal+tax 
     
     return{subTotal,tax,total}

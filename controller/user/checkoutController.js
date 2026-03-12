@@ -53,7 +53,7 @@ const viewCheckoutPage = async (req, res, next) => {
 
     }
 
-    const tax = Math.round(subtotal * 0.18);
+    const tax = Math.round(subtotal * process.env.TAX_RATE);
     const total = subtotal + tax;
 
     const addresses=await Address.findOne({userId})
@@ -120,7 +120,7 @@ const selectPayment=async(req,res,next)=>{
 
     }
 
-    const tax = Math.round(subtotal * 0.18);
+    const tax = Math.round(subtotal * process.env.TAX_RATE);
     const total = subtotal + tax;
 
     
@@ -220,8 +220,8 @@ const coupons = await Coupons.find({
         if (userExist) {
           if (userExist.count >= coupon.usagePerUser) {
             
-                const CGST = Math.round(subTotal * 0.09)
-                const SGST = Math.round(subTotal * 0.09)
+                const CGST = Math.round(subTotal * process.env.TAX_RATE_DIVISION)
+                const SGST = Math.round(subTotal *process.env.TAX_RATE_DIVISION)
                 const totalTax = CGST + SGST
                 const TotalPayable = subTotal + totalTax
                 let shippingCharge = subTotal < 1000 ? 60 : 0;
@@ -303,8 +303,8 @@ const coupons = await Coupons.find({
 
 
 
-    const CGST = Math.round(subTotal * 0.09)
-    const SGST = Math.round(subTotal * 0.09)
+    const CGST = Math.round(subTotal * process.env.TAX_RATE_DIVISION)
+    const SGST = Math.round(subTotal * process.env.TAX_RATE_DIVISION)
     const totalTax = CGST + SGST
     const TotalPayable = subTotal + totalTax
     let shippingCharge = subTotal < 1000 ? 60 : 0;
