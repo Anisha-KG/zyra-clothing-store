@@ -475,7 +475,7 @@ Phone: ${selectedAddress.phone}
           amount: totalPayable,
           description: "Order payment",
           type: "Debit",
-          status: "Completed",
+          status: "Used for order",
         });
 
         await wallet.save({ session });
