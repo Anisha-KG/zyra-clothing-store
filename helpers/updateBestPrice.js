@@ -5,7 +5,7 @@ const updateBestPrice=async(product)=>{
 for(let p of product){
     const bestOffer = await calculateBestOffer(p);
    const discountAmount = (p.price * bestOffer) / 100;
-   p.finalPriceDynamic = Math.round(p.price - discountAmount);
+   p.finalPrice = Math.round(p.price - discountAmount);
    
 
    await p.save()

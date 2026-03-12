@@ -38,7 +38,7 @@ const viewCheckoutPage = async (req, res, next) => {
       const variant=item.variantId
 
       let quantity = item.quantity;
-      let price = product.finalPriceDynamic || product.finalPrice;
+      let price = product.finalPrice || product.price;
       subtotal += quantity * price;
 
       cartItems.push({
@@ -105,7 +105,7 @@ const selectPayment=async(req,res,next)=>{
 
       
       let quantity = item.quantity;
-      let price = product.finalPriceDynamic || product.finalPrice
+        let price = product.finalPrice || product.price;
       subtotal += quantity * price;
 
       cartItems.push({
@@ -167,10 +167,10 @@ const getconfirmationPage = async (req, res, next) => {
       
 
       
-  item.price = product.finalPriceDynamic||product.finalPrice     
+  item.price = product.finalPrice||product.price     
   item.mrp = product.price;
       let quantity = item.quantity;
-      let price = product.finalPriceDynamic||product.finalPrice
+      let price = product.finalPrice||product.price
       const mrp = item.productId.price
       const priceDifference = mrp - price
       totalMRP += mrp * quantity

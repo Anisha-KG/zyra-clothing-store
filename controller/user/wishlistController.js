@@ -54,7 +54,7 @@ const getWishlist = async (req, res, next) => {
         productId: product._id,
         name: product.name,
         color: color,
-        prize: product.finalPriceDynamic||product.finalPrice,
+        prize: product.finalPrice||product.price,
         bestOffer: product.bestOffer,
         mrp: product.price,
         variant,

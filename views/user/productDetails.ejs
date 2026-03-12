@@ -178,7 +178,7 @@
     </h5>
 
     <h4 class="text-dark fw-bold" id="offerPrice">
-      ₹<%= product.finalPriceDynamic %>
+      ₹<%= product.finalPrice %>
     </h4>
 
     <% if (product.bestOffer && product.bestOffer > 0) { %>
@@ -347,7 +347,7 @@
                   <img src="https://via.placeholder.com/200x250" class="img-fluid rounded mb-2">
                 <% } %>
                 <p class="mt-2" style="font-size:0.85rem;">
-                  <%= product.name %><br>₹<%= product.finalPriceDynamic || product.finalPrice %>
+                  <%= product.name %><br>₹<%= product.finalPrice || product.price %>
                 </p>
                 <a href="/product/<%= product._id %>" class="btn btn-sm btn-outline-dark">View</a>
               </div>

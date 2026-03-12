@@ -87,7 +87,7 @@ const addProduct = async (req, res,next) => {
       material,
       status,
       price,
-      finalPrice,
+      finalPrice:price,
       description,
       category,
       subcategory,

@@ -78,7 +78,7 @@ const viewCart = async (req, res, next) => {
 
             }
 
-            const price = product.finalPriceDynamic || product.finalPrice
+            const price = product.finalPrice || product.price
             const itemsTotal = item.quantity * price
             subTotal = subTotal + itemsTotal
 
@@ -263,11 +263,8 @@ const addToCart = async (req, res, next) => {
         .json({ success: false, message: "This product is currently unavailable" });
     }
 
-    // 🔥 SAFE PRICE CALCULATION (IMPORTANT)
-    const finalPrice =
-      product.finalPriceDynamic ||
-      product.finalPrice ||
-      product.price;
+   
+    const finalPrice =product.finalPrice || product.price;
 
     if (!finalPrice || isNaN(finalPrice)) {
       return res.status(httpStatus.BAD_REQUEST)
@@ -324,7 +321,7 @@ const addToCart = async (req, res, next) => {
       }
 
       existingItem.quantity = newQty;
-      existingItem.price = finalPrice; // 🔥 ensure price always updated
+      existingItem.price = finalPrice; 
       existingItem.itemsTotal = finalPrice * newQty;
 
     } else {
@@ -397,7 +394,7 @@ const increment = async (req, res, next) => {
         return res.status(200).json({
             success: true,
             message: 'Quantity incremented',
-            itemTotal: item.quantity * product.finalPriceDynamic,
+            itemTotal: item.quantity * product.finalPrice,
             quantity: item.quantity,
             cartTotal,
             summary
@@ -440,7 +437,7 @@ const decrement = async (req, res, next) => {
         return res.status(200).json({
             success: true,
             message: 'Quantity decremented',
-            itemTotal: item.quantity * product.finalPriceDynamic,
+            itemTotal: item.quantity * product.finalPrice,
             quantity: item.quantity,
             cartTotal,
             summary
@@ -490,7 +487,7 @@ async function calculatetotalSummary(cart){
 
         
 
-        const price=product.finalPriceDynamic
+        const price=product.finalPrice
          
          subTotal+=price*item.quantity
     }

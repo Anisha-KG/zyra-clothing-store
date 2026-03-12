@@ -33,10 +33,10 @@ const geteditProduct = async (req, res) => {
 const editProduct = async (req, res) => {
 
   try {
-    const { productId, productName, material, status, regprice, finalPrice, description, category, subcategory, brand } = req.body
+    const { productId, productName, material, status, regprice, description, category, subcategory, brand } = req.body
     const price = parseFloat(regprice)
-    const finalpriceParsed = parseFloat(finalPrice)
-    if (!productName || !material || !status || !description || !category || !subcategory || !brand || isNaN(price) || isNaN(finalpriceParsed)) {
+    
+    if (!productName || !material || !status || !description || !category || !subcategory || !brand || isNaN(price) ) {
       return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: 'Invalid input fields' })
     }
     const products = await Products.findById(productId)
@@ -49,7 +49,7 @@ const editProduct = async (req, res) => {
       material,
       status,
       price,
-      finalPrice: finalpriceParsed,
+      finalPrice: price,
       description,
       category,
       subcategory,

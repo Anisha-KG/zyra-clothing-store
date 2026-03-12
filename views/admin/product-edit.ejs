@@ -146,15 +146,11 @@ textarea {
     <!-- Price -->
     <div class="form-row">
       <div class="form-group">
-        <label>Regular Price</label>
+        <label>MRP</label>
         <input type="number" name="regprice" value="<%= product.price %>" placeholder="0.00">
         <div id="regularprice-error" class="text-danger"></div>
       </div>
-      <div class="form-group">
-        <label>Final Price</label>
-        <input type="number" name="finalPrice" value="<%= product.finalPrice %>" placeholder="0.00">
-        <div id="finalPrice-error" class="text-danger"></div>
-      </div>
+     
     </div>
 
     <!-- Description -->
@@ -278,10 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('regularprice-error').innerText='Please enter valid price';
       hasError = true;
     }
-    if(!productData.finalPrice || Number(productData.finalPrice) <= 0 || Number(productData.finalPrice) >= Number(productData.regprice)){
-      document.getElementById('finalPrice-error').innerText='Final price must be less than regular price and greater than 0';
-      hasError = true;
-    }
+    
     if(!productData.category){
       document.getElementById('category-error').innerText='Please select category';
       hasError = true;
