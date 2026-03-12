@@ -170,7 +170,9 @@ const addProductOffer = async (req, res,next) => {
   })
   const product=await Products.findById(productId)
 
-  await updateBestPrice(product)
+   const bestOffer = await calculateBestOffer(product);
+   const discountAmount = (product.price * bestOffer) / 100;
+   product.finalPrice = Math.round(product.price - discountAmount);
 
   res.json({ success:true, message:"Offer applied successfully" })
 
@@ -189,7 +191,9 @@ const removeProductOffer = async (req, res) => {
 
     const product=await Products.findById(productId)
 
-    await updateBestPrice(product)
+   const bestOffer = await calculateBestOffer(product);
+   const discountAmount = (product.price * bestOffer) / 100;
+   product.finalPrice = Math.round(product.price - discountAmount);
     res.status(httpStatus.OK).json({ success: true, message: 'Offer removed successfully' })
   } catch (error) {
     console.log('Error while removing product offer:', error)
