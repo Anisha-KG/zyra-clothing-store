@@ -5,61 +5,70 @@ const Brand = require('../models/brandsSchema');
 
 async function calculateBestOffer(product) {
 
-    const now = Date.now(); 
     let offers = [];
 
-
+ 
     if (
         product.offer &&
-        new Date(product.startDate).getTime() <= now &&
-        new Date(product.offerValidUntil).getTime() >= now
+        product.startDate <= new Date() &&
+        product.offerValidUntil >= new Date()
     ) {
-        offers.push(Number(product.offer));
+        offers.push(product.offer);
     }
 
-
+   
     const category = await Category.findById(product.category);
+
+    console.log("CATEGORY:", category);
+
+if (category) {
+    console.log("Offer:", category.categoryOffer);
+    console.log("Start:", category.startDate);
+    console.log("End:", category.endDate);
+}
 
     if (
         category &&
         category.categoryOffer &&
-        new Date(category.startDate).getTime() <= now &&
-        new Date(category.endDate).getTime() >= now
+        category.startDate <= new Date() &&
+        category.endDate >= new Date()
     ) {
-        offers.push(Number(category.categoryOffer));
+         console.log("Category offer added");
+        offers.push(category.categoryOffer);
     }
 
-
+   
     const subcategory = await Subcategory.findById(product.subcategory);
 
     if (
         subcategory &&
         subcategory.offer &&
-        new Date(subcategory.startDate).getTime() <= now &&
-        new Date(subcategory.endDate).getTime() >= now
+        subcategory.startDate <= new Date() &&
+        subcategory.endDate >= new Date()
     ) {
-        offers.push(Number(subcategory.offer));
+        offers.push(subcategory.offer);
     }
 
-
+    
     const brand = await Brand.findById(product.brand);
 
     if (
         brand &&
         brand.brandOffer &&
-        new Date(brand.startDate).getTime() <= now &&
-        new Date(brand.endDate).getTime() >= now
+        brand.startDate <= new Date() &&
+        brand.endDate >= new Date()
     ) {
-        offers.push(Number(brand.brandOffer));
+        offers.push(brand.brandOffer);
     }
 
+    
+    if (offers.length === 0) return 0;
 
-    if (offers.length === 0) {
-        return 0;
-    }
-
-   
+    console.log("All Offers:", offers);
+    console.log("Best Offer:", Math.max(...offers));
+    
     return Math.max(...offers);
 }
 
-module.exports = calculateBestOffer;
+module.exports = 
+    calculateBestOffer
