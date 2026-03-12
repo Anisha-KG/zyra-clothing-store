@@ -5,7 +5,7 @@ const Category = require('../../models/categprySchema')
 const httpStatus = require('../../Constants/httpStatuscode')
 const mesages = require('../../Constants/messages')
 const Offer=require('../../models/offerSchema')
-const updateBestPrice=require('../../helpers/updateBestPrice')
+const calculateBestOffer=require('../../helpers/calculatingBestOffer')
 
 const getProducts = async (req, res) => {
   try {
