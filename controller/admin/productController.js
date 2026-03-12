@@ -167,7 +167,7 @@ const addProductOffer = async (req, res,next) => {
     offerValidUntil: offer.endDate,
     offerId: offer._id
   })
-  const product=await Product.findById(productId)
+  const product=await Products.findById(productId)
 
   await updateBestPrice(product)
 
@@ -185,6 +185,10 @@ const removeProductOffer = async (req, res) => {
     if (!removed) {
       return res.status(httpStatus.NOT_FOUND).json({ success: false, message: 'Cannnot remove offer' })
     }
+
+    const product=await Products.findById(productId)
+
+    await updateBestPrice(product)
     res.status(httpStatus.OK).json({ success: true, message: 'Offer removed successfully' })
   } catch (error) {
     console.log('Error while removing product offer:', error)
