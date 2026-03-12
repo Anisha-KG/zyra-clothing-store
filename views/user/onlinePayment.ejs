@@ -59,7 +59,7 @@
   <!-- Razorpay Script -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-  <script>
+<script>
 let paymentProcessed = false;
 
 document.getElementById("payBtn").onclick = function () {
@@ -91,27 +91,29 @@ document.getElementById("payBtn").onclick = function () {
       })
       .then(res => res.json())
       .then(data => {
-        if (data.redirectURL && data.success) {
-    window.location.href = data.redirectURL;
-  } else if (data.redirectURL && !data.success) {
-    Swal.fire({
-      icon: "error",
-      title: "Payment Failed",
-      text: data.message || "Transaction failed"
-    }).then(() => {
-      window.location.href = data.redirectURL; // payment failure page
-    });
-  } else if (data.message) {
-    Swal.fire({
-      icon: "error",
-      title: "Payment Failed",
-      text: data.message
-    });
-  }
+        if (data.success) {
+          window.location.href = data.redirectURL;
+        } 
+        else {
+          Swal.fire({
+            icon: "error",
+            title: "Payment Failed",
+            text: data.message || "Transaction failed"
+          }).then(() => {
+            if (data.redirectURL) {
+              window.location.href = data.redirectURL;
+            }
+          });
+        }
       })
       .catch(() => {
-        window.location.href = "/onlinepayment/orderfailed?orderId=<%= orderId %>";
+        Swal.fire({
+          icon: "error",
+          title: "Server Error",
+          text: "Something went wrong"
+        });
       });
+
     },
 
     modal: {
