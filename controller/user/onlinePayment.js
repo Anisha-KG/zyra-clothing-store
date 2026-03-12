@@ -230,12 +230,12 @@ const verifyRazorpayPayment = async (req, res, next) => {
     // Check if required values exist
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
 
-  if (order.paymentStatus === "Completed") {
-    return res.status(200).json({
-      success: true,
-      redirectURL: "/orderSuccessfull"
-    });
-  }
+        if (order.paymentStatus === "Completed") {
+          return res.status(200).json({
+            success: true,
+            redirectURL: "/orderSuccessfull"
+          });
+        }
 
   order.orderedItems.forEach((item) => (item.status = "Failed"));
   order.paymentStatus = "Failed";
@@ -253,8 +253,7 @@ const verifyRazorpayPayment = async (req, res, next) => {
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex");
 
-    console.log("Generated Signature:", generatedSignature);
-    console.log("Received Signature:", razorpay_signature);
+   
 
     if (generatedSignature !== razorpay_signature) {
       order.orderedItems.forEach((item) => (item.status = "Failed"));
@@ -297,9 +296,10 @@ const verifyRazorpayPayment = async (req, res, next) => {
         session.endSession();
 
         return res.status(200).json({
-          success: true,
-          message: "Payment already processed",
-        });
+            success: true,
+            message:'Payment already completed',
+            redirectURL: "/orderSuccessfull"
+          });
       }
 
       // Reduce stock
@@ -314,9 +314,14 @@ const verifyRazorpayPayment = async (req, res, next) => {
         );
 
         if (!updatedVariant) {
+
+          await session.abortTransaction()
+          session.endSession();
+
   return res.status(400).json({
     success: false,
-    message: "Out of stock"
+    message:" Out of Stock",
+    redirectURL: "/getCart"
   });
       }
       }
