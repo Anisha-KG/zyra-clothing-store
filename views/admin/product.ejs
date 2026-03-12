@@ -188,7 +188,7 @@
                 <td><%= product.subcategory?.name || 'N/A' %></td>
                 <td>₹<%= product.price.toFixed(2) %></td>
                 <td>₹<%= product.finalPrice.toFixed(2) %></td>
-                <td>₹<%= product.finalPriceDynamic?product.finalPriceDynamic.toFixed(2):product.finalPrice.toFixed(2) %></td>
+
                 <td><%= product.material %></td>
                 <td>
                   <% if (product.isBlocked) { %>
