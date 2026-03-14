@@ -292,6 +292,14 @@
       width: 100%;
     }
   }
+
+  @media (max-width:991px){
+
+.filters{
+  margin-top:10px;
+}
+
+}
 </style>
 </head>
 <body>
@@ -310,7 +318,7 @@
 <div class="container-fluid">
   <div class="row">
     <!-- Sidebar -->
-    <div class="col-lg-3 col-md-4 mb-4 mb-md-0">
+<div class="col-lg-3 col-md-4 mb-4 mb-md-0 d-none d-lg-block">
       <div class="sidebar">
         <div class="filter-header">
           <span>Filters & Sort</span>
@@ -377,6 +385,68 @@
       </div>
     </div>
 
+    <!-- MOBILE SIDEBAR -->
+<div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="mobileSidebar">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Filters & Sort</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+
+  <div class="offcanvas-body">
+
+    <!-- SAME SIDEBAR CONTENT -->
+    <div class="sidebar">
+
+      <div class="filter-header">
+        <span>Filters & Sort</span>
+        <a href="#" id="clearFilters">Clear All</a>
+      </div>
+
+      <div class="mt-3">
+        <button id="applyFiltersBtn" class="zyra-btn w-100">Apply Filters</button>
+      </div>
+
+      <div class="search-box mt-3">
+        <input type="text" placeholder="Search Products">
+        <button class="btn btn-outline-dark btn-sm" type="submit">Search</button>
+      </div>
+
+      <!-- Sort -->
+      <div class="filter-section">
+        <div class="filter-title">Sort By</div>
+
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="sortBy" value="lowhigh">
+          <label class="form-check-label">Price: Low To High</label>
+        </div>
+
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="sortBy" value="highlow">
+          <label class="form-check-label">Price: High To Low</label>
+        </div>
+
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="sortBy" value="az">
+          <label class="form-check-label">Alphabetic: A-Z</label>
+        </div>
+
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="sortBy" value="za">
+          <label class="form-check-label">Alphabetic: Z-A</label>
+        </div>
+
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="sortBy" value="newest">
+          <label class="form-check-label">Newest</label>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
    
 
     <!-- Main Content -->
@@ -384,6 +454,15 @@
 
     
       <div class="main-content">
+
+         <!-- MOBILE FILTER BUTTON -->
+  <button 
+    class="btn zyra-btn d-lg-none mb-3"
+    type="button"
+    data-bs-toggle="offcanvas"
+    data-bs-target="#mobileSidebar">
+    <i class="fa fa-bars"></i> Filters & Sort
+  </button>
 
 
         
