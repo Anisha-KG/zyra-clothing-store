@@ -1,8 +1,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <%- include("../../views/partials/user/header") %>
 <style>
- 
-@media (max-width: 992px) {
+ @media (max-width: 992px) {
   #newArrivalsCarousel .carousel-item > div > div {
     flex: 0 0 33.33%;
     max-width: 33.33%;
@@ -94,6 +93,11 @@ h2.section-title {
   background-color: #f3ebe7;
   padding: 60px 0;
   text-align: center;
+}
+
+.left-box,
+.right-box{
+  height: 350px;
 }
 
 .feature-box {
@@ -210,7 +214,9 @@ h2.section-title {
 /* Images */
 
 .girl-img{
-  max-width: 420px;
+  width: 50%;
+  height: 100%;
+  object-fit: cover;
   border-radius: 10px;
 }
 
@@ -226,6 +232,8 @@ h2.section-title {
 
 .girl-2{
   width:100%;
+  height:100%;
+  object-fit: cover;
   border-radius:10px;
 }
 
@@ -270,6 +278,11 @@ h2.section-title {
   .girl-img{
     margin-top:20px;
     max-width:100%;
+    height:200px;
+  }
+
+  .girl-2{
+    height:200px;
   }
 
 }
