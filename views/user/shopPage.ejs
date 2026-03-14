@@ -396,53 +396,69 @@
 
     <!-- SAME SIDEBAR CONTENT -->
     <div class="sidebar">
-
-      <div class="filter-header">
-        <span>Filters & Sort</span>
-        <a href="#" id="clearFilters">Clear All</a>
+        <div class="filter-header">
+          <span>Filters & Sort</span>
+          <a href="#" id="clearFilters">Clear All</a>
+        </div>
+        <div class="mt-3">
+          <button id="applyFiltersBtn" class="zyra-btn w-100">Apply Filters</button>
+        </div>
+        <div class="search-box mt-3">
+          <input type="text" placeholder="Search Products">
+          <button class="btn btn-outline-dark btn-sm" type="submit" value="<%= search%>">Search</button>
+        </div>
+        <!-- Sort -->
+        <div class="filter-section">
+          <div class="filter-title">Sort By</div>
+          <% ['lowhigh','highlow','az','za','newest'].forEach(sort=> { %>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="sortBy"  id="<%= sort %>" value="<%= sort %>" <%=selectedSort===sort?'checked':'' %>>
+            <label class="form-check-label" for="<%= sort %>">
+              <% if(sort==='lowhigh' ){ %>Price: Low To High<% } %>
+              <% if(sort==='highlow' ){ %>Price: High To Low<% } %>
+              <% if(sort==='az' ){ %>Alphabetic: A-Z<% } %>
+              <% if(sort==='za' ){ %>Alphabetic: Z-A<% } %>
+              <% if(sort==='newest' ){ %>Newest<% } %>
+            </label>
+          </div>
+          <% }) %>
+        </div>
+        <hr>
+        <!-- Size -->
+        <div class="filter-section">
+          <div class="filter-title">Size</div>
+          <% availableSizes.forEach(size=> { %>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="size" id="size-<%= size %>" value="<%= size %>" <%=selectedSizes.includes(size)?'checked':'' %>>
+            <label class="form-check-label" for="size-<%= size %>"> <%= size %> </label>
+          </div>
+          <% }) %>
+        </div>
+        <hr>
+        <!-- Color -->
+        <div class="filter-section">
+          <div class="filter-title">Color</div>
+          <% availableColors.forEach(color=> { %>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="color" id="color-<%= color.replace(/\s+/g,'-') %>" value="<%= color %>" <%=selectedColors.includes(color)?'checked':'' %>>
+            <label class="form-check-label" for="color-<%= color.replace(/\s+/g,'-') %>"> <%= color %> </label>
+          </div>
+          <% }) %>
+        </div>
+        <hr>
+        <!-- Price -->
+        <div class="filter-section">
+          <div class="filter-title">Price</div>
+          <% ['price1','price2','price3','price4'].forEach(p=>{
+              const text = p==='price1'?'Under 500':p==='price2'?'500-1000':p==='price3'?'1000-2000':'Over 2000';
+          %>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="price" id="<%= p %>" value="<%= p %>" <%=selectedPrice===p?'checked':'' %>>
+            <label class="form-check-label" for="<%= p %>"> <%= text %> </label>
+          </div>
+          <% }) %>
+        </div>
       </div>
-
-      <div class="mt-3">
-        <button id="applyFiltersBtn" class="zyra-btn w-100">Apply Filters</button>
-      </div>
-
-      <div class="search-box mt-3">
-        <input type="text" placeholder="Search Products">
-        <button class="btn btn-outline-dark btn-sm" type="submit">Search</button>
-      </div>
-
-      <!-- Sort -->
-      <div class="filter-section">
-        <div class="filter-title">Sort By</div>
-
-        <div class="form-check">
-          <input class="form-check-input" type="radio" name="sortBy" value="lowhigh">
-          <label class="form-check-label">Price: Low To High</label>
-        </div>
-
-        <div class="form-check">
-          <input class="form-check-input" type="radio" name="sortBy" value="highlow">
-          <label class="form-check-label">Price: High To Low</label>
-        </div>
-
-        <div class="form-check">
-          <input class="form-check-input" type="radio" name="sortBy" value="az">
-          <label class="form-check-label">Alphabetic: A-Z</label>
-        </div>
-
-        <div class="form-check">
-          <input class="form-check-input" type="radio" name="sortBy" value="za">
-          <label class="form-check-label">Alphabetic: Z-A</label>
-        </div>
-
-        <div class="form-check">
-          <input class="form-check-input" type="radio" name="sortBy" value="newest">
-          <label class="form-check-label">Newest</label>
-        </div>
-
-      </div>
-
-    </div>
 
   </div>
 </div>
