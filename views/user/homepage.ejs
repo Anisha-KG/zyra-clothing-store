@@ -74,18 +74,13 @@ body{
 
 /* ================= CAROUSEL RESPONSIVE ================= */
 
-@media (max-width:992px){
-  #newArrivalsCarousel .carousel-item > div > div{
-    flex:0 0 33.33%;
-    max-width:33.33%;
-  }
+@media (max-width:768px){
+
+.carousel-control-prev,
+.carousel-control-next{
+  display:none;
 }
 
-@media (max-width:768px){
-  #newArrivalsCarousel .carousel-item > div > div{
-    flex:0 0 50%;
-    max-width:50%;
-  }
 }
 
 
@@ -362,7 +357,7 @@ body{
         <div class="carousel-item <%= i === 0 ? 'active' : '' %>">
           <div class="row">
             <% chunk.forEach(product => { %>
-              <div class="col-6 col-sm-4 col-lg-3 mb-3">
+              <div class="col-6 col-lg-3 mb-3">
                 <div class="card product-card shadow-sm border-0 h-100 " onclick="window.location.href='/product/<%= product._id%>'">
                   <% 
                     const matchingVariant = productVariant.find(v => 
@@ -469,7 +464,7 @@ body{
         <div class="carousel-item <%= i === 0 ? 'active' : '' %>">
           <div class="row">
             <% chunk.forEach(product => { %>
-              <div class="col-6 col-sm-4 col-lg-3 mb-3">
+              <div class="col-6 col-lg-3 mb-3">
                 <div class="card product-card shadow-sm border-0 h-100"  onclick="window.location.href='/product/<%= product._id %>'">
                   <% 
                     const matchingVariant = productVariant.find(v => 
