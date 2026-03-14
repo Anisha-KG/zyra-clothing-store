@@ -1,273 +1,280 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <%- include("../../views/partials/user/header") %>
 <style>
-  @media (max-width: 992px) {
-    #newArrivalsCarousel .carousel-item > div > div {
-      flex: 0 0 33.33%; /* 3 items per slide on medium screens */
-      max-width: 33.33%;
-    }
+ 
+@media (max-width: 992px) {
+  #newArrivalsCarousel .carousel-item > div > div {
+    flex: 0 0 33.33%;
+    max-width: 33.33%;
   }
+}
 
-  @media (max-width: 768px) {
-    #newArrivalsCarousel .carousel-item > div > div {
-      flex: 0 0 50%; /* 2 items per slide on small screens */
-      max-width: 50%;
-    }
+@media (max-width: 768px) {
+  #newArrivalsCarousel .carousel-item > div > div {
+    flex: 0 0 50%;
+    max-width: 50%;
   }
+}
 
 
+/* Global Styles */
 
-  
-  
-</style>
-<style>
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f8f5f3;
+  color: #1b1919;
+}
 
-  
-  
-  body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #f8f5f3;
-    color: #1b1919;
-  }
-  .product-card{
+.product-card{
   cursor: pointer;
 }
 
-  /* Section Titles */
-  h2.section-title {
-    text-align: center;
-    font-weight: 600;
-    margin: 40px 0 20px;
-    color: #1b1919;
-  }
 
-  /* Product Cards */
-  .product-card {
-    border: none;
-    background-color: #fff;
-    border-radius: 10px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-  }
-  .product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  }
-  .product-card img {
-    width: 100%;
-    height: 350px;
-    object-fit: cover;
-  }
-  .product-card .card-body {
-    text-align: center;
-    padding: 15px;
-  }
-  .product-name {
-    font-weight: 600;
-    margin-bottom: 5px;
-  }
-  .product-price {
-    color: #a3654b;
-    font-weight: 500;
-  }
+/* Section Titles */
 
-  /* Carousel Controls */
-  .carousel-control-prev-icon,
-  .carousel-control-next-icon {
-    background-color: #a3654b;
-    border-radius: 50%;
-    width: 40px;
-    height: 50px;
-  }
+h2.section-title {
+  text-align: center;
+  font-weight: 600;
+  margin: 40px 0 20px;
+  color: #1b1919;
+}
 
-  /* Hero Carousel Styling */
-  #heroCarousel {
-    margin-top: 40px;
-  }
-  #heroCarousel .carousel-item img {
-    width: 100%;
-    height: 80vh;
-    object-fit: cover;
-    object-position: center;
-  }
-  @media (max-width: 768px) {
-    #heroCarousel .carousel-item img {
-      height: 50vh;
-    }
-  }
 
-  /* Feature Section */
-  .features-section {
-    background-color: #f3ebe7;
-    padding: 60px 0;
-    text-align: center;
-  }
-  .feature-box {
-    text-align: center;
-  }
-  .feature-box i {
-    font-size: 40px;
-    color: #a3654b;
-    margin-bottom: 15px;
-  }
-  .feature-box h5 {
-    font-weight: 600;
-    color: #1b1919;
-  }
-  .feature-box p {
-    color: #555;
-    font-size: 15px;
-  }
+/* Product Cards */
 
-  /* Brand Grid Section */
-  .brand-grid {
-    background-color: #f8f5f3;
-    padding: 60px 0;
-  }
-  .brand-card {
-    position: relative;
-    overflow: hidden;
-    border-radius: 10px;
-    cursor: pointer;
-  }
+.product-card {
+  border: none;
+  background-color: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.product-card img {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+}
+
+.product-card .card-body {
+  text-align: center;
+  padding: 15px;
+}
+
+.product-name {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.product-price {
+  color: #a3654b;
+  font-weight: 500;
+}
+
+
+/* Carousel Controls */
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: #a3654b;
+  border-radius: 50%;
+  width: 40px;
+  height: 50px;
+}
+
+
+/* Feature Section */
+
+.features-section {
+  background-color: #f3ebe7;
+  padding: 60px 0;
+  text-align: center;
+}
+
+.feature-box {
+  text-align: center;
+}
+
+.feature-box i {
+  font-size: 40px;
+  color: #a3654b;
+  margin-bottom: 15px;
+}
+
+.feature-box h5 {
+  font-weight: 600;
+  color: #1b1919;
+}
+
+.feature-box p {
+  color: #555;
+  font-size: 15px;
+}
+
+
+/* Brand Grid Section */
+
+.brand-grid {
+  background-color: #f8f5f3;
+  padding: 60px 0;
+}
+
+.brand-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.brand-card img {
+  width: 100%;
+  height: 450px;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.brand-card:hover img {
+  transform: scale(1.05);
+}
+
+.brand-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(163, 101, 75, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 30px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 2px;
+}
+
+@media (max-width: 768px) {
   .brand-card img {
-    width: 100%;
-    height: 450px;
-    object-fit: cover;
-    transition: transform 0.4s ease;
+    height: 300px;
   }
-  .brand-card:hover img {
-    transform: scale(1.05);
-  }
-  .brand-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(163, 101, 75, 0.2);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 30px;
-    font-weight: 600;
-    color: #fff;
-    letter-spacing: 2px;
-  }
+}
 
-  @media (max-width: 768px) {
-    .brand-card img {
-      height: 300px;
-    }
-  }
-</style>
-<style>
-  /* LEFT SECTION */
+
+/* Intro Section */
 
 .left-box{
-    background-color: rgb(245,238,230);
-    border-radius: 10px;
-    padding: 30px;
-    transition: 0.3s;
+  background-color: rgb(245,238,230);
+  border-radius: 10px;
+  padding: 30px;
+  transition: 0.3s;
 }
 
 .left-box:hover{
-    box-shadow: -3px 3px 5px rgba(0,0,0,0.3);
+  box-shadow: -3px 3px 5px rgba(0,0,0,0.3);
 }
 
 .left-caption{
-    line-height: 1.2;
+  line-height: 1.2;
 }
 
 .p1{
-    font-size: 42px;
-    font-weight: 600;
+  font-size: 42px;
+  font-weight: 600;
 }
 
-.p2,.p3{
-    font-size: 18px;
-    font-family: Roboto;
+.p2,
+.p3{
+  font-size: 18px;
+  font-family: Roboto;
 }
 
 .shop-now{
-    background-color: rgb(49,48,48);
-    width: 120px;
-    height: 45px;
-    border:none;
-    border-radius: 25px;
-    color:white;
+  background-color: rgb(49,48,48);
+  width: 120px;
+  height: 45px;
+  border:none;
+  border-radius: 25px;
+  color:white;
 }
 
 .shop-now:hover{
-    transform: scale(1.05);
+  transform: scale(1.05);
 }
 
-/* IMAGE */
+
+/* Images */
 
 .girl-img{
-    max-width: 420px;
-    border-radius: 10px;
+  max-width: 420px;
+  border-radius: 10px;
 }
 
-/* RIGHT SECTION */
-
 .right-box{
-    position: relative;
-    overflow: hidden;
-    border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
 }
 
 .right-box:hover{
-    box-shadow: -3px 3px 5px rgba(0,0,0,0.3);
+  box-shadow: -3px 3px 5px rgba(0,0,0,0.3);
 }
 
 .girl-2{
-    width:100%;
-    border-radius:10px;
+  width:100%;
+  border-radius:10px;
 }
 
-/* FOOT NOTE */
+
+/* Foot Note */
 
 .foot-note{
-    position:absolute;
-    bottom:20px;
-    left:20px;
-    color:white;
-    font-family:Roboto;
+  position:absolute;
+  bottom:20px;
+  left:20px;
+  color:white;
+  font-family:Roboto;
 }
 
 .p-right-1{
-    font-size:26px;
-    font-weight:600;
+  font-size:26px;
+  font-weight:600;
 }
 
 .p-right-2{
-    font-size:14px;
+  font-size:14px;
 }
 
-/* RESPONSIVE */
+
+/* Responsive */
 
 @media (max-width:768px){
 
-    .p1{
-        font-size:32px;
-    }
+  .p1{
+    font-size:32px;
+  }
 
-    .p2,.p3{
-        font-size:16px;
-    }
+  .p2,
+  .p3{
+    font-size:16px;
+  }
 
-    .left-box{
-        text-align:center;
-    }
+  .left-box{
+    text-align:center;
+  }
 
-    .girl-img{
-        margin-top:20px;
-        max-width:100%;
-    }
+  .girl-img{
+    margin-top:20px;
+    max-width:100%;
+  }
 
 }
 </style>
+
 
 <body>
 
@@ -285,7 +292,7 @@
           <button class="shop-now">Shop now</button>
         </div>
 
-        <img class="girl-img img-fluid" src="assets/ij_680x540.6676039516_n13hpwth.avif">
+        <img class="girl-img img-fluid" src="/public/images/carousal 3.jpg">
 
       </div>
     </div>
@@ -294,7 +301,7 @@
     <div class="col-lg-4 col-md-12">
       <div class="right-box position-relative">
 
-        <img class="girl-2 img-fluid" src="assets/girl-2.webp">
+        <img class="girl-2 img-fluid" src="/public/images/carosal 1.jpg">
 
         <div class="foot-note">
           <p class="p-right-1">Necklaces</p>
