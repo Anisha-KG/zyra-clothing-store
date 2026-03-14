@@ -632,32 +632,39 @@
 
  // ---------------- GET SIDEBAR FILTERS ----------------
 function getSidebarFilters() {
+
   const filters = {};
 
-  const searchInput = document.querySelector('.search-box input');
+  // detect visible sidebar (desktop or mobile)
+  const sidebar = document.querySelector('.offcanvas.show .sidebar') 
+               || document.querySelector('.col-lg-3 .sidebar');
+
+  if (!sidebar) return filters;
+
+  const searchInput = sidebar.querySelector('.search-box input');
   if (searchInput && searchInput.value.trim())
     filters.search = searchInput.value.trim();
 
-  // FIXED: Correct sortBy name
-  const sort = document.querySelector('input[name="sortBy"]:checked');
+  const sort = sidebar.querySelector('input[name="sortBy"]:checked');
   if (sort) filters.sortBy = sort.value;
 
   const sizes = Array.from(
-    document.querySelectorAll('input[name="size"]:checked')
+    sidebar.querySelectorAll('input[name="size"]:checked')
   ).map(i => i.value);
+
   if (sizes.length) filters.size = sizes;
 
   const colors = Array.from(
-    document.querySelectorAll('input[name="color"]:checked')
+    sidebar.querySelectorAll('input[name="color"]:checked')
   ).map(i => i.value);
+
   if (colors.length) filters.color = colors;
 
-  const price = document.querySelector('input[name="price"]:checked');
+  const price = sidebar.querySelector('input[name="price"]:checked');
   if (price) filters.price = price.value;
 
   return filters;
 }
-
 // ---------------- BUILD QUERY ----------------
 function buildQueryString(filters) {
   const params = new URLSearchParams();
@@ -684,34 +691,41 @@ function applyFilters() {
   window.location.href = '/shop?' + buildQueryString(filters);
 }
 
-document.getElementById('applyFiltersBtn')?.addEventListener('click', applyFilters);
-document.querySelector('.search-box button')?.addEventListener('click', applyFilters);
+document.querySelectorAll('#applyFiltersBtn').forEach(btn=>{
+  btn.addEventListener('click', applyFilters);
+});
+document.querySelectorAll('.search-box button').forEach(btn=>{
+  btn.addEventListener('click', applyFilters);
+});
 document.querySelector('.search-box input')?.addEventListener('keypress', e => {
   if (e.key === 'Enter') applyFilters();
 });
 
 // ---------------- FIXED CLEAR FILTERS ----------------
-document.getElementById('clearFilters')?.addEventListener('click', e => {
-  e.preventDefault();
+document.querySelectorAll('#clearFilters').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.preventDefault();
 
-  document.querySelector('.search-box input').value = '';
+    document.querySelector('.search-box input').value = '';
 
-  // FIXED: Now clears sortBy also
-  document.querySelectorAll(
-    'input[name="size"], input[name="color"], input[name="price"], input[name="sortBy"]'
-  ).forEach(i => i.checked = false);
+    // Clear filters
+    document.querySelectorAll(
+      'input[name="size"], input[name="color"], input[name="price"], input[name="sortBy"]'
+    ).forEach(i => i.checked = false);
 
-  ['categoryDropdown', 'subcategoryDropdown', 'brandDropdown'].forEach(id => {
-    const el = document.getElementById(id);
-    el.dataset.id = '';
-    el.textContent = el.id.includes('category')
-      ? 'Category'
-      : el.id.includes('subcategory')
-      ? 'Subcategory'
-      : 'Brand';
+    // Reset dropdowns
+    ['categoryDropdown', 'subcategoryDropdown', 'brandDropdown'].forEach(id => {
+      const el = document.getElementById(id);
+      el.dataset.id = '';
+      el.textContent = el.id.includes('category')
+        ? 'Category'
+        : el.id.includes('subcategory')
+        ? 'Subcategory'
+        : 'Brand';
+    });
+
+    window.location.href = '/shop';
   });
-
-  window.location.href = '/shop';
 });
 
 // ---------------- FIXED ALL PRODUCTS BUTTON ----------------
