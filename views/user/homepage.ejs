@@ -21,6 +21,8 @@
   
 </style>
 <style>
+
+  
   
   body {
     font-family: 'Poppins', sans-serif;
@@ -159,10 +161,153 @@
     }
   }
 </style>
+<style>
+  /* LEFT SECTION */
+
+.left-box{
+    background-color: rgb(245,238,230);
+    border-radius: 10px;
+    padding: 30px;
+    transition: 0.3s;
+}
+
+.left-box:hover{
+    box-shadow: -3px 3px 5px rgba(0,0,0,0.3);
+}
+
+.left-caption{
+    line-height: 1.2;
+}
+
+.p1{
+    font-size: 42px;
+    font-weight: 600;
+}
+
+.p2,.p3{
+    font-size: 18px;
+    font-family: Roboto;
+}
+
+.shop-now{
+    background-color: rgb(49,48,48);
+    width: 120px;
+    height: 45px;
+    border:none;
+    border-radius: 25px;
+    color:white;
+}
+
+.shop-now:hover{
+    transform: scale(1.05);
+}
+
+/* IMAGE */
+
+.girl-img{
+    max-width: 420px;
+    border-radius: 10px;
+}
+
+/* RIGHT SECTION */
+
+.right-box{
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.right-box:hover{
+    box-shadow: -3px 3px 5px rgba(0,0,0,0.3);
+}
+
+.girl-2{
+    width:100%;
+    border-radius:10px;
+}
+
+/* FOOT NOTE */
+
+.foot-note{
+    position:absolute;
+    bottom:20px;
+    left:20px;
+    color:white;
+    font-family:Roboto;
+}
+
+.p-right-1{
+    font-size:26px;
+    font-weight:600;
+}
+
+.p-right-2{
+    font-size:14px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width:768px){
+
+    .p1{
+        font-size:32px;
+    }
+
+    .p2,.p3{
+        font-size:16px;
+    }
+
+    .left-box{
+        text-align:center;
+    }
+
+    .girl-img{
+        margin-top:20px;
+        max-width:100%;
+    }
+
+}
+</style>
 
 <body>
 
-  <!-- Hero Carousel -->
+  <div class="container my-4">
+  <div class="row g-3">
+
+    <!-- LEFT SECTION -->
+    <div class="col-lg-8 col-md-12">
+      <div class="left-box d-flex flex-column flex-md-row align-items-center justify-content-between">
+
+        <div class="left-caption text-center text-md-start">
+          <p class="p1">Get the looks!</p>
+          <p class="p2">pieces and accessories</p>
+          <p class="p3">to liven up your wardrobe</p>
+          <button class="shop-now">Shop now</button>
+        </div>
+
+        <img class="girl-img img-fluid" src="assets/ij_680x540.6676039516_n13hpwth.avif">
+
+      </div>
+    </div>
+
+    <!-- RIGHT SECTION -->
+    <div class="col-lg-4 col-md-12">
+      <div class="right-box position-relative">
+
+        <img class="girl-2 img-fluid" src="assets/girl-2.webp">
+
+        <div class="foot-note">
+          <p class="p-right-1">Necklaces</p>
+          <p class="p-right-2">Shop now</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+  <!-- Hero Carousel 
   <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
     <div class="carousel-inner">
       <div class="carousel-item active">
@@ -184,7 +329,7 @@
     <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
       <span class="carousel-control-next-icon"></span>
     </button>
-  </div>
+  </div>-->
 <!-- New Arrivals -->
 <section class="container py-5">
   <h2 class="section-title mb-4">New Arrivals</h2>
