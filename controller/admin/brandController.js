@@ -35,40 +35,6 @@ const getBrands = async (req, res) => {
     res.redirect('/pageerror')
   }
 }
-
-const addBrand = async (req, res) => {
-  try {
-    const { brandName } = req.body
-    
-
-    if (!brandName) {
-      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.BRAND_MESSAGES.ENTER_BRAND_NAME })
-    }
-    if (!req.file) {
-      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.BRAND_MESSAGES.UPLOAD_BRAND_LOGO})
-    }
-    const normalizedName = brandName.trim().replace(/\s+/g, " ")
-    const existing = await brands.findOne({
-      name: new RegExp(`^${normalizedName}$`, "i")
-    });
-    if (existing) {
-      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.BRAND_MESSAGES.BRAND_ALREADY_EXISTS})
-    }
-    const newbrand = new brands({
-      brandName: brandName,
-      brandLogo: {
-        url:req.file.path,
-        public_id:req.file.filename
-      },
-
-    })
-    await newbrand.save()
-    res.status(httpStatus.OK).json({ success: true, message:messages.BRAND_MESSAGES.BRAND_ADDED})
-  } catch (error) {
-    console.log("error while adding brand:", error)
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message:messages.MESSAGE.SERVER_ERROR})
-  }
-}
 const addBrand = async (req, res) => {
   try {
 
@@ -137,6 +103,47 @@ const addBrand = async (req, res) => {
       message: messages.MESSAGE.SERVER_ERROR
     });
 
+  }
+};
+const addBrandOffer = async (req, res) => {
+  console.log('controller hit');
+
+  try {
+
+    const { brandId, offerId } = req.body;
+
+    const offer = await Offer.findById(offerId);
+
+    if (!offer) {
+      return res.json({
+        success: false,
+        message: "Offer not found"
+      });
+    }
+
+    await brands.findByIdAndUpdate(brandId, {
+      brandOffer: offer.discount,
+      startDate: offer.startDate,
+      endDate: offer.endDate,
+      offerId: offer._id
+    });
+
+    const products = await Product.find({ brand: brandId });
+
+    await updateBestPrice(products);
+
+    res.json({
+      success: true,
+      message: "Offer applied successfully"
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: messages.MESSAGE.SERVER_ERROR
+    });
   }
 };
 const editBrand = async (req, res) => {
