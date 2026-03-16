@@ -69,69 +69,135 @@ const addBrand = async (req, res) => {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message:messages.MESSAGE.SERVER_ERROR})
   }
 }
-
 const addBrandOffer = async (req, res) => {
-  console.log('controller hit')
+  console.log('controller hit');
+
   try {
-    const { brandId, offerId } = req.body
 
-  const offer = await Offer.findById(offerId)
-  if (!offer) {
-    return res.json({ success:false, message:"Offer not found" })
-  }
+    const { brandId, offerId } = req.body;
 
-  await brands.findByIdAndUpdate(brandId, {
-    brandOffer: offer.discount,
-    startDate: offer.startDate,
-    endDate: offer.endDate,
-    offerId: offer._id
-  })
+    const offer = await Offer.findById(offerId);
 
-  const product=await Product.find({brand:brandId})
-  
-    await updateBestPrice(product)
+    if (!offer) {
+      return res.json({
+        success: false,
+        message: "Offer not found"
+      });
+    }
 
-  res.json({ success:true, message:"Offer applied successfully" })
+    await brands.findByIdAndUpdate(brandId, {
+      brandOffer: offer.discount,
+      startDate: offer.startDate,
+      endDate: offer.endDate,
+      offerId: offer._id
+    });
+
+    const products = await Product.find({ brand: brandId });
+
+    await updateBestPrice(products);
+
+    res.json({
+      success: true,
+      message: "Offer applied successfully"
+    });
 
   } catch (error) {
-    console.log(error)
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message:messages.MESSAGE.SERVER_ERROR})
-  }
-}
+    console.log(error);
 
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: messages.MESSAGE.SERVER_ERROR
+    });
+  }
+};
 const editBrand = async (req, res) => {
   try {
-    const { brandName, brandId } = req.body
-    const updateData = { brandName };
 
-    const existingBrand=await brands.findById(brandId)
+    const { brandName, brandId } = req.body;
+
+    const existingBrand = await brands.findById(brandId);
+
+    if (!existingBrand) {
+      return res.status(404).json({
+        success: false,
+        message: "Brand not found"
+      });
+    }
+
+    // normalize input
+    const normalizedInput = brandName
+      .toLowerCase()
+      .replace(/\s+/g, "")
+      .trim();
+
+    // fetch other brands
+    const brandList = await brands.find(
+      { _id: { $ne: brandId } },
+      { brandName: 1 }
+    );
+
+    // duplicate check
+    const duplicate = brandList.find(brand => {
+      const normalizedDbName = brand.brandName
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .trim();
+
+      return normalizedDbName === normalizedInput;
+    });
+
+    if (duplicate) {
+      return res.status(400).json({
+        success: false,
+        message: "Brand already exists"
+      });
+    }
+
+    const updateData = {
+      brandName: brandName.trim()
+    };
 
     if (req.file) {
+
       if (existingBrand.brandLogo?.public_id) {
-              await cloudinary.uploader.destroy(
-                existingBrand.brandLogo.public_id
-              );
-            }
-      
-          
-            updateData.brandLogo = {
-              url: req.file.path,
-              public_id: req.file.filename
-            };
+        await cloudinary.uploader.destroy(
+          existingBrand.brandLogo.public_id
+        );
+      }
+
+      updateData.brandLogo = {
+        url: req.file.path,
+        public_id: req.file.filename
+      };
     }
 
-    const update = await brands.findByIdAndUpdate(brandId, { $set: updateData }, { new: true })
+    const update = await brands.findByIdAndUpdate(
+      brandId,
+      { $set: updateData },
+      { new: true }
+    );
+
     if (!update) {
-      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message:messages.BRAND_MESSAGES.UNABLE_TO_EDIT_BRAND})
+      return res.status(httpStatus.BAD_REQUEST).json({
+        success: false,
+        message: messages.BRAND_MESSAGES.UNABLE_TO_EDIT_BRAND
+      });
     }
 
-    res.status(httpStatus.OK).json({ success: true, message:messages.BRAND_MESSAGES.BRAND_EDITED})
-  } catch (error) {
-    console.log(error)
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message:messages.MESSAGE.SERVER_ERROR})
-  }
-}
+    res.status(httpStatus.OK).json({
+      success: true,
+      message: messages.BRAND_MESSAGES.BRAND_EDITED
+    });
 
+  } catch (error) {
+    console.log(error);
+
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: messages.MESSAGE.SERVER_ERROR
+    });
+  }
+};
 const unlistBrand = async (req, res) => {
   try {
     const { brandId } = req.body

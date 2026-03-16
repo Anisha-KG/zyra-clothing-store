@@ -90,34 +90,40 @@ const addSubcategory = async (req, res) => {
     res.json({ success: false, message: "Server error , Cannot add subcategory" })
   }
 }
-
-const addSubcategoryOffer = async (req, res,next) => {
-  
+const addSubcategoryOffer = async (req, res, next) => {
   try {
-    const { subcategoryId, offerId } = req.body
 
-  const offer = await Offer.findById(offerId)
-  if (!offer) {
-    return res.json({ success:false, message:"Offer not found" })
-  }
+    const { subcategoryId, offerId } = req.body;
 
-  await Subcategories.findByIdAndUpdate(subcategoryId, {
-    offer: offer.discount,
-    startDate: offer.startDate,
-    endDate: offer.endDate,
-    offerId: offer._id
-  })
+    const offer = await Offer.findById(offerId);
 
-  const product=await Product.find({subcategory:subcategoryId})
-    
-      await updateBestPrice(product)
+    if (!offer) {
+      return res.json({
+        success: false,
+        message: "Offer not found"
+      });
+    }
 
-  res.json({ success:true, message:"Offer applied successfully" })
+    await Subcategories.findByIdAndUpdate(subcategoryId, {
+      offer: offer.discount,
+      startDate: offer.startDate,
+      endDate: offer.endDate,
+      offerId: offer._id
+    });
+
+    const products = await Product.find({ subcategory: subcategoryId });
+
+    await updateBestPrice(products);
+
+    res.json({
+      success: true,
+      message: "Offer applied successfully"
+    });
 
   } catch (error) {
-   next(error)
+    next(error);
   }
-}
+};
 
 
 const removeOffer = async (req, res) => {
@@ -231,6 +237,7 @@ const deteleSubcategory = async (req, res) => {
 };
 const editSubcategory = async (req, res) => {
   try {
+
     const { subcategoryId, subcategoryName, description } = req.body;
 
     const existingSubcategory = await Subcategories.findById(subcategoryId);
@@ -242,10 +249,26 @@ const editSubcategory = async (req, res) => {
       });
     }
 
- 
-    const duplicate = await Subcategories.findOne({
-      name: new RegExp(`^${subcategoryName.trim()}$`, "i"),
-      _id: { $ne: subcategoryId }
+    // normalize input
+    const normalizedInput = subcategoryName
+      .toLowerCase()
+      .replace(/\s+/g, "")
+      .trim();
+
+    // get all other subcategories
+    const subcategories = await Subcategories.find(
+      { _id: { $ne: subcategoryId } },
+      { name: 1 }
+    );
+
+    // check duplicate
+    const duplicate = subcategories.find(sub => {
+      const normalizedDbName = sub.name
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .trim();
+
+      return normalizedDbName === normalizedInput;
     });
 
     if (duplicate) {
@@ -256,13 +279,12 @@ const editSubcategory = async (req, res) => {
     }
 
     const update = {
-      name: subcategoryName,
+      name: subcategoryName.trim(),
       description
     };
 
-
+    // image update
     if (req.file) {
-
 
       if (existingSubcategory.image?.public_id) {
         await cloudinary.uploader.destroy(
@@ -282,8 +304,9 @@ const editSubcategory = async (req, res) => {
       { new: true, runValidators: true }
     );
 
- 
+    // update product prices after edit
     const products = await Product.find({ subcategory: subcategoryId });
+
     await updateBestPrice(products);
 
     res.status(200).json({
