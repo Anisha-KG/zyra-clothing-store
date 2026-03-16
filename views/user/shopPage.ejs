@@ -519,10 +519,10 @@
             <ul class="dropdown-menu zyra-dropdown-menu" id="subcategoryMenu">
   <% subcategory.forEach(sub=> { %>
     <li>
-      <a class="dropdown-item subcategory-item"
+   <a class="dropdown-item subcategory-item"
    href="#"
    data-id="<%= sub._id %>"
-   data-category="<%= sub.category.toString() %>">
+   data-category="<%= sub.categoryId %>">
    <%= sub.name %>
 </a>
     </li>
