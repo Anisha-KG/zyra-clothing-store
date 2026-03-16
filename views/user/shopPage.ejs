@@ -868,9 +868,8 @@ document.querySelectorAll('.category-item').forEach(item => {
     subcategoryMenu.innerHTML = '';
 
     // Filter matching subcategories
-   const filtered = allSubcategories.filter(sub =>
-  String(sub.category) === String(id)
-);
+    const filtered = allSubcategories.filter(sub => {
+  return String(sub.category).trim() === String(id).trim();
 });
 
     if (filtered.length === 0) {
