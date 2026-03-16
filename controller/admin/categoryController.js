@@ -42,14 +42,16 @@ const categoryInfo = async (req, res) => {
     res.redirect('/pageerror')
   }
 }
-
 const addCategory = async (req, res) => {
-
   try {
-    const { categoryName, description } = req.body
-    
+
+    const { categoryName, description } = req.body;
+
     if (!categoryName || !description) {
-      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: message.MESSAGE.ALL_FIELDS_REQUIRED })
+      return res.status(httpStatus.BAD_REQUEST).json({
+        success: false,
+        message: message.MESSAGE.ALL_FIELDS_REQUIRED
+      });
     }
 
     if (!req.file) {
@@ -59,30 +61,55 @@ const addCategory = async (req, res) => {
       });
     }
 
-    const normalizedName = categoryName.trim().replace(/\s+/g, " ")
-    const existing = await category.findOne({
-      name: new RegExp(`^${normalizedName}$`, "i")
+   
+    const normalizedInput = categoryName
+      .toLowerCase()
+      .replace(/\s+/g, "") 
+      .trim();
+
+   
+    const categories = await category.find({}, { name: 1 });
+
+ 
+    const existing = categories.find(cat => {
+      const normalizedDbName = cat.name
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .trim();
+
+      return normalizedDbName === normalizedInput;
     });
+
     if (existing) {
-      return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: message.CATEGORY_MESSAGE.CATEGORY_EXISTS })
+      return res.status(httpStatus.BAD_REQUEST).json({
+        success: false,
+        message: message.CATEGORY_MESSAGE.CATEGORY_EXISTS
+      });
     }
 
     const catData = new category({
-      name: categoryName,
+      name: categoryName.trim(),
       description: description,
       categoryImage: {
-        url:req.file.path,
-        public_id:req.file.filename
+        url: req.file.path,
+        public_id: req.file.filename
       }
-    })
+    });
 
-    await catData.save()
-    return res.status(httpStatus.OK).json({ success: true, message: message.CATEGORY_MESSAGE.CATEGORY_ADDED });//res.redirect wont work in fetch
+    await catData.save();
+
+    return res.status(httpStatus.OK).json({
+      success: true,
+      message: message.CATEGORY_MESSAGE.CATEGORY_ADDED
+    });
+
   } catch (error) {
-    console.log("Add category error:", error)
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: message.MESSAGE.SERVER_ERROR })
+    console.log("Add category error:", error);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: message.MESSAGE.SERVER_ERROR
+    });
   }
-}
+};
 
 const addCategoryOffer = async (req, res,next) => {
   
@@ -165,6 +192,7 @@ const listCategory = async (req, res) => {
 }
 const editCategory = async (req, res) => {
   try {
+
     const categoryId = req.params.id;
     const { categoryName, description } = req.body;
 
@@ -177,10 +205,26 @@ const editCategory = async (req, res) => {
       });
     }
 
-    
-    const duplicate = await category.findOne({
-      name: categoryName,
-      _id: { $ne: categoryId }
+   
+    const normalizedInput = categoryName
+      .toLowerCase()
+      .replace(/\s+/g, "")
+      .trim();
+
+
+    const categories = await category.find(
+      { _id: { $ne: categoryId } },
+      { name: 1 }
+    );
+
+  
+    const duplicate = categories.find(cat => {
+      const normalizedDbName = cat.name
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .trim();
+
+      return normalizedDbName === normalizedInput;
     });
 
     if (duplicate) {
@@ -191,21 +235,19 @@ const editCategory = async (req, res) => {
     }
 
     const updatedData = {
-      name: categoryName,
+      name: categoryName.trim(),
       description
     };
 
-   
+    // image update
     if (req.file) {
 
-      
       if (existingCategory.categoryImage?.public_id) {
         await cloudinary.uploader.destroy(
           existingCategory.categoryImage.public_id
         );
       }
 
-    
       updatedData.categoryImage = {
         url: req.file.path,
         public_id: req.file.filename
