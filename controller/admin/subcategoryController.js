@@ -51,46 +51,6 @@ const loadSubcategories = async (req, res) => {
 }
 
 const addSubcategory = async (req, res) => {
-
-  try {
-    const { subcategoryName, description, categoryId } = req.body
-    
-    if (!subcategoryName || !description) {
-      return res.json({ success: false, message: "Please fill all fields" })
-    }
-    if (!req.file) {
-          return res.status(400).json({
-            success: false,
-            message: "Image is required"
-          });
-        }
-    
-    const normalizedName = subcategoryName.trim().replace(/\s+/g, " ")
-    const existing = await Subcategories.findOne({
-      name: new RegExp(`^${normalizedName}$`, "i")
-    });
-    if (existing) {
-      return res.json({ success: false, message: "Subcategory already exist" })
-    }
-
-    const subcatData = new Subcategories({
-      name: subcategoryName,
-      image: {
-        url:req.file.path,
-        public_id:req.file.filename
-      },
-      description: description,
-      categoryId: categoryId
-    })
-
-    await subcatData.save()
-    res.json({ success: true, message: 'Subcategory added successfully' })
-  } catch (error) {
-    console.log("Error whuile adding subcategory", error)
-    res.json({ success: false, message: "Server error , Cannot add subcategory" })
-  }
-}
-const addSubcategory = async (req, res) => {
   try {
 
     const { subcategoryName, description } = req.body;
@@ -161,6 +121,41 @@ const addSubcategory = async (req, res) => {
 
   }
 };
+const addSubcategoryOffer = async (req, res, next) => {
+  try {
+
+    const { subcategoryId, offerId } = req.body;
+
+    const offer = await Offer.findById(offerId);
+
+    if (!offer) {
+      return res.json({
+        success: false,
+        message: "Offer not found"
+      });
+    }
+
+    await Subcategories.findByIdAndUpdate(subcategoryId, {
+      offer: offer.discount,
+      startDate: offer.startDate,
+      endDate: offer.endDate,
+      offerId: offer._id
+    });
+
+    const products = await Product.find({ subcategory: subcategoryId });
+
+    await updateBestPrice(products);
+
+    res.json({
+      success: true,
+      message: "Offer applied successfully"
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 const removeOffer = async (req, res) => {
   try {
