@@ -90,41 +90,77 @@ const addSubcategory = async (req, res) => {
     res.json({ success: false, message: "Server error , Cannot add subcategory" })
   }
 }
-const addSubcategoryOffer = async (req, res, next) => {
+const addSubcategory = async (req, res) => {
   try {
 
-    const { subcategoryId, offerId } = req.body;
+    const { subcategoryName, description } = req.body;
 
-    const offer = await Offer.findById(offerId);
-
-    if (!offer) {
-      return res.json({
+    if (!subcategoryName || !subcategoryName.trim()) {
+      return res.status(400).json({
         success: false,
-        message: "Offer not found"
+        message: "Subcategory name cannot be empty"
       });
     }
 
-    await Subcategories.findByIdAndUpdate(subcategoryId, {
-      offer: offer.discount,
-      startDate: offer.startDate,
-      endDate: offer.endDate,
-      offerId: offer._id
+    // normalize input
+    const normalizedInput = subcategoryName
+      .toLowerCase()
+      .replace(/\s+/g, "")
+      .trim();
+
+    // duplicate check
+    const duplicate = await Subcategories.findOne({
+      $expr: {
+        $eq: [
+          {
+            $replaceAll: {
+              input: { $toLower: "$name" },
+              find: " ",
+              replacement: ""
+            }
+          },
+          normalizedInput
+        ]
+      }
     });
 
-    const products = await Product.find({ subcategory: subcategoryId });
+    if (duplicate) {
+      return res.status(400).json({
+        success: false,
+        message: "Subcategory already exists"
+      });
+    }
 
-    await updateBestPrice(products);
+    const newSubcategory = new Subcategories({
+      name: subcategoryName.trim(),
+      description
+    });
 
-    res.json({
+    if (req.file) {
+      newSubcategory.image = {
+        url: req.file.path,
+        public_id: req.file.filename
+      };
+    }
+
+    await newSubcategory.save();
+
+    res.status(201).json({
       success: true,
-      message: "Offer applied successfully"
+      message: "Subcategory added successfully"
     });
 
   } catch (error) {
-    next(error);
+
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+
   }
 };
-
 
 const removeOffer = async (req, res) => {
   try {
@@ -236,9 +272,17 @@ const deteleSubcategory = async (req, res) => {
   }
 };
 const editSubcategory = async (req, res) => {
+
   try {
 
     const { subcategoryId, subcategoryName, description } = req.body;
+
+    if (!subcategoryName || !subcategoryName.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Subcategory name cannot be empty"
+      });
+    }
 
     const existingSubcategory = await Subcategories.findById(subcategoryId);
 
@@ -255,20 +299,21 @@ const editSubcategory = async (req, res) => {
       .replace(/\s+/g, "")
       .trim();
 
-    // get all other subcategories
-    const subcategories = await Subcategories.find(
-      { _id: { $ne: subcategoryId } },
-      { name: 1 }
-    );
-
-    // check duplicate
-    const duplicate = subcategories.find(sub => {
-      const normalizedDbName = sub.name
-        .toLowerCase()
-        .replace(/\s+/g, "")
-        .trim();
-
-      return normalizedDbName === normalizedInput;
+    // duplicate check excluding current subcategory
+    const duplicate = await Subcategories.findOne({
+      _id: { $ne: subcategoryId },
+      $expr: {
+        $eq: [
+          {
+            $replaceAll: {
+              input: { $toLower: "$name" },
+              find: " ",
+              replacement: ""
+            }
+          },
+          normalizedInput
+        ]
+      }
     });
 
     if (duplicate) {
@@ -278,12 +323,11 @@ const editSubcategory = async (req, res) => {
       });
     }
 
-    const update = {
+    const updateData = {
       name: subcategoryName.trim(),
       description
     };
 
-    // image update
     if (req.file) {
 
       if (existingSubcategory.image?.public_id) {
@@ -292,7 +336,7 @@ const editSubcategory = async (req, res) => {
         );
       }
 
-      update.image = {
+      updateData.image = {
         url: req.file.path,
         public_id: req.file.filename
       };
@@ -300,14 +344,9 @@ const editSubcategory = async (req, res) => {
 
     const updatedData = await Subcategories.findByIdAndUpdate(
       subcategoryId,
-      { $set: update },
+      { $set: updateData },
       { new: true, runValidators: true }
     );
-
-    // update product prices after edit
-    const products = await Product.find({ subcategory: subcategoryId });
-
-    await updateBestPrice(products);
 
     res.status(200).json({
       success: true,
@@ -316,11 +355,14 @@ const editSubcategory = async (req, res) => {
     });
 
   } catch (error) {
+
     console.log(error);
+
     res.status(500).json({
       success: false,
       message: "Server error"
     });
+
   }
 };
 

@@ -69,51 +69,88 @@ const addBrand = async (req, res) => {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message:messages.MESSAGE.SERVER_ERROR})
   }
 }
-const addBrandOffer = async (req, res) => {
-  console.log('controller hit');
-
+const addBrand = async (req, res) => {
   try {
 
-    const { brandId, offerId } = req.body;
+    const { brandName } = req.body;
 
-    const offer = await Offer.findById(offerId);
-
-    if (!offer) {
-      return res.json({
+    if (!brandName || !brandName.trim()) {
+      return res.status(400).json({
         success: false,
-        message: "Offer not found"
+        message: "Brand name cannot be empty"
       });
     }
 
-    await brands.findByIdAndUpdate(brandId, {
-      brandOffer: offer.discount,
-      startDate: offer.startDate,
-      endDate: offer.endDate,
-      offerId: offer._id
+    // normalize input
+    const normalizedInput = brandName
+      .toLowerCase()
+      .replace(/\s+/g, "")
+      .trim();
+
+    // duplicate check
+    const duplicate = await brands.findOne({
+      $expr: {
+        $eq: [
+          {
+            $replaceAll: {
+              input: { $toLower: "$brandName" },
+              find: " ",
+              replacement: ""
+            }
+          },
+          normalizedInput
+        ]
+      }
     });
 
-    const products = await Product.find({ brand: brandId });
+    if (duplicate) {
+      return res.status(400).json({
+        success: false,
+        message: "Brand already exists"
+      });
+    }
 
-    await updateBestPrice(products);
+    const newBrand = new brands({
+      brandName: brandName.trim()
+    });
 
-    res.json({
+    if (req.file) {
+      newBrand.brandLogo = {
+        url: req.file.path,
+        public_id: req.file.filename
+      };
+    }
+
+    await newBrand.save();
+
+    res.status(201).json({
       success: true,
-      message: "Offer applied successfully"
+      message: "Brand added successfully"
     });
 
   } catch (error) {
+
     console.log(error);
 
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: messages.MESSAGE.SERVER_ERROR
     });
+
   }
 };
 const editBrand = async (req, res) => {
+
   try {
 
     const { brandName, brandId } = req.body;
+
+    if (!brandName || !brandName.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Brand name cannot be empty"
+      });
+    }
 
     const existingBrand = await brands.findById(brandId);
 
@@ -130,20 +167,21 @@ const editBrand = async (req, res) => {
       .replace(/\s+/g, "")
       .trim();
 
-    // fetch other brands
-    const brandList = await brands.find(
-      { _id: { $ne: brandId } },
-      { brandName: 1 }
-    );
-
-    // duplicate check
-    const duplicate = brandList.find(brand => {
-      const normalizedDbName = brand.brandName
-        .toLowerCase()
-        .replace(/\s+/g, "")
-        .trim();
-
-      return normalizedDbName === normalizedInput;
+    // duplicate check excluding current brand
+    const duplicate = await brands.findOne({
+      _id: { $ne: brandId },
+      $expr: {
+        $eq: [
+          {
+            $replaceAll: {
+              input: { $toLower: "$brandName" },
+              find: " ",
+              replacement: ""
+            }
+          },
+          normalizedInput
+        ]
+      }
     });
 
     if (duplicate) {
@@ -190,12 +228,14 @@ const editBrand = async (req, res) => {
     });
 
   } catch (error) {
+
     console.log(error);
 
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: messages.MESSAGE.SERVER_ERROR
     });
+
   }
 };
 const unlistBrand = async (req, res) => {
