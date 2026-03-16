@@ -486,18 +486,30 @@
         <div class="filters">
           <button class="zyra-btn" id="allProductsBtn">All Products</button>
           <!-- Category Dropdown -->
-          <div class="zyra-dropdown dropdown">
-            <button id="categoryDropdown" class="zyra-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-id="<%= selectedCategoryId || '' %>">
-              <%= category.find(c=> c._id.toString() === selectedCategoryId)?.name || 'Category' %>
-            </button>
-            <ul class="dropdown-menu zyra-dropdown-menu" id="categoryMenu">
-              <% category.forEach(cat=> { %>
-              <li>
-                <a class="dropdown-item category-item" href="#" data-id="<%= cat._id %>"> <%= cat.name %> </a>
-              </li>
-              <% }) %>
-            </ul>
-          </div>
+          <div class="dropdown">
+  <button 
+    id="categoryDropdown"
+    class="btn zyra-dropdown-btn dropdown-toggle"
+    type="button"
+    data-bs-toggle="dropdown"
+    data-bs-auto-close="outside"
+    data-id="<%= selectedCategoryId || '' %>">
+
+    <%= category.find(c=> c._id.toString() === selectedCategoryId)?.name || 'Category' %>
+  </button>
+
+  <ul class="dropdown-menu zyra-dropdown-menu" id="categoryMenu">
+    <% category.forEach(cat=> { %>
+      <li>
+        <a class="dropdown-item category-item"
+           href="#"
+           data-id="<%= cat._id %>">
+           <%= cat.name %>
+        </a>
+      </li>
+    <% }) %>
+  </ul>
+</div>
 
           <!-- Subcategory Dropdown -->
           <div class="zyra-dropdown dropdown">
@@ -519,18 +531,29 @@
           </div>
 
           <!-- Brand Dropdown -->
-          <div class="zyra-dropdown dropdown">
-            <button id="brandDropdown" class="zyra-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-id="<%= selectedBrandId || '' %>">
-              <%= brand.find(b=> b._id.toString() === selectedBrandId)?.brandName || 'Brand' %>
-            </button>
-            <ul class="dropdown-menu zyra-dropdown-menu" id="brandMenu">
-              <% brand.forEach(b=> { %>
-              <li>
-                <a class="dropdown-item brand-item" href="#" data-id="<%= b._id %>"> <%= b.brandName %> </a>
-              </li>
-              <% }) %>
-            </ul>
-          </div>
+         <div class="dropdown">
+  <button
+    id="brandDropdown"
+    class="btn zyra-dropdown-btn dropdown-toggle"
+    type="button"
+    data-bs-toggle="dropdown"
+    data-id="<%= selectedBrandId || '' %>">
+
+    <%= brand.find(b=> b._id.toString() === selectedBrandId)?.brandName || 'Brand' %>
+  </button>
+
+  <ul class="dropdown-menu zyra-dropdown-menu">
+    <% brand.forEach(b=> { %>
+      <li>
+        <a class="dropdown-item brand-item"
+           href="#"
+           data-id="<%= b._id %>">
+           <%= b.brandName %>
+        </a>
+      </li>
+    <% }) %>
+  </ul>
+</div>
         </div>
 
         
@@ -617,6 +640,8 @@
 
 
 <script>
+
+  
 
   const productData = <%- JSON.stringify(products) %>;
     console.log(productData);
@@ -906,7 +931,5 @@ attachSubcategoryListeners();
 </script>
 
 
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 </body>
 </html>
