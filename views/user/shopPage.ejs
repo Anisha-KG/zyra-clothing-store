@@ -520,11 +520,11 @@
   <% subcategory.forEach(sub=> { %>
     <li>
       <a class="dropdown-item subcategory-item"
-         href="#"
-         data-id="<%= sub._id %>"
-         data-category="<%= sub.category %>">
-        <%= sub.name %>
-      </a>
+   href="#"
+   data-id="<%= sub._id %>"
+   data-category="<%= sub.category.toString() %>">
+   <%= sub.name %>
+</a>
     </li>
   <% }) %>
 </ul>
