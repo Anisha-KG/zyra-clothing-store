@@ -513,9 +513,15 @@
 
           <!-- Subcategory Dropdown -->
           <div class="zyra-dropdown dropdown">
-            <button id="subcategoryDropdown" class="zyra-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-id="<%= selectedSubcategoryId || '' %>">
-              Subcategory
-            </button>
+           <button id="subcategoryDropdown"
+class="zyra-dropdown-btn dropdown-toggle"
+type="button"
+data-bs-toggle="dropdown"
+data-id="<%= selectedSubcategoryId || '' %>">
+
+<%= subcategory.find(s => s._id.toString() === selectedSubcategoryId)?.name || 'Subcategory' %>
+
+</button>
             <ul class="dropdown-menu zyra-dropdown-menu" id="subcategoryMenu">
   <% subcategory.forEach(sub=> { %>
     <li>
