@@ -166,9 +166,13 @@
                     <div class="row align-items-center g-4">
 
                         <div class="col-md-2 text-center">
-                            <img src="<%= item.variant?.images?.[0] || item.variant?.images?.[0].url%>"
-                                class="product-img">
-                        </div>
+    <img 
+        src="<%= item.variant?.images?.[0]?.secure_url || item.variant?.images?.[0]?.url || '/default-image.png' %>"
+        class="product-img"
+        loading="lazy"
+        onerror="this.src='/default-image.png'"
+    >
+</div>
 
                         <div class="col-md-7">
                             <h5 class="fw-bold mb-1"><%= item.productName %></h5>
