@@ -265,26 +265,98 @@ button:disabled,
     </main>
     
 
+<script>
+    const filterSelect = document.getElementById("filter");
+    const fromInput = document.getElementById("from");
+    const toInput = document.getElementById("to");
 
-    <script>
-        // Enable date fields only when "custom" selected
-        document.querySelector("select[name='filter']").addEventListener("change", function () {
-            const custom = this.value === "custom";
-            document.querySelector("input[name='from']").disabled = !custom;
-            document.querySelector("input[name='to']").disabled = !custom;
-        });
+    // ==============================
+    // ENABLE/DISABLE DATE INPUTS
+    // ==============================
+    filterSelect.addEventListener("change", function () {
+        const isCustom = this.value === "custom";
+        fromInput.disabled = !isCustom;
+        toInput.disabled = !isCustom;
+    });
 
+    // ==============================
+    // SET MAX DATE (NO FUTURE)
+    // ==============================
+    const todayStr = new Date().toISOString().split('T')[0];
+    fromInput.setAttribute("max", todayStr);
+    toInput.setAttribute("max", todayStr);
 
-       function sendGetRequest(page = 1) {
-    const filter = document.getElementById('filter').value;
-    const from = document.getElementById('from').value;
-    const to = document.getElementById('to').value;
+    // ==============================
+    // DYNAMIC DATE CONTROL
+    // ==============================
+    fromInput.addEventListener("change", function () {
+        toInput.setAttribute("min", this.value);
+    });
 
-    const url = `/admin/salesReport?page=${page}&filter=${encodeURIComponent(filter)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
+    toInput.addEventListener("change", function () {
+        fromInput.setAttribute("max", this.value);
+    });
 
-    window.location.href = url;
-}
-    </script>
+    // ==============================
+    // FORM VALIDATION (SWAL)
+    // ==============================
+    document.querySelector("form").addEventListener("submit", function (e) {
+        const filter = filterSelect.value;
+        const from = fromInput.value;
+        const to = toInput.value;
+
+        if (filter === "custom") {
+
+            if (!from || !to) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Dates',
+                    text: 'Please select both From and To dates'
+                });
+                return;
+            }
+
+            const fromDate = new Date(from);
+            const toDate = new Date(to);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (fromDate > today || toDate > today) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Date',
+                    text: 'Future dates are not allowed'
+                });
+                return;
+            }
+
+            if (fromDate > toDate) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Range',
+                    text: 'From date cannot be after To date'
+                });
+                return;
+            }
+        }
+    });
+
+    // ==============================
+    // PAGINATION FUNCTION
+    // ==============================
+    function sendGetRequest(page = 1) {
+        const filter = filterSelect.value;
+        const from = fromInput.value;
+        const to = toInput.value;
+
+        const url = `/admin/salesReport?page=${page}&filter=${encodeURIComponent(filter)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
+        window.location.href = url;
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 </body>
 </html>

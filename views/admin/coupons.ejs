@@ -548,14 +548,25 @@ document.getElementById('addCouponForm').addEventListener('submit', async functi
     const maxDiscount = Number(document.getElementById("add_maximumDiscount").value);
     const usageLimit = Number(document.getElementById("add_usageLimit").value);
     const usagePerUser = Number(document.getElementById("add_usagePerUser").value);
-    const status = document.getElementById('status').value === "true"; // convert to Boolean
+    const status = document.getElementById('status').value === "true";
     const couponType = document.getElementById('couponType').value;
 
     // ==============================
-    // FORM VALIDATION
+    // CLEAR PREVIOUS ERRORS
     // ==============================
+    document.getElementById('name-Error').innerText = '';
+    document.getElementById('code-Error').innerText = '';
+    document.getElementById('date1-Error').innerText = '';
+    document.getElementById('date2-Error').innerText = '';
+    document.getElementById('minOrder-Error').innerText = '';
+    document.getElementById('discount-Error').innerText = '';
+    document.getElementById('maxDiscount-Error').innerText = '';
+
     let hasError = false;
 
+    // ==============================
+    // BASIC VALIDATION
+    // ==============================
     if (!name) {
         document.getElementById('name-Error').innerText = 'Name is required';
         hasError = true;
@@ -566,21 +577,39 @@ document.getElementById('addCouponForm').addEventListener('submit', async functi
         hasError = true;
     }
 
+    // ==============================
+    // DATE VALIDATION
+    // ==============================
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const start = startingDate ? new Date(startingDate) : null;
+    const end = expiryDate ? new Date(expiryDate) : null;
+
     if (!startingDate) {
         document.getElementById('date1-Error').innerText = 'Start Date is required';
+        hasError = true;
+    } else if (start < today) {
+        document.getElementById('date1-Error').innerText = 'Start date cannot be in the past';
         hasError = true;
     }
 
     if (!expiryDate) {
         document.getElementById('date2-Error').innerText = 'Expiry Date is required';
         hasError = true;
-    }
-
-    if (startingDate && expiryDate && new Date(startingDate) >= new Date(expiryDate)) {
-        document.getElementById('date2-Error').innerText = 'Start date must be less than expiry date';
+    } else if (end < today) {
+        document.getElementById('date2-Error').innerText = 'Expiry date cannot be in the past';
         hasError = true;
     }
 
+    if (start && end && start >= end) {
+        document.getElementById('date2-Error').innerText = 'Expiry date must be after start date';
+        hasError = true;
+    }
+
+    // ==============================
+    // NUMERIC VALIDATION
+    // ==============================
     if (!minOrderAmount || minOrderAmount <= 0) {
         document.getElementById('minOrder-Error').innerText = 'Minimum order must be greater than 0';
         hasError = true;
@@ -596,9 +625,15 @@ document.getElementById('addCouponForm').addEventListener('submit', async functi
         hasError = true;
     }
 
-    
+    if (usageLimit < 0) {
+        hasError = true;
+        alert("Usage limit cannot be negative");
+    }
 
-    
+    if (usagePerUser < 0) {
+        hasError = true;
+        alert("Usage per user cannot be negative");
+    }
 
     if (hasError) return;
 
@@ -655,12 +690,11 @@ document.getElementById('addCouponForm').addEventListener('submit', async functi
 
 //edit coupon 
 
-
 document.getElementById('editCouponForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
     // Get form values
-    const id=document.getElementById('editCouponId').value
+    const id = document.getElementById('editCouponId').value;
     const name = document.getElementById("editName").value.trim();
     const code = document.getElementById("editCode").value.trim();
     const startingDate = document.getElementById("editStartingDate").value;
@@ -670,14 +704,25 @@ document.getElementById('editCouponForm').addEventListener('submit', async funct
     const maxDiscount = Number(document.getElementById("editMaxDiscount").value);
     const usageLimit = Number(document.getElementById("editUsageLimit").value);
     const usagePerUser = Number(document.getElementById("editUsagePerUser").value);
-    const status = document.getElementById('editStatus').value === "true"; // convert to Boolean
+    const status = document.getElementById('editStatus').value === "true";
     const couponType = document.getElementById('editType').value;
 
     // ==============================
-    // FORM VALIDATION
+    // CLEAR PREVIOUS ERRORS
     // ==============================
+    document.getElementById('name-Error').innerText = '';
+    document.getElementById('code-Error').innerText = '';
+    document.getElementById('date1-Error').innerText = '';
+    document.getElementById('date2-Error').innerText = '';
+    document.getElementById('minOrder-Error').innerText = '';
+    document.getElementById('discount-Error').innerText = '';
+    document.getElementById('maxDiscount-Error').innerText = '';
+
     let hasError = false;
 
+    // ==============================
+    // BASIC VALIDATION
+    // ==============================
     if (!name) {
         document.getElementById('name-Error').innerText = 'Name is required';
         hasError = true;
@@ -688,21 +733,39 @@ document.getElementById('editCouponForm').addEventListener('submit', async funct
         hasError = true;
     }
 
+    // ==============================
+    // DATE VALIDATION
+    // ==============================
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const start = startingDate ? new Date(startingDate) : null;
+    const end = expiryDate ? new Date(expiryDate) : null;
+
     if (!startingDate) {
         document.getElementById('date1-Error').innerText = 'Start Date is required';
+        hasError = true;
+    } else if (start < today) {
+        document.getElementById('date1-Error').innerText = 'Start date cannot be in the past';
         hasError = true;
     }
 
     if (!expiryDate) {
         document.getElementById('date2-Error').innerText = 'Expiry Date is required';
         hasError = true;
-    }
-
-    if (startingDate && expiryDate && new Date(startingDate) >= new Date(expiryDate)) {
-        document.getElementById('date2-Error').innerText = 'Start date must be less than expiry date';
+    } else if (end < today) {
+        document.getElementById('date2-Error').innerText = 'Expiry date cannot be in the past';
         hasError = true;
     }
 
+    if (start && end && start >= end) {
+        document.getElementById('date2-Error').innerText = 'Expiry date must be after start date';
+        hasError = true;
+    }
+
+    // ==============================
+    // NUMERIC VALIDATION
+    // ==============================
     if (!minOrderAmount || minOrderAmount <= 0) {
         document.getElementById('minOrder-Error').innerText = 'Minimum order must be greater than 0';
         hasError = true;
@@ -718,11 +781,17 @@ document.getElementById('editCouponForm').addEventListener('submit', async funct
         hasError = true;
     }
 
-    
+    if (usageLimit < 0) {
+        hasError = true;
+        alert("Usage limit cannot be negative");
+    }
 
+    if (usagePerUser < 0) {
+        hasError = true;
+        alert("Usage per user cannot be negative");
+    }
 
     if (hasError) return;
-
     // ==============================
     // SEND DATA TO SERVER
     // ==============================
